@@ -1,98 +1,71 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
+import { isAxiosError } from 'axios';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { apiClient } from '@/src/api/client';
+
+type ApiCheckState =
+  | { status: 'loading' }
+  | { status: 'ok'; httpStatus: number }
+  | { status: 'error'; message: string };
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [apiCheck, setApiCheck] = useState<ApiCheckState>({ status: 'loading' });
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkBackend() {
+      try {
+        await apiClient.get('/auth/me');
+        if (!cancelled) {
+          setApiCheck({ status: 'ok', httpStatus: 200 });
+        }
+      } catch (error) {
+        if (cancelled) return;
+
+        if (isAxiosError(error) && error.response) {
+          setApiCheck({ status: 'ok', httpStatus: error.response.status });
+          return;
+        }
+
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        setApiCheck({ status: 'error', message });
+      }
+    }
+
+    void checkBackend();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <View className="flex-1 items-center justify-center bg-white px-6 dark:bg-black">
+      <Text className="text-3xl font-bold text-gray-900 dark:text-white">Hive</Text>
+      <Text className="mt-2 text-center text-gray-500 dark:text-gray-400">
+        Этап 0 — проверка подключения к backend
+      </Text>
+
+      <View className="mt-8 w-full max-w-sm rounded-2xl border border-gray-200 p-4 dark:border-gray-800">
+        {apiCheck.status === 'loading' && (
+          <View className="items-center gap-3 py-2">
+            <ActivityIndicator />
+            <Text className="text-gray-600 dark:text-gray-300">GET /auth/me …</Text>
+          </View>
+        )}
+
+        {apiCheck.status === 'ok' && (
+          <Text className="text-center text-green-600 dark:text-green-400">
+            Backend доступен — HTTP {apiCheck.httpStatus}
+          </Text>
+        )}
+
+        {apiCheck.status === 'error' && (
+          <Text className="text-center text-red-600 dark:text-red-400">{apiCheck.message}</Text>
+        )}
+      </View>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});

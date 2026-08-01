@@ -18,20 +18,20 @@
 
 ## 1. Технологический стек frontend
 
-| Слой | Технология | Причина |
-|---|---|---|
-| Фреймворк | React Native + Expo (managed workflow) | Быстрый старт, не нужен нативный Xcode/Android Studio код на старте |
-| Навигация | Expo Router (file-based) | Структура `app/` уже согласована — см. раздел 2 |
-| Язык | TypeScript | Типы можно синхронизировать с backend через `openapi.yaml` |
-| Стили | NativeWind (Tailwind для RN) | Быстрая стилизация без отдельных StyleSheet-файлов на каждый компонент |
-| Серверное состояние | React Query (`@tanstack/react-query`) | Кэш, инвалидация, повторные запросы — не писать вручную |
-| Клиентское состояние | Zustand | Только для auth и эфемерного UI-состояния (см. `TECH_DOCS.md`, раздел 1.5) |
-| HTTP-клиент | Axios | Интерцепторы для токена и refresh-flow |
-| Realtime | `socket.io-client` | Backend уже на Socket.io — версии протокола должны совпадать |
-| Камера | `expo-camera` | Официальный Expo-модуль, не требует prebuild на старте |
-| Геолокация | `expo-location` | Аналогично |
-| Хранение токенов | `expo-secure-store` | `accessToken`/`refreshToken` не должны лежать в открытом AsyncStorage |
-| Карта | `react-native-maps` | Google/Apple Maps под капотом |
+| Слой                 | Технология                             | Причина                                                                    |
+| -------------------- | -------------------------------------- | -------------------------------------------------------------------------- |
+| Фреймворк            | React Native + Expo (managed workflow) | Быстрый старт, не нужен нативный Xcode/Android Studio код на старте        |
+| Навигация            | Expo Router (file-based)               | Структура `app/` уже согласована — см. раздел 2                            |
+| Язык                 | TypeScript                             | Типы можно синхронизировать с backend через `openapi.yaml`                 |
+| Стили                | NativeWind (Tailwind для RN)           | Быстрая стилизация без отдельных StyleSheet-файлов на каждый компонент     |
+| Серверное состояние  | React Query (`@tanstack/react-query`)  | Кэш, инвалидация, повторные запросы — не писать вручную                    |
+| Клиентское состояние | Zustand                                | Только для auth и эфемерного UI-состояния (см. `TECH_DOCS.md`, раздел 1.5) |
+| HTTP-клиент          | Axios                                  | Интерцепторы для токена и refresh-flow                                     |
+| Realtime             | `socket.io-client`                     | Backend уже на Socket.io — версии протокола должны совпадать               |
+| Камера               | `expo-camera`                          | Официальный Expo-модуль, не требует prebuild на старте                     |
+| Геолокация           | `expo-location`                        | Аналогично                                                                 |
+| Хранение токенов     | `expo-secure-store`                    | `accessToken`/`refreshToken` не должны лежать в открытом AsyncStorage      |
+| Карта                | `react-native-maps`                    | Google/Apple Maps под капотом                                              |
 
 ---
 
@@ -88,6 +88,7 @@ sting-app/
 ### Этап 0 — Инициализация проекта и окружение
 
 **Задачи:**
+
 - `npx create-expo-app sting-app --template` с TypeScript-темплейтом.
 - Настроить Expo Router, NativeWind, ESLint/Prettier.
 - Создать `.env`/`app.config.ts` с `API_URL`, `WS_URL` (указывают на локальный backend на этапе разработки, на прод-домен — при сборке).
@@ -104,6 +105,7 @@ sting-app/
 ### Этап 1 — Авторизация
 
 **Задачи:**
+
 - `src/stores/authStore.ts` — `user`, `accessToken`, `refreshToken`, `status`.
 - `src/api/auth.ts` — обёртки над `/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/me`.
 - Интерцептор в `client.ts`: подстановка `Authorization: Bearer`, обработка 401 → попытка `refresh` → повтор запроса либо logout.
@@ -114,6 +116,7 @@ sting-app/
 **Зависимости:** Этап 0.
 
 **Definition of Done:**
+
 - Регистрация и вход реально создают/логинят пользователя на backend.
 - После перезапуска приложения пользователь остаётся авторизован (токен восстановился из `SecureStore`).
 - Истёкший `accessToken` автоматически обновляется через `refreshToken` без разлогина пользователя.
@@ -126,6 +129,7 @@ sting-app/
 ### Этап 2 — Карта и геолокация (без публикации)
 
 **Задачи:**
+
 - `src/hooks/useLocation.ts` — запрос разрешения, текущие координаты, точность.
 - `src/components/map/MapContainer.tsx` — обёртка над `react-native-maps`, центрирование на пользователе.
 - `src/hooks/useStingsNearby.ts` — React Query поверх `GET /stings/nearby`, с debounce на изменение региона карты (300мс — см. `TECH_DOCS.md`).
@@ -143,6 +147,7 @@ sting-app/
 ### Этап 3 — Камера и публикация жала
 
 **Задачи:**
+
 - `src/hooks/useCamera.ts` — permissions, вызов `expo-camera`, запись временного файла.
 - `src/components/camera/CameraView.tsx`, `CaptureButton.tsx` (с haptic через `src/utils/haptics.ts`).
 - `src/stores/cameraStore.ts` — `capturedUri`, `captureCoords`, `captureAccuracy`.
@@ -162,6 +167,7 @@ sting-app/
 ### Этап 4 — Улья и детальный просмотр
 
 **Задачи:**
+
 - `src/components/map/HiveCircle.tsx` — визуализация кластера, масштаб/пульсация от `activeStingsCount`.
 - `src/components/ui/HiveBottomSheet.tsx` — список фото улья через `GET /hives/:id` или пагинированно через `GET /hives/:id/stings`.
 - `app/(modals)/sting/[id].tsx` — полноэкранный просмотр одного жала (`GET /stings/:id`), таймер до истечения (`src/hooks/useCountdown.ts`), реакции (`POST /stings/:id/reactions`).
@@ -178,6 +184,7 @@ sting-app/
 ### Этап 5 — Realtime (WebSocket)
 
 **Задачи:**
+
 - `src/api/websocket.ts` — синглтон-менеджер, `connect()`/`disconnect()`, авто-reconnect.
 - Подписка на регион карты (`subscribe:region`) при изменении `mapStore.region`, `unsubscribe:region` при уходе с экрана карты.
 - Обработчики `sting:created`, `sting:expired`, `hive:updated`, `hive:dissolved`, `sting:reaction` → `queryClient.setQueryData`/`invalidateQueries` (см. `TECH_DOCS.md`, раздел 4) — не собственное состояние в компонентах.
@@ -194,6 +201,7 @@ sting-app/
 ### Этап 6 — Лента "Рядом" и Профиль
 
 **Задачи:**
+
 - `app/(tabs)/nearby.tsx` + `src/components/feed/NearbyCard.tsx` — список вместо карты, использует те же данные из `useStingsNearby`.
 - `app/(tabs)/profile.tsx` — данные из `/auth/me`, кнопка выхода (`logout` + `POST /auth/logout` с текущим `refreshToken`, очистка `SecureStore`).
 
@@ -206,6 +214,7 @@ sting-app/
 ### Этап 7 — Онбординг
 
 **Задачи:**
+
 - `app/(onboarding)/step1-3.tsx` — объяснение концепции (только камера, TTL 4 часа, ульи).
 - Экран-объяснение permissions перед системным попапом (геолокация, камера).
 - Флаг `hasCompletedOnboarding` в `authStore`, персистится, чтобы не показывать повторно.
@@ -219,6 +228,7 @@ sting-app/
 ### Этап 8 — Полировка, обработка ошибок, подготовка к сборке
 
 **Задачи:**
+
 - Единый компонент/тост для отображения ошибок API по `error.code` из `ErrorResponse` (см. `openapi.yaml`) — не показывать пользователю сырой `message` с backend напрямую без контроля тона.
 - Обработка полного отсутствия сети (не просто ошибка запроса, а `NetInfo`-проверка) — отдельный экран/баннер "нет соединения", а не пустая карта без объяснений.
 - Пустое состояние карты/ленты (когда рядом никого нет).

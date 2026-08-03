@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { AuthProvider } from '@/src/components/auth/AuthProvider';
+import { LoadingScreen } from '@/src/components/ui/LoadingScreen';
 import { useLocaleStore } from '@/src/stores/localeStore';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -44,7 +45,7 @@ export default function RootLayout() {
   }, [fontError, fontsLoaded, localeReady]);
 
   if ((!fontsLoaded && !fontError) || !localeReady) {
-    return null;
+    return <LoadingScreen />;
   }
 
   return (

@@ -2,8 +2,8 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
 import { Apple, Globe, Lock, Mail } from 'lucide-react-native';
 import { useState, type ReactNode } from 'react';
-import { Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Pressable, Text, View } from 'react-native';
 
 import { AuthButton } from '@/src/components/auth/AuthButton';
 import { AuthFormCard } from '@/src/components/auth/AuthFormCard';
@@ -59,11 +59,12 @@ export default function LoginScreen() {
       <AuthFormCard title={t('auth.loginTitle')} subtitle={t('auth.loginCardSubtitle')}>
         <AuthInput
           autoCapitalize="none"
-          autoComplete="email"
+          autoComplete="username"
           icon={Mail}
           keyboardType="email-address"
           label={t('common.email')}
           placeholder={t('common.emailPlaceholder')}
+          textContentType="username"
           value={email}
           onChangeText={setEmail}
         />

@@ -9,7 +9,7 @@ type AuthFormCardProps = PropsWithChildren & {
 export function AuthFormCard({ title, subtitle, children }: AuthFormCardProps) {
   return (
     <View
-      className="w-full gap-6 rounded-hive border border-[#FFFFFF80] bg-hive-surface p-6"
+      className="w-full gap-5 rounded-hive border border-[#FFFFFF80] bg-hive-surface p-6"
       style={{
         shadowColor: '#F5A623',
         shadowOffset: { width: 0, height: 4 },

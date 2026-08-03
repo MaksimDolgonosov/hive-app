@@ -1,31 +1,38 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import type { PropsWithChildren } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const GRADIENT_TOP_COLOR = '#FFF8ED';
 
 export function AuthScreenLayout({ children }: PropsWithChildren) {
+  const insets = useSafeAreaInsets();
+
   return (
     <LinearGradient
-      colors={['#FFF8ED', '#FFE8B8', '#FFD54F44']}
+      colors={[GRADIENT_TOP_COLOR, '#FFE8B8', '#FFD54F44']}
       locations={[0, 0.5, 1]}
-      className="flex-1"
-      style={{ paddingTop: 50 }}
+      style={{ flex: 1 }}
     >
-      <SafeAreaView className="flex-1">
+      <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}>
         <KeyboardAvoidingView
-          className="flex-1"
+          style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
         >
           <ScrollView
+            style={{ flex: 1 }}
             bounces={false}
-            contentContainerClassName="grow px-5 pb-6 pt-8"
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingHorizontal: 20,
+              paddingTop: 16,
+              paddingBottom: 24,
+            }}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <View className="w-full max-w-[390px] self-center">
-              {/* <LanguageSwitcher className="mb-4" /> */}
-              {children}
-            </View>
+            <View style={{ width: '100%', maxWidth: 390, alignSelf: 'center' }}>{children}</View>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>

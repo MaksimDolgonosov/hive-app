@@ -57,10 +57,11 @@ export default function RegisterScreen() {
       <AuthFormCard title={t('auth.registerTitle')} subtitle={t('auth.registerCardSubtitle')}>
         <AuthInput
           autoCapitalize="words"
-          autoComplete="username"
+          autoComplete="name"
           icon={User}
           label={t('auth.name')}
           placeholder={t('auth.namePlaceholder')}
+          textContentType="name"
           value={username}
           onChangeText={setUsername}
         />
@@ -71,6 +72,7 @@ export default function RegisterScreen() {
           keyboardType="email-address"
           label={t('common.email')}
           placeholder={t('common.emailPlaceholder')}
+          textContentType="emailAddress"
           value={email}
           onChangeText={setEmail}
         />

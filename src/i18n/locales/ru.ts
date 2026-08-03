@@ -1,0 +1,51 @@
+import type { TranslationSchema } from './types';
+
+export const ru: TranslationSchema = {
+  common: {
+    loading: 'Загрузка…',
+    email: 'Email',
+    password: 'Пароль',
+    guest: 'гость',
+    emailPlaceholder: 'email@example.com',
+    passwordPlaceholder: '••••••••',
+  },
+  language: {
+    label: 'Язык',
+    ru: 'Русский',
+    en: 'English',
+  },
+  auth: {
+    registerSubtitle: 'Открой местность через фото других',
+    loginSubtitle: 'С возвращением!',
+    registerTitle: 'Регистрация',
+    registerCardSubtitle: 'Создай аккаунт, чтобы делиться фото',
+    loginTitle: 'Вход',
+    loginCardSubtitle: 'Войди, чтобы увидеть фото рядом',
+    name: 'Имя',
+    namePlaceholder: 'Ваше имя',
+    forgotPassword: 'Забыли пароль?',
+    login: 'Войти',
+    register: 'Зарегистрироваться',
+    createAccount: 'Создать аккаунт',
+    orLoginVia: 'или войти через',
+    noAccount: 'Нет аккаунта?',
+    hasAccount: 'Уже есть аккаунт?',
+    fillAllFields: 'Заполните все поля',
+    fillEmailPassword: 'Заполните email и пароль',
+    passwordMinLength: 'Пароль должен содержать минимум 8 символов',
+    loginFailed: 'Не удалось войти',
+    registerFailed: 'Не удалось зарегистрироваться',
+  },
+  home: {
+    greeting: 'Привет, {{name}}!',
+    authWorks: 'Авторизация работает. Карта будет на следующем этапе.',
+    logout: 'Выйти',
+  },
+  errors: {
+    generic: 'Что-то пошло не так',
+    INVALID_CREDENTIALS: 'Неверный email или пароль',
+    USER_ALREADY_EXISTS: 'Пользователь с таким email или именем уже существует',
+    UNAUTHORIZED: 'Необходима авторизация',
+    VALIDATION_ERROR: 'Проверьте правильность введённых данных',
+  },
+};

@@ -1,0 +1,51 @@
+import type { TranslationSchema } from './types';
+
+export const en: TranslationSchema = {
+  common: {
+    loading: 'Loading…',
+    email: 'Email',
+    password: 'Password',
+    guest: 'guest',
+    emailPlaceholder: 'email@example.com',
+    passwordPlaceholder: '••••••••',
+  },
+  language: {
+    label: 'Language',
+    ru: 'Russian',
+    en: 'English',
+  },
+  auth: {
+    registerSubtitle: 'Discover the area through others’ photos',
+    loginSubtitle: 'Welcome back!',
+    registerTitle: 'Sign up',
+    registerCardSubtitle: 'Create an account to share photos',
+    loginTitle: 'Log in',
+    loginCardSubtitle: 'Log in to see photos nearby',
+    name: 'Name',
+    namePlaceholder: 'Your name',
+    forgotPassword: 'Forgot password?',
+    login: 'Log in',
+    register: 'Sign up',
+    createAccount: 'Create account',
+    orLoginVia: 'or log in with',
+    noAccount: 'No account?',
+    hasAccount: 'Already have an account?',
+    fillAllFields: 'Fill in all fields',
+    fillEmailPassword: 'Enter email and password',
+    passwordMinLength: 'Password must be at least 8 characters',
+    loginFailed: 'Could not log in',
+    registerFailed: 'Could not sign up',
+  },
+  home: {
+    greeting: 'Hello, {{name}}!',
+    authWorks: 'Auth is working. The map comes in the next stage.',
+    logout: 'Log out',
+  },
+  errors: {
+    generic: 'Something went wrong',
+    INVALID_CREDENTIALS: 'Invalid email or password',
+    USER_ALREADY_EXISTS: 'A user with this email or name already exists',
+    UNAUTHORIZED: 'Authentication required',
+    VALIDATION_ERROR: 'Please check the entered data',
+  },
+};

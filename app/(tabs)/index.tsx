@@ -1,71 +1,39 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
-import { isAxiosError } from 'axios';
+import { router } from 'expo-router';
+import { Pressable, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
-import { apiClient } from '@/src/api/client';
-
-type ApiCheckState =
-  | { status: 'loading' }
-  | { status: 'ok'; httpStatus: number }
-  | { status: 'error'; message: string };
+import { LanguageSwitcher } from '@/src/components/ui/LanguageSwitcher';
+import { useAuthStore } from '@/src/stores/authStore';
 
 export default function HomeScreen() {
-  const [apiCheck, setApiCheck] = useState<ApiCheckState>({ status: 'loading' });
+  const { t } = useTranslation();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function checkBackend() {
-      try {
-        await apiClient.get('/auth/me');
-        if (!cancelled) {
-          setApiCheck({ status: 'ok', httpStatus: 200 });
-        }
-      } catch (error) {
-        if (cancelled) return;
-
-        if (isAxiosError(error) && error.response) {
-          setApiCheck({ status: 'ok', httpStatus: error.response.status });
-          return;
-        }
-
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        setApiCheck({ status: 'error', message });
-      }
-    }
-
-    void checkBackend();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  async function handleLogout() {
+    await logout();
+    router.replace('/(auth)/login');
+  }
 
   return (
-    <View className="flex-1 items-center justify-center bg-white px-6 dark:bg-black">
-      <Text className="text-3xl font-bold text-gray-900 dark:text-white">Hive</Text>
-      <Text className="mt-2 text-center text-gray-500 dark:text-gray-400">
-        Этап 0 — проверка подключения к backend
+    <View className="flex-1 items-center justify-center bg-hive-bg px-6">
+      <LanguageSwitcher className="absolute right-6 top-16" />
+
+      <Text className="font-inter text-3xl font-bold text-hive-foreground">Hive</Text>
+      <Text className="mt-2 text-center font-inter text-base text-hive-muted">
+        {t('home.greeting', { name: user?.username ?? t('common.guest') })}
+      </Text>
+      <Text className="mt-1 text-center font-inter text-sm text-hive-muted">
+        {t('home.authWorks')}
       </Text>
 
-      <View className="mt-8 w-full max-w-sm rounded-2xl border border-gray-200 p-4 dark:border-gray-800">
-        {apiCheck.status === 'loading' && (
-          <View className="items-center gap-3 py-2">
-            <ActivityIndicator />
-            <Text className="text-gray-600 dark:text-gray-300">GET /auth/me …</Text>
-          </View>
-        )}
-
-        {apiCheck.status === 'ok' && (
-          <Text className="text-center text-green-600 dark:text-green-400">
-            Backend доступен — HTTP {apiCheck.httpStatus}
-          </Text>
-        )}
-
-        {apiCheck.status === 'error' && (
-          <Text className="text-center text-red-600 dark:text-red-400">{apiCheck.message}</Text>
-        )}
-      </View>
+      <Pressable
+        accessibilityRole="button"
+        className="mt-8 rounded-hive-md bg-hive-primary px-6 py-3"
+        onPress={handleLogout}
+      >
+        <Text className="font-inter text-base font-bold text-white">{t('home.logout')}</Text>
+      </Pressable>
     </View>
   );
 }

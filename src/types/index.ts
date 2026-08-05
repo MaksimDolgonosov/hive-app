@@ -20,6 +20,51 @@ export interface AuthSession {
 
 export type AuthStatus = 'idle' | 'authenticated' | 'unauthenticated';
 
+export interface GeoPoint {
+  lat: number;
+  lng: number;
+}
+
+export interface Sting {
+  id: UUID;
+  authorId: UUID;
+  imageUrl: string;
+  thumbnailUrl: string;
+  location: GeoPoint;
+  hiveId: UUID | null;
+  createdAt: string;
+  expiresAt: string;
+  reactionsCount: number;
+}
+
+export interface Hive {
+  id: UUID;
+  center: GeoPoint;
+  radiusM: number;
+  activeStingsCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MapRegion {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+}
+
+export interface MapBounds {
+  swLat: number;
+  swLng: number;
+  neLat: number;
+  neLng: number;
+}
+
+export interface StingsNearbyResponse {
+  stings: Sting[];
+  hives: Hive[];
+}
+
 export interface ApiErrorBody {
   error: {
     code: string;

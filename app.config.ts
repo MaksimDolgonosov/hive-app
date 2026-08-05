@@ -39,6 +39,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       supportsTablet: true,
     },
     android: {
+      permissions: ['VIBRATE'],
       adaptiveIcon: {
         backgroundColor: '#E6F4FE',
         foregroundImage: './assets/images/android-icon-foreground.png',
@@ -56,6 +57,20 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       'expo-router',
       'expo-secure-store',
       'expo-localization',
+      [
+        'expo-location',
+        {
+          locationWhenInUsePermission:
+            'Hive использует геолокацию для отображения фото рядом с вами на карте.',
+        },
+      ],
+      [
+        'expo-camera',
+        {
+          cameraPermission: 'Hive использует камеру для публикации фото с вашего местоположения.',
+          recordAudioAndroid: false,
+        },
+      ],
       [
         'expo-splash-screen',
         {

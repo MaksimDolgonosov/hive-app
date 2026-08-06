@@ -175,6 +175,11 @@ function applyCaptureMetadataToExif(exifObj: piexif.IExif, metadata: CaptureMeta
   exifObj.Exif[piexif.ExifIFD.DateTimeDigitized] = dateTime;
 }
 
+/** После normalizePhotoPixels пиксели уже выровнены — фиксируем Orientation=1. */
+function normalizePhotoOrientation(exifObj: piexif.IExif): void {
+  exifObj['0th'][piexif.ImageIFD.Orientation] = 1;
+}
+
 /** Преобразует EXIF DateTimeOriginal в ISO 8601 для POST /stings. */
 export function parseExifCapturedAt(exif: ExifRecord | undefined): string | null {
   if (!exif) {
@@ -265,6 +270,7 @@ export async function embedCaptureMetadataInPhoto(
     lat: roundCoord(metadata.lat),
     lng: roundCoord(metadata.lng),
   });
+  normalizePhotoOrientation(exifObj);
 
   const updatedBinary = piexif.insert(piexif.dump(exifObj), binary);
   const outputFile = new File(Paths.cache, `sting-${Date.now()}.jpg`);

@@ -55,6 +55,22 @@ export type TranslationSchema = {
   profile: {
     comingSoon: string;
   };
+  hive: {
+    title: string;
+    photoCount: string;
+    close: string;
+    loadError: string;
+    empty: string;
+  };
+  sting: {
+    photoAlt: string;
+    close: string;
+    notFound: string;
+    expiresIn: string;
+    like: string;
+    reactFailedTitle: string;
+    reactFailedMessage: string;
+  };
   camera: {
     title: string;
     close: string;
@@ -76,12 +92,21 @@ export type TranslationSchema = {
   };
   errors: {
     generic: string;
+    network: string;
+    timeout: string;
+    httpStatus: string;
     INVALID_CREDENTIALS: string;
     USER_ALREADY_EXISTS: string;
     UNAUTHORIZED: string;
     VALIDATION_ERROR: string;
     STING_VALIDATION_FAILED: string;
+    STING_NOT_FOUND: string;
+    INTERNAL_ERROR: string;
+    STORAGE_NOT_CONFIGURED: string;
+    CAPTURED_AT_MISMATCH: string;
+    SUSPICIOUS_GPS: string;
     EXIF_MISMATCH: string;
+    EXIF_GPS_MISMATCH: string;
     TIMESTAMP_MISMATCH: string;
     RATE_LIMITED: string;
   };

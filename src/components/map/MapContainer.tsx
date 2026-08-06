@@ -2,15 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Linking, Pressable, Text, View } from 'react-native';
 import MapView, { type Region } from 'react-native-maps';
+import { router, type Href } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { HiveCircle } from '@/src/components/map/HiveCircle';
+import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { useLocation } from '@/src/hooks/useLocation';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
 import { useMapStore } from '@/src/stores/mapStore';
 import type { MapBounds, MapRegion } from '@/src/types';
 import { DEFAULT_MAP_REGION, regionToBounds } from '@/src/utils/map';
+import { isActiveHive } from '@/src/utils/hive';
 
-import { HiveCircle } from '@/src/components/map/HiveCircle';
 import { StingMarker } from './StingMarker';
 
 const REGION_DEBOUNCE_MS = 300;
@@ -36,6 +39,7 @@ export function MapContainer() {
   const setRegion = useMapStore((state) => state.setRegion);
   const setSelectedStingId = useMapStore((state) => state.setSelectedStingId);
   const setSelectedHiveId = useMapStore((state) => state.setSelectedHiveId);
+  const selectedHiveId = useMapStore((state) => state.selectedHiveId);
   const pendingMapFocus = useMapStore((state) => state.pendingMapFocus);
   const clearPendingMapFocus = useMapStore((state) => state.clearPendingMapFocus);
 
@@ -109,6 +113,19 @@ export function MapContainer() {
     setRegion(toMapRegion(nextRegion));
   }
 
+  function openSting(stingId: string) {
+    setSelectedStingId(stingId);
+    router.push(`/(modals)/sting/${stingId}` as Href);
+  }
+
+  function openHive(hiveId: string) {
+    setSelectedHiveId(hiveId);
+  }
+
+  function closeHiveSheet() {
+    setSelectedHiveId(null);
+  }
+
   if (locationStatus === 'loading' || locationStatus === 'idle') {
     return (
       <View className="flex-1 items-center justify-center bg-hive-bg">
@@ -152,10 +169,10 @@ export function MapContainer() {
         userInterfaceStyle="light"
       >
         {data?.stings.map((sting) => (
-          <StingMarker key={sting.id} sting={sting} onPress={() => setSelectedStingId(sting.id)} />
+          <StingMarker key={sting.id} sting={sting} onPress={() => openSting(sting.id)} />
         ))}
-        {data?.hives.map((hive) => (
-          <HiveCircle key={hive.id} hive={hive} onPress={() => setSelectedHiveId(hive.id)} />
+        {data?.hives.filter((hive) => isActiveHive(hive.activeStingsCount)).map((hive) => (
+          <HiveCircle key={hive.id} hive={hive} onPress={() => openHive(hive.id)} />
         ))}
       </MapView>
 
@@ -174,6 +191,10 @@ export function MapContainer() {
             {t('map.loadError')}
           </Text>
         </View>
+      )}
+
+      {selectedHiveId && (
+        <HiveBottomSheet hiveId={selectedHiveId} onClose={closeHiveSheet} />
       )}
     </View>
   );

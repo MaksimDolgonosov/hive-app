@@ -65,6 +65,16 @@ export interface StingsNearbyResponse {
   hives: Hive[];
 }
 
+export interface HiveDetailResponse {
+  hive: Hive;
+  stings: Sting[];
+}
+
+export interface HiveStingsPageResponse {
+  stings: Sting[];
+  nextCursor: string | null;
+}
+
 export interface ApiErrorBody {
   error: {
     code: string;

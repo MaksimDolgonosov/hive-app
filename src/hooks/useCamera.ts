@@ -9,6 +9,7 @@ import {
   readPhotoMetadataFromFile,
   roundCoord,
 } from '@/src/utils/exif';
+import { normalizePhotoPixels } from '@/src/utils/photo-orientation';
 
 export type CaptureResult =
   | { ok: true }
@@ -52,7 +53,7 @@ export function useCamera(cameraRef: RefObject<CameraView | null>) {
       }
 
       const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.85,
+        quality: 0.7,
         exif: true,
       });
 
@@ -64,7 +65,9 @@ export function useCamera(cameraRef: RefObject<CameraView | null>) {
       const location = await resolveCaptureLocation();
       const { latitude, longitude, altitude, accuracy } = location.coords;
 
-      const preparedUri = await embedCaptureMetadataInPhoto(photo.uri, {
+      const normalizedUri = await normalizePhotoPixels(photo.uri);
+
+      const preparedUri = await embedCaptureMetadataInPhoto(normalizedUri, {
         lat: latitude,
         lng: longitude,
         altitude,

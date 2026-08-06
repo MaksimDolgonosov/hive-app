@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AuthButton } from '@/src/components/auth/AuthButton';
 import { usePublishSting } from '@/src/hooks/usePublishSting';
 import { useCameraStore } from '@/src/stores/cameraStore';
-import { getApiErrorMessage } from '@/src/utils/api-error';
+import { getApiErrorMessage, logApiError } from '@/src/utils/api-error';
 import { normalizeAccuracy } from '@/src/utils/exif';
 import { notifyPublishError, notifyPublishSuccess } from '@/src/utils/haptics';
 
@@ -82,6 +82,7 @@ export default function PreviewScreen() {
       router.dismissAll();
       router.replace('/(tabs)/' as Href);
     } catch (error) {
+      logApiError('preview.publish', error);
       await notifyPublishError();
       Alert.alert(
         t('camera.publishFailedTitle'),

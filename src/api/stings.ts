@@ -1,3 +1,6 @@
+import { File } from 'expo-file-system';
+import { Platform } from 'react-native';
+
 import { apiClient } from '@/src/api/client';
 import type { MapBounds, Sting, StingsNearbyResponse } from '@/src/types';
 
@@ -8,6 +11,14 @@ export interface PublishStingInput {
   accuracy: number;
   capturedAt: string;
   idempotencyKey: string;
+}
+
+function resolveUploadUri(uri: string): string {
+  if (Platform.OS === 'ios' && !uri.startsWith('file://')) {
+    return `file://${uri}`;
+  }
+
+  return uri;
 }
 
 export async function getNearby(bounds: MapBounds): Promise<StingsNearbyResponse> {
@@ -23,10 +34,28 @@ export async function getNearby(bounds: MapBounds): Promise<StingsNearbyResponse
   return data;
 }
 
+export async function getById(id: string): Promise<{ sting: Sting }> {
+  const { data } = await apiClient.get<{ sting: Sting }>(`/stings/${id}`);
+  return data;
+}
+
+export async function react(id: string, type: 'like' = 'like'): Promise<{ reactionsCount: number }> {
+  const { data } = await apiClient.post<{ reactionsCount: number }>(`/stings/${id}/reactions`, {
+    type,
+  });
+  return data;
+}
+
 export async function create(input: PublishStingInput): Promise<{ sting: Sting }> {
+  const photoFile = new File(input.photoUri);
+
+  if (!photoFile.exists) {
+    throw new Error('Файл фото не найден. Переснимите снимок.');
+  }
+
   const formData = new FormData();
   formData.append('photo', {
-    uri: input.photoUri,
+    uri: resolveUploadUri(photoFile.uri),
     type: 'image/jpeg',
     name: 'sting.jpg',
   } as unknown as Blob);
@@ -40,7 +69,7 @@ export async function create(input: PublishStingInput): Promise<{ sting: Sting }
       Accept: 'application/json',
       'Idempotency-Key': input.idempotencyKey,
     },
-    timeout: 60_000,
+    timeout: 90_000,
     transformRequest: (data, headers) => {
       if (headers) {
         delete headers['Content-Type'];

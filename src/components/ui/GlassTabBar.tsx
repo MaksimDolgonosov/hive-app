@@ -3,9 +3,17 @@ import { BlurView } from 'expo-blur';
 import type { GlassActiveRenderer } from 'expo-liquid-glass-view';
 import { router, type Href } from 'expo-router';
 import { Camera, Map, User, type LucideIcon } from 'lucide-react-native';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  LayoutChangeEvent,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { shouldUseLiquidGlass } from '@/src/utils/liquid-glass';
@@ -28,6 +36,17 @@ const TABS: TabConfig[] = [
 const GLASS_CORNER_RADIUS = 28;
 const GLASS_TINT = 'rgba(255, 255, 255, 0.58)';
 
+const TAB_SPRING = {
+  damping: 22,
+  stiffness: 280,
+  mass: 0.7,
+};
+
+type TabLayout = {
+  x: number;
+  width: number;
+};
+
 export const GLASS_TAB_BAR_HEIGHT = 56;
 export const GLASS_TAB_BAR_BOTTOM_GAP = 12;
 
@@ -43,9 +62,50 @@ function TabBarContent({
   onPress: (tab: TabConfig) => void;
 }) {
   const { t } = useTranslation();
+  const tabLayouts = useRef<Partial<Record<TabKey, TabLayout>>>({});
+  const hasAnimated = useRef(false);
+  const pillX = useSharedValue(0);
+  const pillWidth = useSharedValue(0);
+
+  function movePillTo(key: TabKey, animated: boolean) {
+    const layout = tabLayouts.current[key];
+    if (!layout) {
+      return;
+    }
+
+    if (animated) {
+      pillX.value = withSpring(layout.x, TAB_SPRING);
+      pillWidth.value = withSpring(layout.width, TAB_SPRING);
+      return;
+    }
+
+    pillX.value = layout.x;
+    pillWidth.value = layout.width;
+  }
+
+  useEffect(() => {
+    movePillTo(activeTab, hasAnimated.current);
+    hasAnimated.current = true;
+  }, [activeTab]);
+
+  const pillAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: pillX.value }],
+    width: pillWidth.value,
+  }));
+
+  function handleTabLayout(key: TabKey, event: LayoutChangeEvent) {
+    const { x, width } = event.nativeEvent.layout;
+    tabLayouts.current[key] = { x, width };
+
+    if (key === activeTab) {
+      movePillTo(key, hasAnimated.current);
+    }
+  }
 
   return (
     <View style={styles.tabsRow}>
+      <Animated.View pointerEvents="none" style={[styles.activePill, pillAnimatedStyle]} />
+
       {TABS.map((tab) => {
         const isActive = tab.key === activeTab;
         const Icon = tab.icon;
@@ -55,8 +115,9 @@ function TabBarContent({
             key={tab.key}
             accessibilityRole="button"
             accessibilityState={{ selected: isActive }}
+            onLayout={(event) => handleTabLayout(tab.key, event)}
             onPress={() => onPress(tab)}
-            style={[styles.tab, isActive && styles.tabActive]}
+            style={styles.tab}
           >
             <Icon color={isActive ? '#FFFFFF' : '#8B7355'} size={22} />
             <Text style={[styles.label, isActive && styles.labelActive]}>{t(tab.labelKey)}</Text>
@@ -211,6 +272,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 6,
     gap: 4,
+    position: 'relative',
+  },
+  activePill: {
+    position: 'absolute',
+    top: 6,
+    bottom: 6,
+    left: 0,
+    borderRadius: 22,
+    backgroundColor: '#F5A623',
   },
   tab: {
     flex: 1,
@@ -219,9 +289,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 2,
     borderRadius: 22,
-  },
-  tabActive: {
-    backgroundColor: '#F5A623',
+    zIndex: 1,
   },
   label: {
     fontFamily: 'Inter',

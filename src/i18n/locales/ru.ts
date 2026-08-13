@@ -49,14 +49,25 @@ export const ru: TranslationSchema = {
     openSettings: 'Открыть настройки',
     loadError: 'Не удалось загрузить жала поблизости',
     capturePhoto: 'Сделать фото',
+    centerOnUser: 'Показать моё местоположение',
   },
   tabs: {
     map: 'Карта',
+    nearby: 'Рядом',
     camera: 'Камера',
     profile: 'Профиль',
   },
+  nearby: {
+    title: 'Рядом',
+    subtitle: 'Фото поблизости, отсортированные по расстоянию',
+    emptyTitle: 'Пока никого рядом',
+    emptyMessage: 'Сделайте первое фото или загляните позже — жала живут 4 часа.',
+    locationDeniedMessage:
+      'Разрешите доступ к геолокации в настройках, чтобы видеть фото рядом в ленте.',
+    retry: 'Повторить',
+  },
   profile: {
-    comingSoon: 'Раздел в разработке',
+    memberSince: 'В Hive с {{date}}',
   },
   hive: {
     title: 'Улей',
@@ -71,6 +82,7 @@ export const ru: TranslationSchema = {
     notFound: 'Жало истекло или не найдено',
     expiresIn: 'Истекает через',
     like: 'Нравится',
+    unlike: 'Убрать лайк',
     reactFailedTitle: 'Не удалось поставить реакцию',
     reactFailedMessage: 'Попробуйте ещё раз позже.',
   },
@@ -82,6 +94,8 @@ export const ru: TranslationSchema = {
     requestPermission: 'Разрешить камеру',
     captureFailedTitle: 'Не удалось снять фото',
     captureFailedMessage: 'Попробуйте ещё раз или проверьте доступ к камере и геолокации.',
+    locationUnavailableMessage:
+      'Не удалось определить местоположение. На симуляторе задайте локацию: Features → Location → Apple или Custom Location.',
     previewAlt: 'Предпросмотр снимка',
     lowAccuracyWarning: 'GPS неточный — фото может не пройти проверку при публикации.',
     staleCaptureWarning: 'Прошло больше 2 минут с момента съёмки — опубликуйте сейчас или переснимите.',

@@ -35,6 +35,8 @@ export interface Sting {
   createdAt: string;
   expiresAt: string;
   reactionsCount: number;
+  /** Поставил ли текущий пользователь like (есть в GET /stings/:id и POST /reactions). */
+  hasLiked?: boolean;
 }
 
 export interface Hive {

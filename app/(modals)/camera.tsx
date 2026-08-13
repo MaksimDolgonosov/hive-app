@@ -79,7 +79,9 @@ export default function CameraScreen() {
       t('camera.captureFailedTitle'),
       result.reason === 'location_denied'
         ? t('map.locationDeniedMessage')
-        : t('camera.captureFailedMessage'),
+        : result.reason === 'location_unavailable'
+          ? t('camera.locationUnavailableMessage')
+          : t('camera.captureFailedMessage'),
     );
   }
 

@@ -3,6 +3,9 @@ import * as Location from 'expo-location';
 import { useCallback, useState, type RefObject } from 'react';
 
 import { useCameraStore } from '@/src/stores/cameraStore';
+import { useLocationStore } from '@/src/stores/locationStore';
+import { useMapStore } from '@/src/stores/mapStore';
+import { resolveCaptureLocation } from '@/src/utils/capture-location';
 import {
   embedCaptureMetadataInPhoto,
   normalizeAccuracy,
@@ -13,29 +16,12 @@ import { normalizePhotoPixels } from '@/src/utils/photo-orientation';
 
 export type CaptureResult =
   | { ok: true }
-  | { ok: false; reason: 'location_denied' | 'camera' };
-
-async function resolveCaptureLocation(): Promise<Location.LocationObject> {
-  try {
-    return await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
-    });
-  } catch {
-    const lastKnown = await Location.getLastKnownPositionAsync({
-      maxAge: 60_000,
-      requiredAccuracy: 200,
-    });
-
-    if (lastKnown) {
-      return lastKnown;
-    }
-
-    throw new Error('Location unavailable');
-  }
-}
+  | { ok: false; reason: 'location_denied' | 'location_unavailable' | 'camera' };
 
 export function useCamera(cameraRef: RefObject<CameraView | null>) {
   const setCapture = useCameraStore((state) => state.setCapture);
+  const storedCoords = useLocationStore((state) => state.coords);
+  const mapRegion = useMapStore((state) => state.region);
   const [isReady, setIsReady] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
 
@@ -62,7 +48,28 @@ export function useCamera(cameraRef: RefObject<CameraView | null>) {
       }
 
       const captureMoment = new Date();
-      const location = await resolveCaptureLocation();
+
+      const fallbackCoords = storedCoords
+        ? {
+            lat: storedCoords.latitude,
+            lng: storedCoords.longitude,
+            accuracy: storedCoords.accuracy,
+          }
+        : mapRegion
+          ? {
+              lat: mapRegion.latitude,
+              lng: mapRegion.longitude,
+              accuracy: 500,
+            }
+          : undefined;
+
+      let location: Location.LocationObject;
+      try {
+        location = await resolveCaptureLocation(fallbackCoords);
+      } catch {
+        return { ok: false, reason: 'location_unavailable' };
+      }
+
       const { latitude, longitude, altitude, accuracy } = location.coords;
 
       const normalizedUri = await normalizePhotoPixels(photo.uri);
@@ -99,6 +106,7 @@ export function useCamera(cameraRef: RefObject<CameraView | null>) {
           fileLat: fileMetadata.lat,
           fileLng: fileMetadata.lng,
           capturedAt: fileMetadata.capturedAt,
+          usedFallback: Boolean(fallbackCoords),
         });
       }
 
@@ -111,7 +119,7 @@ export function useCamera(cameraRef: RefObject<CameraView | null>) {
     } finally {
       setIsCapturing(false);
     }
-  }, [cameraRef, isCapturing, isReady, setCapture]);
+  }, [cameraRef, isCapturing, isReady, mapRegion, setCapture, storedCoords]);
 
   return {
     isReady,

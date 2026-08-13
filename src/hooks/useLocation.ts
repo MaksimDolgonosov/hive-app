@@ -1,6 +1,8 @@
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 
+import { useLocationStore } from '@/src/stores/locationStore';
+
 export type LocationStatus = 'idle' | 'loading' | 'granted' | 'denied';
 
 const LOW_ACCURACY_THRESHOLD_M = 50;
@@ -8,6 +10,8 @@ const LOW_ACCURACY_THRESHOLD_M = 50;
 export function useLocation() {
   const [coords, setCoords] = useState<Location.LocationObjectCoords | null>(null);
   const [status, setStatus] = useState<LocationStatus>('idle');
+  const setStoredCoords = useLocationStore((state) => state.setCoords);
+  const setStoredStatus = useLocationStore((state) => state.setStatus);
 
   useEffect(() => {
     let subscription: Location.LocationSubscription | null = null;
@@ -15,6 +19,7 @@ export function useLocation() {
 
     async function init() {
       setStatus('loading');
+      setStoredStatus('loading');
 
       const { status: permissionStatus } = await Location.requestForegroundPermissionsAsync();
       if (cancelled) {
@@ -23,10 +28,13 @@ export function useLocation() {
 
       if (permissionStatus !== Location.PermissionStatus.GRANTED) {
         setStatus('denied');
+        setStoredStatus('denied');
+        setStoredCoords(null);
         return;
       }
 
       setStatus('granted');
+      setStoredStatus('granted');
 
       try {
         const location = await Location.getCurrentPositionAsync({
@@ -34,6 +42,7 @@ export function useLocation() {
         });
         if (!cancelled) {
           setCoords(location.coords);
+          setStoredCoords(location.coords);
         }
       } catch {
         // watchPositionAsync may still deliver a fix
@@ -47,6 +56,7 @@ export function useLocation() {
         (location) => {
           if (!cancelled) {
             setCoords(location.coords);
+            setStoredCoords(location.coords);
           }
         },
       );
@@ -58,7 +68,7 @@ export function useLocation() {
       cancelled = true;
       subscription?.remove();
     };
-  }, []);
+  }, [setStoredCoords, setStoredStatus]);
 
   const accuracy = coords?.accuracy ?? null;
   const isLowAccuracy = accuracy !== null && accuracy > LOW_ACCURACY_THRESHOLD_M;

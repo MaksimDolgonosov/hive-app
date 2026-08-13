@@ -17,6 +17,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Карта' }} />
+      <Tabs.Screen name="nearby" options={{ title: 'Рядом' }} />
       <Tabs.Screen name="profile" options={{ title: 'Профиль' }} />
     </Tabs>
   );

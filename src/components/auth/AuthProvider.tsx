@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 
 import { LoadingScreen } from '@/src/components/ui/LoadingScreen';
+import { useWebSocketLifecycle } from '@/src/hooks/useWebSocketLifecycle';
 import { useAuthStore } from '@/src/stores/authStore';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -13,6 +14,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void hydrateAuth();
   }, [hydrateAuth]);
+
+  useWebSocketLifecycle();
 
   useEffect(() => {
     if (status === 'idle') {

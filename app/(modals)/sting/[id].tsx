@@ -20,6 +20,7 @@ export default function StingDetailScreen() {
   const reactToSting = useStingReaction(stingId ?? '');
 
   const sting = data?.sting;
+  const isLiked = sting?.hasLiked ?? false;
 
   function handleClose() {
     if (router.canGoBack()) {
@@ -82,10 +83,7 @@ export default function StingDetailScreen() {
         style={{ flex: 1 }}
       />
 
-      <View
-        className="absolute left-0 right-0 flex-row items-center justify-between px-4"
-        style={{ top: insets.top + 8 }}
-      >
+      <View className="absolute left-4" style={{ top: insets.top + 8 }}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('sting.close')}
@@ -94,17 +92,10 @@ export default function StingDetailScreen() {
         >
           <X color="#FFFFFF" size={22} />
         </Pressable>
-
-        <View className="rounded-full bg-black/50 px-4 py-2">
-          <Timer
-            expiresAt={sting.expiresAt}
-            className="font-inter text-sm font-semibold text-white"
-          />
-        </View>
       </View>
 
       <View
-        className="absolute bottom-0 left-0 right-0 flex-row items-center justify-between bg-black/60 px-6 pt-4"
+        className="absolute bottom-0 left-0 right-0 flex-row items-end justify-between bg-black/60 px-6 pt-4"
         style={{ paddingBottom: insets.bottom + 16 }}
       >
         <View>
@@ -117,15 +108,18 @@ export default function StingDetailScreen() {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('sting.like')}
-          className="flex-row items-center gap-2 rounded-full bg-hive-primary px-5 py-3"
+          accessibilityLabel={isLiked ? t('sting.unlike') : t('sting.like')}
+          accessibilityState={{ selected: isLiked }}
+          className={`flex-row items-center gap-2 rounded-full px-5 py-3 ${
+            isLiked ? 'bg-hive-primary' : 'border border-white/30 bg-black/40'
+          }`}
           disabled={reactToSting.isPending}
           onPress={() => void handleReact()}
         >
           {reactToSting.isPending ? (
             <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
-            <Heart color="#FFFFFF" fill="#FFFFFF" size={20} />
+            <Heart color="#FFFFFF" fill={isLiked ? '#FFFFFF' : 'transparent'} size={20} />
           )}
           <Text className="font-inter text-base font-semibold text-white">
             {sting.reactionsCount}

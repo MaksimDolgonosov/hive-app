@@ -46,14 +46,24 @@ export type TranslationSchema = {
     openSettings: string;
     loadError: string;
     capturePhoto: string;
+    centerOnUser: string;
   };
   tabs: {
     map: string;
+    nearby: string;
     camera: string;
     profile: string;
   };
+  nearby: {
+    title: string;
+    subtitle: string;
+    emptyTitle: string;
+    emptyMessage: string;
+    locationDeniedMessage: string;
+    retry: string;
+  };
   profile: {
-    comingSoon: string;
+    memberSince: string;
   };
   hive: {
     title: string;
@@ -68,6 +78,7 @@ export type TranslationSchema = {
     notFound: string;
     expiresIn: string;
     like: string;
+    unlike: string;
     reactFailedTitle: string;
     reactFailedMessage: string;
   };
@@ -79,6 +90,7 @@ export type TranslationSchema = {
     requestPermission: string;
     captureFailedTitle: string;
     captureFailedMessage: string;
+    locationUnavailableMessage: string;
     previewAlt: string;
     lowAccuracyWarning: string;
     staleCaptureWarning: string;

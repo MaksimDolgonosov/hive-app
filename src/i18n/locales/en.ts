@@ -48,14 +48,24 @@ export const en: TranslationSchema = {
     openSettings: 'Open Settings',
     loadError: 'Could not load nearby stings',
     capturePhoto: 'Take photo',
+    centerOnUser: 'Center map on my location',
   },
   tabs: {
     map: 'Map',
+    nearby: 'Nearby',
     camera: 'Camera',
     profile: 'Profile',
   },
+  nearby: {
+    title: 'Nearby',
+    subtitle: 'Photos around you, sorted by distance',
+    emptyTitle: 'No one nearby yet',
+    emptyMessage: 'Take the first photo or check back later — stings live for 4 hours.',
+    locationDeniedMessage: 'Allow location access in Settings to see nearby photos in the feed.',
+    retry: 'Retry',
+  },
   profile: {
-    comingSoon: 'Coming soon',
+    memberSince: 'In Hive since {{date}}',
   },
   hive: {
     title: 'Hive',
@@ -70,6 +80,7 @@ export const en: TranslationSchema = {
     notFound: 'Sting expired or not found',
     expiresIn: 'Expires in',
     like: 'Like',
+    unlike: 'Unlike',
     reactFailedTitle: 'Could not react',
     reactFailedMessage: 'Please try again later.',
   },
@@ -81,6 +92,8 @@ export const en: TranslationSchema = {
     requestPermission: 'Allow camera',
     captureFailedTitle: 'Could not take photo',
     captureFailedMessage: 'Try again or check camera and location permissions.',
+    locationUnavailableMessage:
+      'Could not determine your location. On a simulator, set it via Features → Location → Apple or Custom Location.',
     previewAlt: 'Photo preview',
     lowAccuracyWarning: 'GPS accuracy is low — the photo may fail validation when publishing.',
     staleCaptureWarning: 'More than 2 minutes have passed since capture — publish now or retake.',

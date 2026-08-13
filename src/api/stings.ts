@@ -39,8 +39,13 @@ export async function getById(id: string): Promise<{ sting: Sting }> {
   return data;
 }
 
-export async function react(id: string, type: 'like' = 'like'): Promise<{ reactionsCount: number }> {
-  const { data } = await apiClient.post<{ reactionsCount: number }>(`/stings/${id}/reactions`, {
+export interface StingReactionResponse {
+  reactionsCount: number;
+  hasLiked?: boolean;
+}
+
+export async function react(id: string, type: 'like' = 'like'): Promise<StingReactionResponse> {
+  const { data } = await apiClient.post<StingReactionResponse>(`/stings/${id}/reactions`, {
     type,
   });
   return data;

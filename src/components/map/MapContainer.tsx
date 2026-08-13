@@ -6,8 +6,11 @@ import { router, type Href } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HiveCircle } from '@/src/components/map/HiveCircle';
+import { MapLocationButton } from '@/src/components/map/MapLocationButton';
 import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
+import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { useLocation } from '@/src/hooks/useLocation';
+import { useMapWebSocket } from '@/src/hooks/useMapWebSocket';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
 import { useMapStore } from '@/src/stores/mapStore';
 import type { MapBounds, MapRegion } from '@/src/types';
@@ -18,6 +21,7 @@ import { StingMarker } from './StingMarker';
 
 const REGION_DEBOUNCE_MS = 300;
 const PUBLISH_FOCUS_DELTA = 0.008;
+const USER_REGION_DELTA = 0.01;
 
 function toMapRegion(region: Region): MapRegion {
   return {
@@ -47,6 +51,8 @@ export function MapContainer() {
 
   const { data, isFetching, isError } = useStingsNearby(debouncedBounds);
 
+  useMapWebSocket(debouncedBounds);
+
   useEffect(() => {
     if (!coords || hasCenteredOnUser.current) {
       return;
@@ -55,8 +61,8 @@ export function MapContainer() {
     const userRegion: MapRegion = {
       latitude: coords.latitude,
       longitude: coords.longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
+      latitudeDelta: USER_REGION_DELTA,
+      longitudeDelta: USER_REGION_DELTA,
     };
 
     hasCenteredOnUser.current = true;
@@ -126,6 +132,23 @@ export function MapContainer() {
     setSelectedHiveId(null);
   }
 
+  function centerOnUserLocation() {
+    if (!coords) {
+      return;
+    }
+
+    const userRegion: MapRegion = {
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+      latitudeDelta: USER_REGION_DELTA,
+      longitudeDelta: USER_REGION_DELTA,
+    };
+
+    setRegion(userRegion);
+    setDebouncedBounds(regionToBounds(userRegion));
+    mapRef.current?.animateToRegion(userRegion, 500);
+  }
+
   if (locationStatus === 'loading' || locationStatus === 'idle') {
     return (
       <View className="flex-1 items-center justify-center bg-hive-bg">
@@ -165,7 +188,7 @@ export function MapContainer() {
         initialRegion={initialRegion}
         onRegionChangeComplete={handleRegionChangeComplete}
         showsUserLocation
-        showsMyLocationButton
+        showsMyLocationButton={false}
         userInterfaceStyle="light"
       >
         {data?.stings.map((sting) => (
@@ -185,13 +208,20 @@ export function MapContainer() {
       {isError && (
         <View
           className="absolute left-4 right-4 rounded-hive-md bg-hive-surface px-4 py-3 shadow-sm"
-          style={{ bottom: insets.bottom + 88 }}
+          style={{ bottom: getGlassTabBarInset(insets.bottom) + 12 }}
         >
           <Text className="text-center font-inter text-sm text-hive-foreground">
             {t('map.loadError')}
           </Text>
         </View>
       )}
+
+      <View
+        className="absolute right-4"
+        style={{ bottom: getGlassTabBarInset(insets.bottom) + 12 }}
+      >
+        <MapLocationButton disabled={!coords} onPress={centerOnUserLocation} />
+      </View>
 
       {selectedHiveId && (
         <HiveBottomSheet hiveId={selectedHiveId} onClose={closeHiveSheet} />

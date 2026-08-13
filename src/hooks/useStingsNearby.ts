@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import * as stingsApi from '@/src/api/stings';
 import type { MapBounds } from '@/src/types';
@@ -15,5 +15,6 @@ export function useStingsNearby(bounds: MapBounds | null) {
     queryFn: () => stingsApi.getNearby(bounds!),
     enabled: bounds !== null,
     staleTime: STALE_TIME_MS,
+    placeholderData: keepPreviousData,
   });
 }

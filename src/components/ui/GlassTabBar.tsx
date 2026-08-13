@@ -2,7 +2,7 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
 import type { GlassActiveRenderer } from 'expo-liquid-glass-view';
 import { router, type Href } from 'expo-router';
-import { Camera, Map, User, type LucideIcon } from 'lucide-react-native';
+import { Camera, List, Map, User, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -18,17 +18,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { shouldUseLiquidGlass } from '@/src/utils/liquid-glass';
 
-type TabKey = 'map' | 'camera' | 'profile';
+type TabKey = 'map' | 'nearby' | 'camera' | 'profile';
 
 type TabConfig = {
   key: TabKey;
-  labelKey: 'tabs.map' | 'tabs.camera' | 'tabs.profile';
+  labelKey: 'tabs.map' | 'tabs.nearby' | 'tabs.camera' | 'tabs.profile';
   icon: LucideIcon;
   routeName?: string;
 };
 
 const TABS: TabConfig[] = [
   { key: 'map', labelKey: 'tabs.map', icon: Map, routeName: 'index' },
+  { key: 'nearby', labelKey: 'tabs.nearby', icon: List, routeName: 'nearby' },
   { key: 'camera', labelKey: 'tabs.camera', icon: Camera },
   { key: 'profile', labelKey: 'tabs.profile', icon: User, routeName: 'profile' },
 ];
@@ -199,7 +200,12 @@ export function GlassTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
   const activeRouteName = state.routes[state.index]?.name;
-  const activeTab: TabKey = activeRouteName === 'profile' ? 'profile' : 'map';
+  const activeTab: TabKey =
+    activeRouteName === 'profile'
+      ? 'profile'
+      : activeRouteName === 'nearby'
+        ? 'nearby'
+        : 'map';
 
   function handlePress(tab: TabConfig) {
     if (tab.key === 'camera') {

@@ -3,34 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as stingsApi from '@/src/api/stings';
 import type { PublishStingInput } from '@/src/api/stings';
 import { useMapStore } from '@/src/stores/mapStore';
-import type { StingsNearbyResponse } from '@/src/types';
-
-function upsertPublishedSting(
-  queryClient: ReturnType<typeof useQueryClient>,
-  sting: StingsNearbyResponse['stings'][number],
-) {
-  queryClient.setQueriesData<StingsNearbyResponse>({ queryKey: ['stings'] }, (cached) => {
-    if (!cached) {
-      return cached;
-    }
-
-    if (sting.hiveId) {
-      return {
-        ...cached,
-        stings: cached.stings.filter((item) => item.id !== sting.id),
-      };
-    }
-
-    if (cached.stings.some((item) => item.id === sting.id)) {
-      return cached;
-    }
-
-    return {
-      ...cached,
-      stings: [sting, ...cached.stings],
-    };
-  });
-}
+import { upsertStingInNearbyQueries } from '@/src/utils/stings-query-cache';
 
 export function usePublishSting() {
   const queryClient = useQueryClient();
@@ -41,7 +14,7 @@ export function usePublishSting() {
     onSuccess: (response) => {
       const { sting } = response;
 
-      upsertPublishedSting(queryClient, sting);
+      upsertStingInNearbyQueries(queryClient, sting);
       requestMapFocus({
         lat: sting.location.lat,
         lng: sting.location.lng,

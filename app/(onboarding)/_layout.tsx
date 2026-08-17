@@ -1,0 +1,21 @@
+import { Stack } from 'expo-router';
+
+export default function OnboardingLayout() {
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: 'fade',
+        contentStyle: { backgroundColor: '#FFF8ED' },
+        gestureEnabled: false,
+      }}
+    >
+      <Stack.Screen name="language" />
+      <Stack.Screen name="step1" />
+      <Stack.Screen name="step2" />
+      <Stack.Screen name="step3" />
+      <Stack.Screen name="location-permission" />
+      <Stack.Screen name="camera-permission" />
+    </Stack>
+  );
+}

@@ -67,6 +67,28 @@ export const en: TranslationSchema = {
   profile: {
     memberSince: 'In Hive since {{date}}',
   },
+  onboarding: {
+    next: 'Next',
+    languageTitle: 'Choose your language',
+    languageDescription: 'You can change this later in your profile.',
+    step1Title: 'Camera only',
+    step1Description:
+      'Hive does not allow gallery uploads — only live camera shots. That is how we know each photo is authentic.',
+    step2Title: '4 hours on the map',
+    step2Description:
+      'Every photo lives for 4 hours, then disappears. The map shows what is happening near you right now.',
+    step3Title: 'Hives',
+    step3Description:
+      'When many fresh photos cluster in one spot, they form a hive — open it to browse all shots from that place.',
+    locationTitle: 'Where you are',
+    locationDescription:
+      'Hive shows nearby photos on the map and in the feed. Allow location access — the app cannot work without it.',
+    allowLocation: 'Allow location',
+    cameraTitle: 'Shoot on location',
+    cameraDescription:
+      'The camera is required to publish photos from your spot on the map. Allow access — the system prompt appears next.',
+    allowCamera: 'Allow camera',
+  },
   hive: {
     title: 'Hive',
     photoCount: '{{count}} photos',

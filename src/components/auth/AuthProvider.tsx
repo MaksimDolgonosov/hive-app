@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import { useRouter, useSegments } from 'expo-router';
+import { useRouter, useSegments, type Href } from 'expo-router';
 
 import { LoadingScreen } from '@/src/components/ui/LoadingScreen';
 import { useWebSocketLifecycle } from '@/src/hooks/useWebSocketLifecycle';
@@ -7,6 +7,8 @@ import { useAuthStore } from '@/src/stores/authStore';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const status = useAuthStore((state) => state.status);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
+  const hasCompletedOnboarding = useAuthStore((state) => state.hasCompletedOnboarding);
   const hydrateAuth = useAuthStore((state) => state.hydrate);
   const router = useRouter();
   const segments = useSegments();
@@ -18,11 +20,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useWebSocketLifecycle();
 
   useEffect(() => {
-    if (status === 'idle') {
+    if (!isHydrated || status === 'idle') {
       return;
     }
 
-    const inAuthGroup = segments[0] === '(auth)';
+    const rootSegment = segments[0] as string | undefined;
+    const inOnboardingGroup = rootSegment === '(onboarding)';
+    const inAuthGroup = rootSegment === '(auth)';
+
+    if (!hasCompletedOnboarding) {
+      if (!inOnboardingGroup) {
+        router.replace('/(onboarding)/language' as Href);
+      }
+      return;
+    }
+
+    if (inOnboardingGroup) {
+      if (status === 'authenticated') {
+        router.replace('/(tabs)');
+      } else {
+        router.replace('/(auth)/login');
+      }
+      return;
+    }
 
     if (status === 'unauthenticated' && !inAuthGroup) {
       router.replace('/(auth)/login');
@@ -32,9 +52,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (status === 'authenticated' && inAuthGroup) {
       router.replace('/(tabs)');
     }
-  }, [router, segments, status]);
+  }, [hasCompletedOnboarding, isHydrated, router, segments, status]);
 
-  if (status === 'idle') {
+  if (!isHydrated || status === 'idle') {
     return <LoadingScreen />;
   }
 

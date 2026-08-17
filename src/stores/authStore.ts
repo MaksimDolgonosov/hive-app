@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import * as authApi from '@/src/api/auth';
 import type { AuthStatus, AuthTokens, User } from '@/src/types';
 
+import { loadOnboardingCompleted, saveOnboardingCompleted } from './onboarding-storage';
 import { clearTokens, loadTokens, saveTokens } from './secure-storage';
 
 interface AuthState {
@@ -10,10 +11,13 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   status: AuthStatus;
+  hasCompletedOnboarding: boolean;
+  isHydrated: boolean;
   setSession: (user: User, tokens: AuthTokens) => Promise<void>;
   setTokens: (tokens: AuthTokens) => Promise<void>;
   clearSession: () => Promise<void>;
   hydrate: () => Promise<void>;
+  completeOnboarding: () => Promise<void>;
   register: (input: { email: string; password: string; username: string }) => Promise<void>;
   login: (input: { email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
@@ -24,6 +28,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   refreshToken: null,
   status: 'idle',
+  hasCompletedOnboarding: false,
+  isHydrated: false,
 
   setSession: async (user, tokens) => {
     await saveTokens(tokens.accessToken, tokens.refreshToken);
@@ -54,18 +60,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   hydrate: async () => {
+    const hasCompletedOnboarding = await loadOnboardingCompleted();
     const { accessToken, refreshToken } = await loadTokens();
 
     if (!refreshToken) {
-      set({ status: 'unauthenticated' });
+      set({ hasCompletedOnboarding, status: 'unauthenticated', isHydrated: true });
       return;
     }
 
-    set({ accessToken, refreshToken });
+    set({ accessToken, refreshToken, hasCompletedOnboarding });
 
     try {
       const { user } = await authApi.getMe();
-      set({ user, status: 'authenticated' });
+      set({ user, status: 'authenticated', isHydrated: true });
       return;
     } catch {
       // accessToken might be expired — try refresh below
@@ -75,10 +82,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { tokens } = await authApi.refresh(refreshToken);
       await get().setTokens(tokens);
       const { user } = await authApi.getMe();
-      set({ user, status: 'authenticated' });
+      set({ user, status: 'authenticated', isHydrated: true });
     } catch {
       await get().clearSession();
+      set({ hasCompletedOnboarding, isHydrated: true });
     }
+  },
+
+  completeOnboarding: async () => {
+    await saveOnboardingCompleted();
+    set({ hasCompletedOnboarding: true });
   },
 
   register: async (input) => {

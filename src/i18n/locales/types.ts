@@ -65,6 +65,23 @@ export type TranslationSchema = {
   profile: {
     memberSince: string;
   };
+  onboarding: {
+    next: string;
+    languageTitle: string;
+    languageDescription: string;
+    step1Title: string;
+    step1Description: string;
+    step2Title: string;
+    step2Description: string;
+    step3Title: string;
+    step3Description: string;
+    locationTitle: string;
+    locationDescription: string;
+    allowLocation: string;
+    cameraTitle: string;
+    cameraDescription: string;
+    allowCamera: string;
+  };
   hive: {
     title: string;
     photoCount: string;

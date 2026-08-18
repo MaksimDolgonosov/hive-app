@@ -2,13 +2,13 @@ import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Heart, X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Timer } from '@/src/components/ui/Timer';
 import { useStingDetail } from '@/src/hooks/useStingDetail';
 import { useStingReaction } from '@/src/hooks/useStingReaction';
-import { getApiErrorMessage } from '@/src/utils/api-error';
+import { showApiErrorToast } from '@/src/utils/show-toast';
 
 export default function StingDetailScreen() {
   const { t } = useTranslation();
@@ -39,7 +39,10 @@ export default function StingDetailScreen() {
     try {
       await reactToSting.mutateAsync();
     } catch (error) {
-      Alert.alert(t('sting.reactFailedTitle'), getApiErrorMessage(error, 'sting.reactFailedMessage'));
+      showApiErrorToast(error, {
+        titleKey: 'sting.reactFailedTitle',
+        fallbackKey: 'sting.reactFailedMessage',
+      });
     }
   }
 

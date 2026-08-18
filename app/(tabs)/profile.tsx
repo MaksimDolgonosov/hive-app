@@ -1,21 +1,18 @@
-import { useMemo, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Heart, Hexagon, Image as ImageIcon, LogOut, Settings } from 'lucide-react-native';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AuthButton } from '@/src/components/auth/AuthButton';
-import { LanguageSwitcher } from '@/src/components/ui/LanguageSwitcher';
+import { ProfileGlassCard } from '@/src/components/profile/ProfileGlassCard';
+import { ProfileHeaderCard } from '@/src/components/profile/ProfileHeaderCard';
+import { ProfileMenuRow } from '@/src/components/profile/ProfileMenuRow';
+import { ProfileRecentPhotos } from '@/src/components/profile/ProfileRecentPhotos';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
+import { LanguageSelect } from '@/src/components/ui/LanguageSelect';
 import { useAuthStore } from '@/src/stores/authStore';
-
-function getInitials(username: string): string {
-  return username
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('');
-}
 
 function formatMemberDate(isoDate: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, {
@@ -30,15 +27,33 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const refreshUser = useAuthStore((state) => state.refreshUser);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const memberSince = useMemo(() => {
+  useFocusEffect(
+    useCallback(() => {
+      void refreshUser();
+    }, [refreshUser]),
+  );
+
+  const subtitle = useMemo(() => {
     if (!user?.createdAt) {
-      return null;
+      return '';
     }
 
-    return formatMemberDate(user.createdAt, i18n.language === 'ru' ? 'ru-RU' : 'en-US');
-  }, [i18n.language, user?.createdAt]);
+    const date = formatMemberDate(user.createdAt, i18n.language === 'ru' ? 'ru-RU' : 'en-US');
+    return t('profile.memberSince', { date });
+  }, [i18n.language, t, user?.createdAt]);
+
+  const stats = useMemo(
+    () => ({
+      photos: 0,
+      hives: 0,
+      likes: 0,
+    }),
+    [],
+  );
 
   async function handleLogout() {
     if (isLoggingOut) {
@@ -54,53 +69,88 @@ export default function ProfileScreen() {
     }
   }
 
-  return (
-    <View
-      className="flex-1 bg-hive-bg px-6"
-      style={{
-        paddingTop: insets.top + 24,
-        paddingBottom: getGlassTabBarInset(insets.bottom) + 16,
-      }}
-    >
-      <Text className="font-inter text-2xl font-bold text-hive-foreground">{t('tabs.profile')}</Text>
-
-      {user && (
-        <View className="mt-6 flex-row items-center gap-4">
-          {user.avatarUrl ? (
-            <Image
-              source={{ uri: user.avatarUrl }}
-              style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: '#E8E0D4' }}
-            />
-          ) : (
-            <View className="h-16 w-16 items-center justify-center rounded-full bg-hive-primary/15">
-              <Text className="font-inter text-xl font-bold text-hive-primary">
-                {getInitials(user.username) || '?'}
-              </Text>
-            </View>
-          )}
-
-          <View className="flex-1">
-            <Text className="font-inter text-lg font-semibold text-hive-foreground">
-              {user.username}
-            </Text>
-            {memberSince && (
-              <Text className="mt-1 font-inter text-sm text-hive-muted">
-                {t('profile.memberSince', { date: memberSince })}
-              </Text>
-            )}
-          </View>
-        </View>
-      )}
-
-      <LanguageSwitcher className="mt-10" />
-
-      <View className="mt-auto">
-        <AuthButton
-          loading={isLoggingOut}
-          title={t('home.logout')}
-          onPress={() => void handleLogout()}
-        />
+  if (!user) {
+    return (
+      <View className="flex-1 items-center justify-center bg-hive-bg">
+        <Text className="font-inter text-sm text-hive-muted">{t('common.loading')}</Text>
       </View>
-    </View>
+    );
+  }
+
+  return (
+    <LinearGradient colors={['#FFF8ED', '#FFE8B8', '#FFD54F44']} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: insets.top + 16,
+          paddingBottom: getGlassTabBarInset(insets.bottom) + 16,
+          paddingHorizontal: 20,
+          gap: 20,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <ProfileHeaderCard stats={stats} subtitle={subtitle} user={user} />
+
+        <ProfileGlassCard>
+          <ProfileMenuRow
+            badge={stats.photos > 0 ? stats.photos : undefined}
+            icon={ImageIcon}
+            label={t('profile.menuPhotos')}
+            onPress={() => undefined}
+          />
+          <ProfileMenuRow
+            badge={stats.hives > 0 ? stats.hives : undefined}
+            icon={Hexagon}
+            label={t('profile.menuHives')}
+            onPress={() => undefined}
+          />
+          <ProfileMenuRow icon={Heart} label={t('profile.menuFavorites')} onPress={() => undefined} />
+          <ProfileMenuRow
+            icon={Settings}
+            label={t('profile.menuSettings')}
+            onPress={() => setSettingsOpen(true)}
+          />
+          <ProfileMenuRow
+            icon={LogOut}
+            label={t('profile.menuLogout')}
+            showDivider={false}
+            onPress={() => void handleLogout()}
+          />
+        </ProfileGlassCard>
+
+        <ProfileRecentPhotos />
+      </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent
+        visible={settingsOpen}
+        onRequestClose={() => setSettingsOpen(false)}
+      >
+        <Pressable
+          accessibilityRole="button"
+          className="flex-1 justify-end bg-black/40"
+          onPress={() => setSettingsOpen(false)}
+        >
+          <Pressable
+            className="rounded-t-[20px] bg-hive-bg px-5 pt-4"
+            style={{ paddingBottom: insets.bottom + 20 }}
+            onPress={(event) => event.stopPropagation()}
+          >
+            <View className="mb-4 h-1 w-10 self-center rounded-full bg-hive-primary/30" />
+            <Text className="mb-4 text-center font-inter text-lg font-semibold text-hive-foreground">
+              {t('profile.menuSettings')}
+            </Text>
+            <LanguageSelect />
+            <Pressable
+              accessibilityRole="button"
+              className="mt-6 items-center rounded-hive-md bg-hive-primary py-3"
+              onPress={() => setSettingsOpen(false)}
+            >
+              <Text className="font-inter text-base font-semibold text-white">{t('profile.closeSettings')}</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </LinearGradient>
   );
 }

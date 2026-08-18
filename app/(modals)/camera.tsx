@@ -4,7 +4,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,6 +15,7 @@ import { ZoomPresets } from '@/src/components/camera/ZoomPresets';
 import { useCamera } from '@/src/hooks/useCamera';
 import { useCameraZoom } from '@/src/hooks/useCameraZoom';
 import { useCameraStore } from '@/src/stores/cameraStore';
+import { showMessageToast } from '@/src/utils/show-toast';
 
 export default function CameraScreen() {
   const { t } = useTranslation();
@@ -75,13 +76,13 @@ export default function CameraScreen() {
       return;
     }
 
-    Alert.alert(
-      t('camera.captureFailedTitle'),
+    showMessageToast(
       result.reason === 'location_denied'
-        ? t('map.locationDeniedMessage')
+        ? 'map.locationDeniedMessage'
         : result.reason === 'location_unavailable'
-          ? t('camera.locationUnavailableMessage')
-          : t('camera.captureFailedMessage'),
+          ? 'camera.locationUnavailableMessage'
+          : 'camera.captureFailedMessage',
+      'camera.captureFailedTitle',
     );
   }
 

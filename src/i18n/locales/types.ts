@@ -47,12 +47,18 @@ export type TranslationSchema = {
     loadError: string;
     capturePhoto: string;
     centerOnUser: string;
+    emptyTitle: string;
+    emptyMessage: string;
   };
   tabs: {
     map: string;
     nearby: string;
     camera: string;
     profile: string;
+  };
+  network: {
+    offline: string;
+    offlineHint: string;
   };
   nearby: {
     title: string;
@@ -64,21 +70,42 @@ export type TranslationSchema = {
   };
   profile: {
     memberSince: string;
+    statsPhotos: string;
+    statsHives: string;
+    statsLikes: string;
+    menuPhotos: string;
+    menuHives: string;
+    menuFavorites: string;
+    menuSettings: string;
+    menuLogout: string;
+    recentPhotos: string;
+    viewAll: string;
+    closeSettings: string;
   };
   onboarding: {
     next: string;
-    languageTitle: string;
-    languageDescription: string;
+    skip: string;
+    welcomeTitle: string;
+    welcomeSubtitle: string;
+    welcomeDescription: string;
     step1Title: string;
+    step1Subtitle: string;
     step1Description: string;
     step2Title: string;
+    step2Subtitle: string;
     step2Description: string;
     step3Title: string;
+    step3Subtitle: string;
     step3Description: string;
+    galleryUnavailable: string;
+    expiresInFourHours: string;
+    publishedAtLocation: string;
     locationTitle: string;
+    locationSubtitle: string;
     locationDescription: string;
     allowLocation: string;
     cameraTitle: string;
+    cameraSubtitle: string;
     cameraDescription: string;
     allowCamera: string;
   };

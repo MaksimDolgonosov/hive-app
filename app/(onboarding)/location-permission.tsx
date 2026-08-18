@@ -4,10 +4,13 @@ import { MapPin } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { OnboardingScreen, ONBOARDING_TOTAL_STEPS } from '@/src/components/onboarding/OnboardingScreen';
+import { OnboardingScreen } from '@/src/components/onboarding/OnboardingScreen';
+import { PermissionIllustration } from '@/src/components/onboarding/OnboardingIllustrations';
+import { useOnboardingSkip } from '@/src/hooks/useOnboardingSkip';
 
 export default function OnboardingLocationPermissionScreen() {
   const { t } = useTranslation();
+  const skipOnboarding = useOnboardingSkip();
   const [loading, setLoading] = useState(false);
 
   async function handleContinue() {
@@ -27,14 +30,20 @@ export default function OnboardingLocationPermissionScreen() {
 
   return (
     <OnboardingScreen
+      showPagination={false}
       actionLabel={t('onboarding.allowLocation')}
       description={t('onboarding.locationDescription')}
-      icon={MapPin}
+      illustration={
+        <PermissionIllustration>
+          <MapPin color="#F5A623" size={56} strokeWidth={2} />
+        </PermissionIllustration>
+      }
       loading={loading}
-      step={5}
+      skipLabel={t('onboarding.skip')}
+      subtitle={t('onboarding.locationSubtitle')}
       title={t('onboarding.locationTitle')}
-      totalSteps={ONBOARDING_TOTAL_STEPS}
       onAction={() => void handleContinue()}
+      onSkip={() => void skipOnboarding()}
     />
   );
 }

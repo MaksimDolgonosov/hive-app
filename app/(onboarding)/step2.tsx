@@ -1,21 +1,29 @@
 import { router, type Href } from 'expo-router';
-import { Clock } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
-import { OnboardingScreen, ONBOARDING_TOTAL_STEPS } from '@/src/components/onboarding/OnboardingScreen';
+import {
+  ONBOARDING_CONTENT_STEPS,
+  OnboardingScreen,
+} from '@/src/components/onboarding/OnboardingScreen';
+import { FourHoursIllustration } from '@/src/components/onboarding/OnboardingIllustrations';
+import { useOnboardingSkip } from '@/src/hooks/useOnboardingSkip';
 
 export default function OnboardingStep2Screen() {
   const { t } = useTranslation();
+  const skipOnboarding = useOnboardingSkip();
 
   return (
     <OnboardingScreen
       actionLabel={t('onboarding.next')}
       description={t('onboarding.step2Description')}
-      icon={Clock}
+      illustration={<FourHoursIllustration />}
+      skipLabel={t('onboarding.skip')}
       step={3}
+      subtitle={t('onboarding.step2Subtitle')}
       title={t('onboarding.step2Title')}
-      totalSteps={ONBOARDING_TOTAL_STEPS}
+      totalSteps={ONBOARDING_CONTENT_STEPS}
       onAction={() => router.push('/(onboarding)/step3' as Href)}
+      onSkip={() => void skipOnboarding()}
     />
   );
 }

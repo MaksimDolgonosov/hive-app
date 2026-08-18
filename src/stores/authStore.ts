@@ -1,9 +1,13 @@
 import { create } from 'zustand';
 
 import * as authApi from '@/src/api/auth';
+import {
+  registerAuthSessionHandlers,
+  setAuthSessionTokens,
+} from '@/src/api/auth-session';
 import type { AuthStatus, AuthTokens, User } from '@/src/types';
 
-import { loadOnboardingCompleted, saveOnboardingCompleted } from './onboarding-storage';
+import { loadOnboardingCompleted, saveOnboardingCompleted, clearOnboardingCompleted } from './onboarding-storage';
 import { clearTokens, loadTokens, saveTokens } from './secure-storage';
 
 interface AuthState {
@@ -18,9 +22,11 @@ interface AuthState {
   clearSession: () => Promise<void>;
   hydrate: () => Promise<void>;
   completeOnboarding: () => Promise<void>;
+  resetOnboarding: () => Promise<void>;
   register: (input: { email: string; password: string; username: string }) => Promise<void>;
   login: (input: { email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -33,6 +39,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setSession: async (user, tokens) => {
     await saveTokens(tokens.accessToken, tokens.refreshToken);
+    setAuthSessionTokens(tokens.accessToken, tokens.refreshToken);
     set({
       user,
       accessToken: tokens.accessToken,
@@ -43,6 +50,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setTokens: async (tokens) => {
     await saveTokens(tokens.accessToken, tokens.refreshToken);
+    setAuthSessionTokens(tokens.accessToken, tokens.refreshToken);
     set({
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
@@ -51,6 +59,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   clearSession: async () => {
     await clearTokens();
+    setAuthSessionTokens(null, null);
     set({
       user: null,
       accessToken: null,
@@ -60,6 +69,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   hydrate: async () => {
+    if (__DEV__ && process.env.EXPO_PUBLIC_RESET_ONBOARDING === 'true') {
+      await clearOnboardingCompleted();
+    }
+
     const hasCompletedOnboarding = await loadOnboardingCompleted();
     const { accessToken, refreshToken } = await loadTokens();
 
@@ -69,6 +82,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     set({ accessToken, refreshToken, hasCompletedOnboarding });
+    setAuthSessionTokens(accessToken, refreshToken);
 
     try {
       const { user } = await authApi.getMe();
@@ -94,12 +108,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ hasCompletedOnboarding: true });
   },
 
+  resetOnboarding: async () => {
+    await clearOnboardingCompleted();
+    set({ hasCompletedOnboarding: false });
+  },
+
   register: async (input) => {
     const { user, tokens } = await authApi.register(input);
     await get().setSession(user, tokens);
   },
 
   login: async (input) => {
+    await get().clearSession();
     const { user, tokens } = await authApi.login(input);
     await get().setSession(user, tokens);
   },
@@ -115,4 +135,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     await get().clearSession();
   },
+
+  refreshUser: async () => {
+    if (get().status !== 'authenticated') {
+      return;
+    }
+
+    try {
+      const { user } = await authApi.getMe();
+      set({ user });
+    } catch {
+      // Keep cached user if refresh fails transiently.
+    }
+  },
 }));
+
+registerAuthSessionHandlers({
+  refreshTokens: async (refreshToken) => {
+    try {
+      const { tokens } = await authApi.refresh(refreshToken);
+      await useAuthStore.getState().setTokens(tokens);
+      return tokens;
+    } catch {
+      return null;
+    }
+  },
+  clearSession: async () => {
+    await useAuthStore.getState().clearSession();
+  },
+});

@@ -4,12 +4,15 @@ import { Camera as CameraIcon } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { OnboardingScreen, ONBOARDING_TOTAL_STEPS } from '@/src/components/onboarding/OnboardingScreen';
+import { OnboardingScreen } from '@/src/components/onboarding/OnboardingScreen';
+import { PermissionIllustration } from '@/src/components/onboarding/OnboardingIllustrations';
+import { useOnboardingSkip } from '@/src/hooks/useOnboardingSkip';
 import { useAuthStore } from '@/src/stores/authStore';
 
 export default function OnboardingCameraPermissionScreen() {
   const { t } = useTranslation();
   const completeOnboarding = useAuthStore((state) => state.completeOnboarding);
+  const skipOnboarding = useOnboardingSkip();
   const [loading, setLoading] = useState(false);
 
   async function handleContinue() {
@@ -30,14 +33,20 @@ export default function OnboardingCameraPermissionScreen() {
 
   return (
     <OnboardingScreen
+      showPagination={false}
       actionLabel={t('onboarding.allowCamera')}
       description={t('onboarding.cameraDescription')}
-      icon={CameraIcon}
+      illustration={
+        <PermissionIllustration>
+          <CameraIcon color="#F5A623" size={56} strokeWidth={2} />
+        </PermissionIllustration>
+      }
       loading={loading}
-      step={6}
+      skipLabel={t('onboarding.skip')}
+      subtitle={t('onboarding.cameraSubtitle')}
       title={t('onboarding.cameraTitle')}
-      totalSteps={ONBOARDING_TOTAL_STEPS}
       onAction={() => void handleContinue()}
+      onSkip={() => void skipOnboarding()}
     />
   );
 }

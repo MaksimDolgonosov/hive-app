@@ -1,5 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { Link, router } from 'expo-router';
+import { Link, router, type Href } from 'expo-router';
 import { Apple, Globe, Lock, Mail } from 'lucide-react-native';
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +11,7 @@ import { AuthInput } from '@/src/components/auth/AuthInput';
 import { AuthLogo } from '@/src/components/auth/AuthLogo';
 import { AuthScreenLayout } from '@/src/components/auth/AuthScreenLayout';
 import { useAuthStore } from '@/src/stores/authStore';
-import { getApiErrorMessage } from '@/src/utils/api-error';
+import { getApiErrorMessage, logApiError } from '@/src/utils/api-error';
 
 function SocialButton({ children }: { children: ReactNode }) {
   return (
@@ -24,6 +24,7 @@ function SocialButton({ children }: { children: ReactNode }) {
 export default function LoginScreen() {
   const { t } = useTranslation();
   const login = useAuthStore((state) => state.login);
+  const resetOnboarding = useAuthStore((state) => state.resetOnboarding);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,6 +47,7 @@ export default function LoginScreen() {
       });
       router.replace('/(tabs)');
     } catch (err) {
+      logApiError('auth.login', err);
       setError(getApiErrorMessage(err, 'auth.loginFailed'));
     } finally {
       setLoading(false);
@@ -59,12 +61,12 @@ export default function LoginScreen() {
       <AuthFormCard title={t('auth.loginTitle')} subtitle={t('auth.loginCardSubtitle')}>
         <AuthInput
           autoCapitalize="none"
-          autoComplete="username"
+          autoComplete="email"
           icon={Mail}
           keyboardType="email-address"
           label={t('common.email')}
           placeholder={t('common.emailPlaceholder')}
-          textContentType="username"
+          textContentType="emailAddress"
           value={email}
           onChangeText={setEmail}
         />
@@ -75,6 +77,7 @@ export default function LoginScreen() {
           label={t('common.password')}
           placeholder={t('common.passwordPlaceholder')}
           secureTextEntry
+          textContentType="password"
           value={password}
           onChangeText={setPassword}
         />
@@ -117,6 +120,20 @@ export default function LoginScreen() {
           </Pressable>
         </Link>
       </View>
+
+      {__DEV__ ? (
+        <Pressable
+          accessibilityRole="button"
+          className="mt-4 items-center py-2"
+          onPress={() => {
+            void resetOnboarding().then(() => {
+              router.replace('/(onboarding)/welcome' as Href);
+            });
+          }}
+        >
+          <Text className="font-inter text-xs text-hive-muted underline">Dev: показать онбординг</Text>
+        </Pressable>
+      ) : null}
     </AuthScreenLayout>
   );
 }

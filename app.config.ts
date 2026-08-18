@@ -25,9 +25,14 @@ function resolveUrls() {
 export default ({ config }: ConfigContext): ExpoConfig => {
   const { apiUrl, wsUrl } = resolveUrls();
 
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[app.config] API_URL =', apiUrl);
+    console.log('[app.config] WS_URL =', wsUrl);
+  }
+
   return {
     ...config,
-    name: 'hive-app',
+    name: 'Hive',
     slug: 'hive-app',
     version: '1.0.0',
     orientation: 'portrait',
@@ -37,8 +42,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
+      bundleIdentifier: 'com.hive.app',
     },
     android: {
+      package: 'com.hive.app',
       permissions: ['VIBRATE'],
       adaptiveIcon: {
         backgroundColor: '#E6F4FE',

@@ -16,6 +16,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { AuthProvider } from '@/src/components/auth/AuthProvider';
+import { AppShell } from '@/src/components/ui/AppShell';
 import { QueryProvider } from '@/src/components/providers/QueryProvider';
 import { LoadingScreen } from '@/src/components/ui/LoadingScreen';
 import i18n from '@/src/i18n';
@@ -58,15 +59,17 @@ export default function RootLayout() {
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <QueryProvider>
             <AuthProvider>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(onboarding)" />
-                <Stack.Screen name="(auth)" />
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen
-                  name="(modals)"
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-              </Stack>
+              <AppShell>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="(onboarding)" />
+                  <Stack.Screen name="(auth)" />
+                  <Stack.Screen name="(tabs)" />
+                  <Stack.Screen
+                    name="(modals)"
+                    options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                  />
+                </Stack>
+              </AppShell>
             </AuthProvider>
           </QueryProvider>
           <StatusBar style="dark" />

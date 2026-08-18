@@ -2,13 +2,14 @@ import { Image } from 'expo-image';
 import { router, type Href } from 'expo-router';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/src/components/auth/AuthButton';
 import { usePublishSting } from '@/src/hooks/usePublishSting';
 import { useCameraStore } from '@/src/stores/cameraStore';
-import { getApiErrorMessage, logApiError } from '@/src/utils/api-error';
+import { logApiError } from '@/src/utils/api-error';
+import { showApiErrorToast } from '@/src/utils/show-toast';
 import { normalizeAccuracy } from '@/src/utils/exif';
 import { notifyPublishError, notifyPublishSuccess } from '@/src/utils/haptics';
 
@@ -84,10 +85,10 @@ export default function PreviewScreen() {
     } catch (error) {
       logApiError('preview.publish', error);
       await notifyPublishError();
-      Alert.alert(
-        t('camera.publishFailedTitle'),
-        getApiErrorMessage(error, 'camera.publishFailedMessage'),
-      );
+      showApiErrorToast(error, {
+        titleKey: 'camera.publishFailedTitle',
+        fallbackKey: 'camera.publishFailedMessage',
+      });
     }
   }
 

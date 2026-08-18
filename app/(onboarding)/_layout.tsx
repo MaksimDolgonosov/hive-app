@@ -10,7 +10,7 @@ export default function OnboardingLayout() {
         gestureEnabled: false,
       }}
     >
-      <Stack.Screen name="language" />
+      <Stack.Screen name="welcome" />
       <Stack.Screen name="step1" />
       <Stack.Screen name="step2" />
       <Stack.Screen name="step3" />

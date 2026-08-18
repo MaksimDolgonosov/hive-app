@@ -5,24 +5,25 @@ import {
   ONBOARDING_CONTENT_STEPS,
   OnboardingScreen,
 } from '@/src/components/onboarding/OnboardingScreen';
-import { CameraIllustration } from '@/src/components/onboarding/OnboardingIllustrations';
+import { WelcomeMapIllustration } from '@/src/components/onboarding/OnboardingIllustrations';
 import { useOnboardingSkip } from '@/src/hooks/useOnboardingSkip';
 
-export default function OnboardingStep1Screen() {
+export default function OnboardingWelcomeScreen() {
   const { t } = useTranslation();
   const skipOnboarding = useOnboardingSkip();
 
   return (
     <OnboardingScreen
+      showLanguagePicker
       actionLabel={t('onboarding.next')}
-      description={t('onboarding.step1Description')}
-      illustration={<CameraIllustration />}
+      description={t('onboarding.welcomeDescription')}
+      illustration={<WelcomeMapIllustration />}
       skipLabel={t('onboarding.skip')}
-      step={2}
-      subtitle={t('onboarding.step1Subtitle')}
-      title={t('onboarding.step1Title')}
+      step={1}
+      subtitle={t('onboarding.welcomeSubtitle')}
+      title={t('onboarding.welcomeTitle')}
       totalSteps={ONBOARDING_CONTENT_STEPS}
-      onAction={() => router.push('/(onboarding)/step2' as Href)}
+      onAction={() => router.push('/(onboarding)/step1' as Href)}
       onSkip={() => void skipOnboarding()}
     />
   );

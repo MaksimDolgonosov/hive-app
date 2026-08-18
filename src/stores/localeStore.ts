@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 import { changeAppLanguage, initI18n } from '@/src/i18n';
-import { AppLanguage } from '@/src/i18n/languages';
+import { AppLanguage, resolveDeviceLanguage } from '@/src/i18n/languages';
 
 interface LocaleState {
   language: AppLanguage;
@@ -11,7 +11,7 @@ interface LocaleState {
 }
 
 export const useLocaleStore = create<LocaleState>((set) => ({
-  language: 'ru',
+  language: resolveDeviceLanguage(),
   isReady: false,
 
   hydrate: async () => {

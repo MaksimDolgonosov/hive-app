@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (!hasCompletedOnboarding) {
       if (!inOnboardingGroup) {
-        router.replace('/(onboarding)/language' as Href);
+        router.replace('/(onboarding)/welcome' as Href);
       }
       return;
     }

@@ -179,6 +179,14 @@ export function MapContainer() {
   }
 
   const initialRegion = region ?? DEFAULT_MAP_REGION;
+  const activeHives = data?.hives.filter((hive) => isActiveHive(hive.activeStingsCount)) ?? [];
+  const isEmpty =
+    debouncedBounds !== null &&
+    data !== undefined &&
+    !isFetching &&
+    !isError &&
+    data.stings.length === 0 &&
+    activeHives.length === 0;
 
   return (
     <View className="flex-1">
@@ -198,6 +206,21 @@ export function MapContainer() {
           <HiveCircle key={hive.id} hive={hive} onPress={() => openHive(hive.id)} />
         ))}
       </MapView>
+
+      {isEmpty && (
+        <View
+          pointerEvents="none"
+          className="absolute left-4 right-4 rounded-hive-md bg-hive-surface/95 px-4 py-3 shadow-sm"
+          style={{ top: insets.top + 16 }}
+        >
+          <Text className="text-center font-inter text-sm font-semibold text-hive-foreground">
+            {t('map.emptyTitle')}
+          </Text>
+          <Text className="mt-1 text-center font-inter text-xs text-hive-muted">
+            {t('map.emptyMessage')}
+          </Text>
+        </View>
+      )}
 
       {isFetching && (
         <View className="absolute right-4 top-14 rounded-full bg-hive-surface px-3 py-2 shadow-sm">

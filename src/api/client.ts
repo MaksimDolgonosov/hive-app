@@ -1,8 +1,7 @@
 import { create, isAxiosError } from 'axios';
 
+import { getAccessToken, refreshAccessTokenViaSession } from '@/src/api/auth-session';
 import { env } from '@/src/config/env';
-import * as authApi from '@/src/api/auth';
-import { useAuthStore } from '@/src/stores/authStore';
 
 export const apiClient = create({
   baseURL: env.apiUrl,
@@ -15,27 +14,9 @@ export const apiClient = create({
 
 let refreshPromise: Promise<string | null> | null = null;
 
-async function refreshAccessToken(): Promise<string | null> {
-  const { refreshToken, setTokens, clearSession } = useAuthStore.getState();
-
-  if (!refreshToken) {
-    await clearSession();
-    return null;
-  }
-
-  try {
-    const { tokens } = await authApi.refresh(refreshToken);
-    await setTokens(tokens);
-    return tokens.accessToken;
-  } catch {
-    await clearSession();
-    return null;
-  }
-}
-
 function getOrCreateRefreshPromise(): Promise<string | null> {
   if (!refreshPromise) {
-    refreshPromise = refreshAccessToken().finally(() => {
+    refreshPromise = refreshAccessTokenViaSession().finally(() => {
       refreshPromise = null;
     });
   }
@@ -44,7 +25,11 @@ function getOrCreateRefreshPromise(): Promise<string | null> {
 }
 
 apiClient.interceptors.request.use((config) => {
-  const { accessToken } = useAuthStore.getState();
+  if (config.skipAuthRefresh) {
+    return config;
+  }
+
+  const accessToken = getAccessToken();
 
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;

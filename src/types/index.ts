@@ -7,6 +7,17 @@ export interface User {
   createdAt: string;
 }
 
+export interface ProfileStats {
+  photos: number;
+  hives: number;
+  likes: number;
+}
+
+export interface ProfileOverview {
+  stats: ProfileStats;
+  recentPhotos: string[];
+}
+
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;

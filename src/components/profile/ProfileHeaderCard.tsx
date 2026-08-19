@@ -1,16 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 
-import type { User } from '@/src/types';
+import type { ProfileStats, User } from '@/src/types';
 
 import { ProfileAvatar } from './ProfileAvatar';
 import { ProfileGlassCard } from './ProfileGlassCard';
-
-export type ProfileStats = {
-  photos: number;
-  hives: number;
-  likes: number;
-};
 
 type ProfileHeaderCardProps = {
   user: User;

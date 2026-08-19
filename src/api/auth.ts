@@ -1,4 +1,4 @@
-import type { AuthSession, AuthTokens, User } from '@/src/types';
+import type { AuthSession, AuthTokens, ProfileOverview, User } from '@/src/types';
 
 import { apiClient } from './client';
 
@@ -35,5 +35,10 @@ export async function logout(refreshToken: string): Promise<void> {
 
 export async function getMe(): Promise<{ user: User }> {
   const { data } = await apiClient.get<{ user: User }>('/auth/me');
+  return data;
+}
+
+export async function getProfileOverview(): Promise<ProfileOverview> {
+  const { data } = await apiClient.get<ProfileOverview>('/auth/me/stats');
   return data;
 }

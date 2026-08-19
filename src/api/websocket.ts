@@ -6,7 +6,7 @@ import type { Hive, MapBounds, Sting } from '@/src/types';
 import {
   removeHiveFromNearbyQueries,
   removeStingFromNearbyQueries,
-  updateStingReactionCount,
+  updateStingReactionCountInLists,
   upsertHiveInNearbyQueries,
   upsertStingInNearbyQueries,
 } from '@/src/utils/stings-query-cache';
@@ -267,7 +267,7 @@ class WebSocketManager {
       return;
     }
 
-    updateStingReactionCount(queryClient, payload.stingId, payload.reactionsCount);
+    updateStingReactionCountInLists(queryClient, payload.stingId, payload.reactionsCount);
   }
 }
 

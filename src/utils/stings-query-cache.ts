@@ -95,10 +95,10 @@ export function removeHiveFromNearbyQueries(queryClient: QueryClient, hiveId: st
   queryClient.removeQueries({ queryKey: ['hive', hiveId] });
 }
 
-export function updateStingReactionCount(
+export function updateStingReactionState(
   queryClient: QueryClient,
   stingId: string,
-  reactionsCount: number,
+  patch: { reactionsCount: number; hasLiked?: boolean },
 ): void {
   queryClient.setQueryData<{ sting: Sting }>(['sting', stingId], (cached) => {
     if (!cached) {
@@ -108,11 +108,57 @@ export function updateStingReactionCount(
     return {
       sting: {
         ...cached.sting,
-        reactionsCount,
+        reactionsCount: patch.reactionsCount,
+        ...(patch.hasLiked !== undefined ? { hasLiked: patch.hasLiked } : {}),
       },
     };
   });
 
+  queryClient.setQueriesData<StingsNearbyResponse>({ queryKey: ['stings'] }, (cached) => {
+    if (!cached) {
+      return cached;
+    }
+
+    return {
+      ...cached,
+      stings: cached.stings.map((sting) =>
+        sting.id === stingId
+          ? {
+              ...sting,
+              reactionsCount: patch.reactionsCount,
+              ...(patch.hasLiked !== undefined ? { hasLiked: patch.hasLiked } : {}),
+            }
+          : sting,
+      ),
+    };
+  });
+
+  queryClient.setQueriesData<HiveDetailResponse>({ queryKey: ['hive'] }, (cached) => {
+    if (!cached) {
+      return cached;
+    }
+
+    return {
+      ...cached,
+      stings: cached.stings.map((sting) =>
+        sting.id === stingId
+          ? {
+              ...sting,
+              reactionsCount: patch.reactionsCount,
+              ...(patch.hasLiked !== undefined ? { hasLiked: patch.hasLiked } : {}),
+            }
+          : sting,
+      ),
+    };
+  });
+}
+
+/** Обновляет только списки — не трогает кэш детальной карточки (там toggle-like). */
+export function updateStingReactionCountInLists(
+  queryClient: QueryClient,
+  stingId: string,
+  reactionsCount: number,
+): void {
   queryClient.setQueriesData<StingsNearbyResponse>({ queryKey: ['stings'] }, (cached) => {
     if (!cached) {
       return cached;

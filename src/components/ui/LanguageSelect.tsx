@@ -1,14 +1,7 @@
 import { Check, ChevronDown, Globe } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  FlatList,
-  Modal,
-  Pressable,
-  Text,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+import { FlatList, Modal, Pressable, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppLanguage, SUPPORTED_LANGUAGES } from '@/src/i18n/languages';
@@ -45,7 +38,7 @@ export function LanguageSelect({ className }: LanguageSelectProps) {
         <Pressable
           accessibilityRole="button"
           accessibilityState={{ expanded: open }}
-          className="h-12 flex-row items-center gap-2.5 rounded-hive-md border border-[#F5A62333] bg-hive-input-bg px-3.5"
+          className="h-14 flex-row items-center gap-2.5 rounded-hive-md border border-[#F5A62333] bg-hive-input-bg px-3.5"
           onPress={() => setOpen(true)}
         >
           <Globe color="#8B7355" size={18} strokeWidth={2} />
@@ -56,12 +49,7 @@ export function LanguageSelect({ className }: LanguageSelectProps) {
         </Pressable>
       </View>
 
-      <Modal
-        animationType="fade"
-        transparent
-        visible={open}
-        onRequestClose={() => setOpen(false)}
-      >
+      <Modal animationType="fade" transparent visible={open} onRequestClose={() => setOpen(false)}>
         <Pressable
           accessibilityRole="button"
           className="flex-1 justify-end bg-black/40"

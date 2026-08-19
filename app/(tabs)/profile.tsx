@@ -12,7 +12,15 @@ import { ProfileMenuRow } from '@/src/components/profile/ProfileMenuRow';
 import { ProfileRecentPhotos } from '@/src/components/profile/ProfileRecentPhotos';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { LanguageSelect } from '@/src/components/ui/LanguageSelect';
+import { useProfileOverview } from '@/src/hooks/useProfileOverview';
 import { useAuthStore } from '@/src/stores/authStore';
+import type { ProfileStats } from '@/src/types';
+
+const EMPTY_STATS: ProfileStats = {
+  photos: 0,
+  hives: 0,
+  likes: 0,
+};
 
 function formatMemberDate(isoDate: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, {
@@ -31,10 +39,13 @@ export default function ProfileScreen() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  const { data: profileOverview, refetch: refetchProfileOverview } = useProfileOverview(user !== null);
+
   useFocusEffect(
     useCallback(() => {
       void refreshUser();
-    }, [refreshUser]),
+      void refetchProfileOverview();
+    }, [refetchProfileOverview, refreshUser]),
   );
 
   const subtitle = useMemo(() => {
@@ -46,14 +57,8 @@ export default function ProfileScreen() {
     return t('profile.memberSince', { date });
   }, [i18n.language, t, user?.createdAt]);
 
-  const stats = useMemo(
-    () => ({
-      photos: 0,
-      hives: 0,
-      likes: 0,
-    }),
-    [],
-  );
+  const stats = profileOverview?.stats ?? EMPTY_STATS;
+  const recentPhotos = profileOverview?.recentPhotos ?? [];
 
   async function handleLogout() {
     if (isLoggingOut) {
@@ -117,7 +122,7 @@ export default function ProfileScreen() {
           />
         </ProfileGlassCard>
 
-        <ProfileRecentPhotos />
+        <ProfileRecentPhotos photoUrls={recentPhotos} />
       </ScrollView>
 
       <Modal

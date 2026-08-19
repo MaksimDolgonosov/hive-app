@@ -1,9 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import * as stingsApi from '@/src/api/stings';
-import type { StingReactionResponse } from '@/src/api/stings';
 import type { Sting } from '@/src/types';
-import { updateStingReactionCount } from '@/src/utils/stings-query-cache';
+import { updateStingReactionState } from '@/src/utils/stings-query-cache';
 
 type StingDetailCache = { sting: Sting };
 
@@ -15,30 +14,6 @@ function toggleLikeState(sting: Sting): Sting {
     hasLiked: !wasLiked,
     reactionsCount: Math.max(0, sting.reactionsCount + (wasLiked ? -1 : 1)),
   };
-}
-
-function resolveReactionState(
-  optimistic: Sting,
-  response: StingReactionResponse,
-): Sting {
-  if (response.hasLiked !== undefined) {
-    return {
-      ...optimistic,
-      reactionsCount: response.reactionsCount,
-      hasLiked: response.hasLiked,
-    };
-  }
-
-  // Backend POST сейчас всегда инкрементирует count. Если ответ не совпал
-  // с оптимистичным toggle (+1 / −1), оставляем локальный счётчик.
-  if (response.reactionsCount === optimistic.reactionsCount) {
-    return {
-      ...optimistic,
-      reactionsCount: response.reactionsCount,
-    };
-  }
-
-  return optimistic;
 }
 
 export function useStingReaction(stingId: string) {
@@ -71,14 +46,18 @@ export function useStingReaction(stingId: string) {
         }
 
         return {
-          sting: resolveReactionState(cached.sting, response),
+          sting: {
+            ...cached.sting,
+            reactionsCount: response.reactionsCount,
+            hasLiked: response.hasLiked,
+          },
         };
       });
 
-      const updated = queryClient.getQueryData<StingDetailCache>(['sting', stingId]);
-      if (updated) {
-        updateStingReactionCount(queryClient, stingId, updated.sting.reactionsCount);
-      }
+      updateStingReactionState(queryClient, stingId, {
+        reactionsCount: response.reactionsCount,
+        hasLiked: response.hasLiked,
+      });
     },
   });
 }

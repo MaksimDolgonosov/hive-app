@@ -41,7 +41,7 @@ export async function getById(id: string): Promise<{ sting: Sting }> {
 
 export interface StingReactionResponse {
   reactionsCount: number;
-  hasLiked?: boolean;
+  hasLiked: boolean;
 }
 
 export async function react(id: string, type: 'like' = 'like'): Promise<StingReactionResponse> {

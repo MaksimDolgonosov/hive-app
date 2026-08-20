@@ -172,6 +172,7 @@ export const ru: TranslationSchema = {
     unlike: 'Убрать лайк',
     reactFailedTitle: 'Не удалось поставить реакцию',
     reactFailedMessage: 'Попробуйте ещё раз позже.',
+    viewAuthorProfile: 'Профиль {{username}}',
   },
   camera: {
     title: 'Съёмка',

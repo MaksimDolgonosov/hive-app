@@ -162,6 +162,7 @@ export type TranslationSchema = {
     unlike: string;
     reactFailedTitle: string;
     reactFailedMessage: string;
+    viewAuthorProfile: string;
   };
   camera: {
     title: string;

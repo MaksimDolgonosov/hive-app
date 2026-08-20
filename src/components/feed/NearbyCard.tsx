@@ -37,7 +37,18 @@ export function NearbyCard({ sting, distanceM, onPress }: NearbyCardProps) {
       />
 
       <View className="flex-1 justify-center px-3 py-2">
-        <Text className="font-inter text-sm font-semibold text-hive-foreground">
+        {sting.comment ? (
+          <Text
+            className="font-inter text-sm text-hive-foreground"
+            numberOfLines={2}
+          >
+            {sting.comment}
+          </Text>
+        ) : null}
+
+        <Text
+          className={`font-inter text-sm font-semibold text-hive-foreground${sting.comment ? ' mt-1' : ''}`}
+        >
           {formatDistance(distanceM)}
         </Text>
 

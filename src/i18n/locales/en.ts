@@ -170,6 +170,7 @@ export const en: TranslationSchema = {
     unlike: 'Unlike',
     reactFailedTitle: 'Could not react',
     reactFailedMessage: 'Please try again later.',
+    viewAuthorProfile: "View {{username}}'s profile",
   },
   camera: {
     title: 'Camera',

@@ -27,7 +27,7 @@ export function ProfileHeaderCard({ user, subtitle, stats }: ProfileHeaderCardPr
   return (
     <ProfileGlassCard>
       <View className="items-center gap-4 px-6 py-6">
-        <ProfileAvatar avatarUrl={user.avatarUrl} username={user.username} />
+        <ProfileAvatar avatarUrl={user.avatarUrl} editable username={user.username} />
 
         <View className="items-center gap-1">
           <Text className="font-inter text-[22px] font-bold text-hive-foreground">{user.username}</Text>

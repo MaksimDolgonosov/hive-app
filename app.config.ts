@@ -79,6 +79,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         },
       ],
       [
+        'expo-image-picker',
+        {
+          photosPermission: 'Hive использует галерею для выбора фото профиля.',
+          cameraPermission: 'Hive использует камеру для фото профиля.',
+        },
+      ],
+      [
         'expo-splash-screen',
         {
           image: './assets/images/splash-icon.png',

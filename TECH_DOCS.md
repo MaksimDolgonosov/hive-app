@@ -123,6 +123,7 @@ interface Sting {
   createdAt: string; // ISO 8601
   expiresAt: string; // ISO 8601, createdAt + 4h
   reactionsCount: number;
+  comment: string | null; // опциональный комментарий автора, до 280 символов
 }
 
 interface Hive {
@@ -248,6 +249,7 @@ fields:
   lng: number
   accuracy: number          // метры, точность GPS в момент съёмки
   capturedAt: string        // ISO 8601, клиентский таймстамп съёмки
+  comment?: string            // опционально, до 280 символов
 ```
 
 ```json

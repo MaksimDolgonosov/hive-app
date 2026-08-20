@@ -17,7 +17,11 @@ interface AuthState {
   status: AuthStatus;
   hasCompletedOnboarding: boolean;
   isHydrated: boolean;
+  /** Меняется при upload/remove аватара — сбрасывает кэш expo-image. */
+  avatarCacheVersion: number;
   setSession: (user: User, tokens: AuthTokens) => Promise<void>;
+  setUser: (user: User) => void;
+  bumpAvatarCacheVersion: () => void;
   setTokens: (tokens: AuthTokens) => Promise<void>;
   clearSession: () => Promise<void>;
   hydrate: () => Promise<void>;
@@ -36,6 +40,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   status: 'idle',
   hasCompletedOnboarding: false,
   isHydrated: false,
+  avatarCacheVersion: 0,
 
   setSession: async (user, tokens) => {
     await saveTokens(tokens.accessToken, tokens.refreshToken);
@@ -46,6 +51,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       refreshToken: tokens.refreshToken,
       status: 'authenticated',
     });
+  },
+
+  setUser: (user) => {
+    set({ user });
+  },
+
+  bumpAvatarCacheVersion: () => {
+    set({ avatarCacheVersion: Date.now() });
   },
 
   setTokens: async (tokens) => {

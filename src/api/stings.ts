@@ -11,7 +11,10 @@ export interface PublishStingInput {
   accuracy: number;
   capturedAt: string;
   idempotencyKey: string;
+  comment?: string;
 }
+
+export const STING_COMMENT_MAX_LENGTH = 280;
 
 function resolveUploadUri(uri: string): string {
   if (Platform.OS === 'ios' && !uri.startsWith('file://')) {
@@ -68,6 +71,11 @@ export async function create(input: PublishStingInput): Promise<{ sting: Sting }
   formData.append('lng', String(input.lng));
   formData.append('accuracy', String(input.accuracy));
   formData.append('capturedAt', input.capturedAt);
+
+  const trimmedComment = input.comment?.trim();
+  if (trimmedComment) {
+    formData.append('comment', trimmedComment);
+  }
 
   const { data } = await apiClient.post<{ sting: Sting }>('/stings', formData, {
     headers: {

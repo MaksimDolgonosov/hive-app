@@ -81,6 +81,19 @@ export type TranslationSchema = {
     recentPhotos: string;
     viewAll: string;
     closeSettings: string;
+    avatarPickerTitle: string;
+    avatarTakePhoto: string;
+    avatarChooseGallery: string;
+    avatarRemove: string;
+    avatarCancel: string;
+    avatarEditLabel: string;
+    avatarEditHint: string;
+    avatarPermissionTitle: string;
+    avatarCameraPermissionMessage: string;
+    avatarGalleryPermissionMessage: string;
+    avatarOpenSettings: string;
+    avatarUploadFailedTitle: string;
+    avatarUploadFailedMessage: string;
   };
   onboarding: {
     next: string;
@@ -138,6 +151,9 @@ export type TranslationSchema = {
     previewAlt: string;
     lowAccuracyWarning: string;
     staleCaptureWarning: string;
+    commentLabel: string;
+    commentPlaceholder: string;
+    commentCounter: string;
     publish: string;
     retake: string;
     cancel: string;

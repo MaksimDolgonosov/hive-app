@@ -46,6 +46,8 @@ export interface Sting {
   createdAt: string;
   expiresAt: string;
   reactionsCount: number;
+  /** Текстовый комментарий автора (опционально). */
+  comment?: string | null;
   /** Поставил ли текущий пользователь like (есть в GET /stings/:id и POST /reactions). */
   hasLiked?: boolean;
 }

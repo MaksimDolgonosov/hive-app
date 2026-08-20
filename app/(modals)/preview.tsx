@@ -1,11 +1,21 @@
 import { Image } from 'expo-image';
 import { router, type Href } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/src/components/auth/AuthButton';
+import { STING_COMMENT_MAX_LENGTH } from '@/src/api/stings';
 import { usePublishSting } from '@/src/hooks/usePublishSting';
 import { useCameraStore } from '@/src/stores/cameraStore';
 import { logApiError } from '@/src/utils/api-error';
@@ -20,6 +30,7 @@ export default function PreviewScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const publishSting = usePublishSting();
+  const [comment, setComment] = useState('');
 
   const capturedUri = useCameraStore((state) => state.capturedUri);
   const captureCoords = useCameraStore((state) => state.captureCoords);
@@ -53,12 +64,18 @@ export default function PreviewScreen() {
   const photoCapturedAt = capturedAt;
   const publishKey = idempotencyKey;
 
+  function dismissKeyboard() {
+    Keyboard.dismiss();
+  }
+
   function handleRetake() {
+    dismissKeyboard();
     clearPhoto();
     router.back();
   }
 
   function handleCancel() {
+    dismissKeyboard();
     clearCapture();
     router.dismissAll();
   }
@@ -68,6 +85,8 @@ export default function PreviewScreen() {
       return;
     }
 
+    dismissKeyboard();
+
     try {
       await publishSting.mutateAsync({
         photoUri,
@@ -76,6 +95,7 @@ export default function PreviewScreen() {
         accuracy: normalizeAccuracy(captureAccuracy),
         capturedAt: photoCapturedAt,
         idempotencyKey: publishKey,
+        comment: comment.trim() || undefined,
       });
 
       void notifyPublishSuccess();
@@ -93,29 +113,60 @@ export default function PreviewScreen() {
   }
 
   return (
-    <View className="flex-1 bg-black">
-      <Image
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1 bg-black"
+      keyboardVerticalOffset={0}
+    >
+      <Pressable
+        accessibilityRole="button"
         accessibilityLabel={t('camera.previewAlt')}
-        contentFit="contain"
-        source={{ uri: photoUri }}
-        style={{ flex: 1 }}
-      />
+        className="flex-1"
+        onPress={dismissKeyboard}
+      >
+        <Image
+          accessibilityLabel={t('camera.previewAlt')}
+          contentFit="contain"
+          source={{ uri: photoUri }}
+          style={{ flex: 1 }}
+        />
 
-      {(isLowAccuracy || isStaleCapture) && (
-        <View
-          className="absolute left-4 right-4 rounded-hive-md bg-amber-500/90 px-4 py-3"
-          style={{ top: insets.top + 12 }}
-        >
-          <Text className="text-center font-inter text-sm font-semibold text-white">
-            {isStaleCapture ? t('camera.staleCaptureWarning') : t('camera.lowAccuracyWarning')}
+        {(isLowAccuracy || isStaleCapture) && (
+          <View
+            className="absolute left-4 right-4 rounded-hive-md bg-amber-500/90 px-4 py-3"
+            style={{ top: insets.top + 12 }}
+            pointerEvents="none"
+          >
+            <Text className="text-center font-inter text-sm font-semibold text-white">
+              {isStaleCapture ? t('camera.staleCaptureWarning') : t('camera.lowAccuracyWarning')}
+            </Text>
+          </View>
+        )}
+      </Pressable>
+
+      <View className="gap-3 bg-black/70 px-6 pt-4" style={{ paddingBottom: insets.bottom + 16 }}>
+        <View className="gap-1.5">
+          <TextInput
+            accessibilityLabel={t('camera.commentLabel')}
+            className="max-h-[120px] min-h-[72px] rounded-hive-md border border-white/20 bg-black/40 px-3.5 py-2.5 font-inter text-[15px] text-white"
+            maxLength={STING_COMMENT_MAX_LENGTH}
+            multiline
+            placeholder={t('camera.commentPlaceholder')}
+            placeholderTextColor="rgba(255,255,255,0.45)"
+            returnKeyType="done"
+            submitBehavior="blurAndSubmit"
+            textAlignVertical="top"
+            value={comment}
+            onChangeText={setComment}
+          />
+          <Text className="text-right font-inter text-xs text-white/50">
+            {t('camera.commentCounter', {
+              count: comment.length,
+              max: STING_COMMENT_MAX_LENGTH,
+            })}
           </Text>
         </View>
-      )}
 
-      <View
-        className="absolute bottom-0 left-0 right-0 gap-3 bg-black/70 px-6 pt-4"
-        style={{ paddingBottom: insets.bottom + 16 }}
-      >
         <AuthButton
           loading={publishSting.isPending}
           title={t('camera.publish')}
@@ -146,6 +197,6 @@ export default function PreviewScreen() {
           </Pressable>
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }

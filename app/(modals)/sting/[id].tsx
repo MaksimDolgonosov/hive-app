@@ -98,36 +98,42 @@ export default function StingDetailScreen() {
       </View>
 
       <View
-        className="absolute bottom-0 left-0 right-0 flex-row items-end justify-between bg-black/60 px-6 pt-4"
+        className="absolute bottom-0 left-0 right-0 gap-3 bg-black/60 px-6 pt-4"
         style={{ paddingBottom: insets.bottom + 16 }}
       >
-        <View>
-          <Text className="font-inter text-xs text-white/70">{t('sting.expiresIn')}</Text>
-          <Timer
-            expiresAt={sting.expiresAt}
-            className="font-inter text-lg font-semibold text-white"
-          />
-        </View>
+        {sting.comment ? (
+          <Text className="font-inter text-sm text-white/90">{sting.comment}</Text>
+        ) : null}
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={isLiked ? t('sting.unlike') : t('sting.like')}
-          accessibilityState={{ selected: isLiked }}
-          className={`flex-row items-center gap-2 rounded-full px-5 py-3 ${
-            isLiked ? 'bg-hive-primary' : 'border border-white/30 bg-black/40'
-          }`}
-          disabled={reactToSting.isPending}
-          onPress={() => void handleReact()}
-        >
-          {reactToSting.isPending ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <Heart color="#FFFFFF" fill={isLiked ? '#FFFFFF' : 'transparent'} size={20} />
-          )}
-          <Text className="font-inter text-base font-semibold text-white">
-            {sting.reactionsCount}
-          </Text>
-        </Pressable>
+        <View className="flex-row items-end justify-between">
+          <View>
+            <Text className="font-inter text-xs text-white/70">{t('sting.expiresIn')}</Text>
+            <Timer
+              expiresAt={sting.expiresAt}
+              className="font-inter text-lg font-semibold text-white"
+            />
+          </View>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={isLiked ? t('sting.unlike') : t('sting.like')}
+            accessibilityState={{ selected: isLiked }}
+            className={`flex-row items-center gap-2 rounded-full px-5 py-3 ${
+              isLiked ? 'bg-hive-primary' : 'border border-white/30 bg-black/40'
+            }`}
+            disabled={reactToSting.isPending}
+            onPress={() => void handleReact()}
+          >
+            {reactToSting.isPending ? (
+              <ActivityIndicator color="#FFFFFF" size="small" />
+            ) : (
+              <Heart color="#FFFFFF" fill={isLiked ? '#FFFFFF' : 'transparent'} size={20} />
+            )}
+            <Text className="font-inter text-base font-semibold text-white">
+              {sting.reactionsCount}
+            </Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );

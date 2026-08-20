@@ -3,9 +3,12 @@ import { Heart } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
+import { StingAuthorBadge } from '@/src/components/feed/StingAuthorBadge';
 import { Timer } from '@/src/components/ui/Timer';
+import { useAuthStore } from '@/src/stores/authStore';
 import type { Sting } from '@/src/types';
 import { formatDistance } from '@/src/utils/geo';
+import { resolveStingAuthor } from '@/src/utils/resolve-sting-author';
 
 type NearbyCardProps = {
   sting: Sting;
@@ -15,6 +18,9 @@ type NearbyCardProps = {
 
 export function NearbyCard({ sting, distanceM, onPress }: NearbyCardProps) {
   const { t } = useTranslation();
+  const currentUser = useAuthStore((state) => state.user);
+  const avatarCacheVersion = useAuthStore((state) => state.avatarCacheVersion);
+  const author = resolveStingAuthor(sting, currentUser);
 
   return (
     <Pressable
@@ -49,6 +55,12 @@ export function NearbyCard({ sting, distanceM, onPress }: NearbyCardProps) {
           </View>
         )}
       </View>
+
+      <StingAuthorBadge
+        avatarCacheVersion={avatarCacheVersion}
+        avatarUrl={author.avatarUrl}
+        username={author.username}
+      />
     </Pressable>
   );
 }

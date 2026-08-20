@@ -2,8 +2,23 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import * as stingsApi from '@/src/api/stings';
 import type { PublishStingInput } from '@/src/api/stings';
+import { useAuthStore } from '@/src/stores/authStore';
 import { useMapStore } from '@/src/stores/mapStore';
+import type { Sting } from '@/src/types';
 import { upsertStingInNearbyQueries } from '@/src/utils/stings-query-cache';
+
+function enrichStingWithAuthor(sting: Sting): Sting {
+  const user = useAuthStore.getState().user;
+  if (!user || user.id !== sting.authorId) {
+    return sting;
+  }
+
+  return {
+    ...sting,
+    authorUsername: sting.authorUsername ?? user.username,
+    authorAvatarUrl: sting.authorAvatarUrl ?? user.avatarUrl ?? null,
+  };
+}
 
 export function usePublishSting() {
   const queryClient = useQueryClient();
@@ -12,7 +27,7 @@ export function usePublishSting() {
   return useMutation({
     mutationFn: (input: PublishStingInput) => stingsApi.create(input),
     onSuccess: (response) => {
-      const { sting } = response;
+      const sting = enrichStingWithAuthor(response.sting);
 
       upsertStingInNearbyQueries(queryClient, sting);
       requestMapFocus({

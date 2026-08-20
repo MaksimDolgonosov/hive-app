@@ -39,6 +39,8 @@ export interface GeoPoint {
 export interface Sting {
   id: UUID;
   authorId: UUID;
+  authorUsername?: string;
+  authorAvatarUrl?: string | null;
   imageUrl: string;
   thumbnailUrl: string;
   location: GeoPoint;

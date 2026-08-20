@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ProfileAboutCard } from '@/src/components/profile/ProfileAboutCard';
+import { ProfileEditModal } from '@/src/components/profile/ProfileEditModal';
 import { ProfileGlassCard } from '@/src/components/profile/ProfileGlassCard';
 import { ProfileHeaderCard } from '@/src/components/profile/ProfileHeaderCard';
 import { ProfileMenuRow } from '@/src/components/profile/ProfileMenuRow';
@@ -38,8 +40,11 @@ export default function ProfileScreen() {
   const refreshUser = useAuthStore((state) => state.refreshUser);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
 
-  const { data: profileOverview, refetch: refetchProfileOverview } = useProfileOverview(user !== null);
+  const { data: profileOverview, refetch: refetchProfileOverview } = useProfileOverview(
+    user !== null,
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -83,17 +88,23 @@ export default function ProfileScreen() {
   }
 
   return (
-    <LinearGradient colors={['#FFF8ED', '#FFE8B8', '#FFD54F44']} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
+    <LinearGradient
+      colors={['#FFF8ED', '#FFE8B8', '#FFD54F44']}
+      locations={[0, 0.5, 1]}
+      style={{ flex: 1 }}
+    >
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 16,
           paddingBottom: getGlassTabBarInset(insets.bottom) + 16,
           paddingHorizontal: 20,
-          gap: 20,
+          gap: 10,
         }}
         showsVerticalScrollIndicator={false}
       >
         <ProfileHeaderCard stats={stats} subtitle={subtitle} user={user} />
+
+        <ProfileAboutCard user={user} onEdit={() => setEditProfileOpen(true)} />
 
         <ProfileGlassCard>
           <ProfileMenuRow
@@ -108,7 +119,11 @@ export default function ProfileScreen() {
             label={t('profile.menuHives')}
             onPress={() => undefined}
           />
-          <ProfileMenuRow icon={Heart} label={t('profile.menuFavorites')} onPress={() => undefined} />
+          <ProfileMenuRow
+            icon={Heart}
+            label={t('profile.menuFavorites')}
+            onPress={() => undefined}
+          />
           <ProfileMenuRow
             icon={Settings}
             label={t('profile.menuSettings')}
@@ -151,11 +166,19 @@ export default function ProfileScreen() {
               className="mt-6 items-center rounded-hive-md bg-hive-primary py-3"
               onPress={() => setSettingsOpen(false)}
             >
-              <Text className="font-inter text-base font-semibold text-white">{t('profile.closeSettings')}</Text>
+              <Text className="font-inter text-base font-semibold text-white">
+                {t('profile.closeSettings')}
+              </Text>
             </Pressable>
           </Pressable>
         </Pressable>
       </Modal>
+
+      <ProfileEditModal
+        user={user}
+        visible={editProfileOpen}
+        onClose={() => setEditProfileOpen(false)}
+      />
     </LinearGradient>
   );
 }

@@ -1,7 +1,7 @@
 import { File } from 'expo-file-system';
 import { Platform } from 'react-native';
 
-import type { AuthSession, AuthTokens, ProfileOverview, User } from '@/src/types';
+import type { AuthSession, AuthTokens, ProfileOverview, UpdateProfileInput, User } from '@/src/types';
 
 import { apiClient } from './client';
 
@@ -85,5 +85,10 @@ export async function uploadAvatar(photoUri: string): Promise<{ user: User }> {
 
 export async function removeAvatar(): Promise<{ user: User }> {
   const { data } = await apiClient.delete<{ user: User }>('/auth/me/avatar');
+  return data;
+}
+
+export async function updateProfile(input: UpdateProfileInput): Promise<{ user: User }> {
+  const { data } = await apiClient.patch<{ user: User }>('/auth/me', input);
   return data;
 }

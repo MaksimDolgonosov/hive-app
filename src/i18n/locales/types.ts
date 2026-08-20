@@ -94,6 +94,30 @@ export type TranslationSchema = {
     avatarOpenSettings: string;
     avatarUploadFailedTitle: string;
     avatarUploadFailedMessage: string;
+    aboutTitle: string;
+    aboutEmpty: string;
+    socialEmpty: string;
+    editAbout: string;
+    bioLabel: string;
+    bioPlaceholder: string;
+    bioCounter: string;
+    socialTitle: string;
+    socialHint: string;
+    socialInstagram: string;
+    socialTelegram: string;
+    socialTiktok: string;
+    socialYoutube: string;
+    socialWebsite: string;
+    socialPlaceholder: {
+      instagram: string;
+      telegram: string;
+      tiktok: string;
+      youtube: string;
+      website: string;
+    };
+    saveProfile: string;
+    updateFailedTitle: string;
+    updateFailedMessage: string;
   };
   onboarding: {
     next: string;

@@ -30,7 +30,9 @@ export function ProfileHeaderCard({ user, subtitle, stats }: ProfileHeaderCardPr
         <ProfileAvatar avatarUrl={user.avatarUrl} editable username={user.username} />
 
         <View className="items-center gap-1">
-          <Text className="font-inter text-[22px] font-bold text-hive-foreground">{user.username}</Text>
+          <Text className="font-inter text-[22px] font-bold text-hive-foreground">
+            {user.username}
+          </Text>
           <Text className="font-inter text-sm text-hive-muted">{subtitle}</Text>
         </View>
 

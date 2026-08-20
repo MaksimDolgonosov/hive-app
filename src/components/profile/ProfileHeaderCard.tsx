@@ -10,6 +10,7 @@ type ProfileHeaderCardProps = {
   user: User;
   subtitle: string;
   stats: ProfileStats;
+  editableAvatar?: boolean;
 };
 
 function StatItem({ value, label }: { value: number; label: string }) {
@@ -21,13 +22,18 @@ function StatItem({ value, label }: { value: number; label: string }) {
   );
 }
 
-export function ProfileHeaderCard({ user, subtitle, stats }: ProfileHeaderCardProps) {
+export function ProfileHeaderCard({
+  user,
+  subtitle,
+  stats,
+  editableAvatar = false,
+}: ProfileHeaderCardProps) {
   const { t } = useTranslation();
 
   return (
     <ProfileGlassCard>
       <View className="items-center gap-4 px-6 py-6">
-        <ProfileAvatar avatarUrl={user.avatarUrl} editable username={user.username} />
+        <ProfileAvatar avatarUrl={user.avatarUrl} editable={editableAvatar} username={user.username} />
 
         <View className="items-center gap-1">
           <Text className="font-inter text-[22px] font-bold text-hive-foreground">

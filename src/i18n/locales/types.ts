@@ -186,6 +186,12 @@ export type TranslationSchema = {
     flipCamera: string;
     toggleFlash: string;
   };
+  userProfile: {
+    back: string;
+    notFound: string;
+    aboutEmpty: string;
+    socialEmpty: string;
+  };
   errors: {
     generic: string;
     network: string;

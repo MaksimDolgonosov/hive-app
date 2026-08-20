@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { getProfileInitials } from '@/src/components/profile/ProfileAvatar';
 import { buildAvatarDisplayUri } from '@/src/utils/avatar-url';
@@ -11,21 +11,23 @@ type StingAuthorBadgeProps = {
   username: string;
   avatarUrl: string | null;
   avatarCacheVersion?: number;
+  onPress?: () => void;
 };
 
 export function StingAuthorBadge({
   username,
   avatarUrl,
   avatarCacheVersion = 0,
+  onPress,
 }: StingAuthorBadgeProps) {
   const displayUri = avatarUrl ? buildAvatarDisplayUri(avatarUrl, avatarCacheVersion) : null;
   const initials = getProfileInitials(username) || '?';
 
-  return (
-    <View className="items-center justify-center gap-1 px-3 py-2">
+  const content = (
+    <>
       {displayUri ? (
         <View
-          className="overflow-hidden rounded-hive-md "
+          className="overflow-hidden rounded-hive-md"
           style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
         >
           <Image
@@ -59,6 +61,20 @@ export function StingAuthorBadge({
       >
         {username}
       </Text>
-    </View>
+    </>
+  );
+
+  if (!onPress) {
+    return <View className="items-center justify-center gap-1 px-3 py-2">{content}</View>;
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      className="items-center justify-center gap-1 px-3 py-2"
+      onPress={onPress}
+    >
+      {content}
+    </Pressable>
   );
 }

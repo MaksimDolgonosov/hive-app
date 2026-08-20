@@ -102,7 +102,7 @@ export default function ProfileScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <ProfileHeaderCard stats={stats} subtitle={subtitle} user={user} />
+        <ProfileHeaderCard editableAvatar stats={stats} subtitle={subtitle} user={user} />
 
         <ProfileAboutCard user={user} onEdit={() => setEditProfileOpen(true)} />
 

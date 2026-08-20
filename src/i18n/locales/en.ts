@@ -195,6 +195,12 @@ export const en: TranslationSchema = {
     flipCamera: 'Flip camera',
     toggleFlash: 'Flash',
   },
+  userProfile: {
+    back: 'Back',
+    notFound: 'Profile not found',
+    aboutEmpty: 'This user has not added a bio yet.',
+    socialEmpty: 'No social links provided.',
+  },
   errors: {
     generic: 'Something went wrong',
     network: 'Could not reach the server. Check your connection and try again.',

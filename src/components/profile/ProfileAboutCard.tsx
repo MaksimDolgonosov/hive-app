@@ -10,10 +10,17 @@ import { ProfileGlassCard } from './ProfileGlassCard';
 
 type ProfileAboutCardProps = {
   user: User;
-  onEdit: () => void;
+  onEdit?: () => void;
+  emptyBioKey?: string;
+  emptySocialKey?: string;
 };
 
-export function ProfileAboutCard({ user, onEdit }: ProfileAboutCardProps) {
+export function ProfileAboutCard({
+  user,
+  onEdit,
+  emptyBioKey = 'profile.aboutEmpty',
+  emptySocialKey = 'profile.socialEmpty',
+}: ProfileAboutCardProps) {
   const { t } = useTranslation();
   const bio = user.bio?.trim() ?? '';
   const socialLinks = normalizeUserSocialLinks(user.socialLinks);
@@ -27,21 +34,23 @@ export function ProfileAboutCard({ user, onEdit }: ProfileAboutCardProps) {
           <Text className="font-inter text-base font-semibold text-hive-foreground">
             {t('profile.aboutTitle')}
           </Text>
-          <Pressable
-            accessibilityLabel={t('profile.editAbout')}
-            accessibilityRole="button"
-            className="h-8 w-8 items-center justify-center rounded-full bg-hive-primary/15"
-            hitSlop={8}
-            onPress={onEdit}
-          >
-            <Pencil color="#F5A623" size={16} />
-          </Pressable>
+          {onEdit ? (
+            <Pressable
+              accessibilityLabel={t('profile.editAbout')}
+              accessibilityRole="button"
+              className="h-8 w-8 items-center justify-center rounded-full bg-hive-primary/15"
+              hitSlop={8}
+              onPress={onEdit}
+            >
+              <Pencil color="#F5A623" size={16} />
+            </Pressable>
+          ) : null}
         </View>
 
         {bio.length > 0 ? (
           <Text className="font-inter text-sm leading-5 text-hive-foreground">{bio}</Text>
         ) : (
-          <Text className="font-inter text-sm leading-5 text-hive-muted">{t('profile.aboutEmpty')}</Text>
+          <Text className="font-inter text-sm leading-5 text-hive-muted">{t(emptyBioKey)}</Text>
         )}
 
         {activeLinks.length > 0 ? (
@@ -67,7 +76,7 @@ export function ProfileAboutCard({ user, onEdit }: ProfileAboutCardProps) {
             })}
           </View>
         ) : hasContent ? null : (
-          <Text className="font-inter text-xs text-hive-muted">{t('profile.socialEmpty')}</Text>
+          <Text className="font-inter text-xs text-hive-muted">{t(emptySocialKey)}</Text>
         )}
       </View>
     </ProfileGlassCard>

@@ -197,6 +197,12 @@ export const ru: TranslationSchema = {
     flipCamera: 'Переключить камеру',
     toggleFlash: 'Вспышка',
   },
+  userProfile: {
+    back: 'Назад',
+    notFound: 'Профиль не найден',
+    aboutEmpty: 'Пользователь пока ничего не рассказал о себе.',
+    socialEmpty: 'Ссылки на соцсети не указаны.',
+  },
   errors: {
     generic: 'Что-то пошло не так',
     network: 'Нет связи с сервером. Проверьте интернет и попробуйте снова.',

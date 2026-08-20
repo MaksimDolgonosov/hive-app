@@ -48,6 +48,10 @@ export interface ProfileOverview {
   recentPhotos: string[];
 }
 
+export interface PublicUserProfile extends ProfileOverview {
+  user: User;
+}
+
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;

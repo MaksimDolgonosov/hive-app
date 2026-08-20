@@ -8,6 +8,7 @@ import { Timer } from '@/src/components/ui/Timer';
 import { useAuthStore } from '@/src/stores/authStore';
 import type { Sting } from '@/src/types';
 import { formatDistance } from '@/src/utils/geo';
+import { openUserProfile } from '@/src/utils/open-user-profile';
 import { resolveStingAuthor } from '@/src/utils/resolve-sting-author';
 
 type NearbyCardProps = {
@@ -60,6 +61,7 @@ export function NearbyCard({ sting, distanceM, onPress }: NearbyCardProps) {
         avatarCacheVersion={avatarCacheVersion}
         avatarUrl={author.avatarUrl}
         username={author.username}
+        onPress={() => openUserProfile(sting.authorId, currentUser?.id)}
       />
     </Pressable>
   );

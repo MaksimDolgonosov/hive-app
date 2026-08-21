@@ -203,6 +203,8 @@ export type TranslationSchema = {
     UNAUTHORIZED: string;
     VALIDATION_ERROR: string;
     STING_VALIDATION_FAILED: string;
+    CONTENT_MODERATION_FAILED: string;
+    MODERATION_UNAVAILABLE: string;
     STING_NOT_FOUND: string;
     INTERNAL_ERROR: string;
     STORAGE_NOT_CONFIGURED: string;

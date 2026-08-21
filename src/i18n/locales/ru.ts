@@ -214,6 +214,8 @@ export const ru: TranslationSchema = {
     UNAUTHORIZED: 'Необходима авторизация',
     VALIDATION_ERROR: 'Проверьте правильность введённых данных',
     STING_VALIDATION_FAILED: 'Фото не прошло проверку подлинности. Снимите новое с камеры.',
+    CONTENT_MODERATION_FAILED: 'Фото не прошло проверку безопасности.',
+    MODERATION_UNAVAILABLE: 'Сервис проверки фото временно недоступен. Попробуйте позже.',
     STING_NOT_FOUND: 'Жало истекло или не найдено',
     INTERNAL_ERROR: 'Внутренняя ошибка сервера. Попробуйте позже.',
     STORAGE_NOT_CONFIGURED: 'Сервер временно не может сохранить фото',

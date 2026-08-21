@@ -3,11 +3,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileAboutCard } from '@/src/components/profile/ProfileAboutCard';
 import { ProfileHeaderCard } from '@/src/components/profile/ProfileHeaderCard';
+import { PublicProfileSkeleton } from '@/src/components/profile/PublicProfileSkeleton';
 import { ProfileRecentPhotos } from '@/src/components/profile/ProfileRecentPhotos';
 import { usePublicProfile } from '@/src/hooks/usePublicProfile';
 import type { ProfileStats } from '@/src/types';
@@ -31,8 +32,11 @@ export default function PublicUserProfileScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const userId = typeof id === 'string' ? id : null;
+  const userId = typeof id === 'string' ? id : Array.isArray(id) ? id[0] : null;
   const { data, isLoading, isError } = usePublicProfile(userId);
+
+  const showSkeleton = isLoading && !data;
+  const showError = isError && !data;
 
   const subtitle = useMemo(() => {
     if (!data?.user.createdAt) {
@@ -85,11 +89,7 @@ export default function PublicUserProfileScreen() {
         </Pressable>
       </View>
 
-      {isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#F5A623" size="large" />
-        </View>
-      ) : isError || !data ? (
+      {showError ? (
         <View className="flex-1 items-center justify-center px-8">
           <Text className="text-center font-inter text-base text-hive-foreground">
             {t('userProfile.notFound')}
@@ -112,15 +112,21 @@ export default function PublicUserProfileScreen() {
           }}
           showsVerticalScrollIndicator={false}
         >
-          <ProfileHeaderCard stats={data.stats ?? EMPTY_STATS} subtitle={subtitle} user={data.user} />
+          {showSkeleton || !data ? (
+            <PublicProfileSkeleton />
+          ) : (
+            <>
+              <ProfileHeaderCard stats={data.stats ?? EMPTY_STATS} subtitle={subtitle} user={data.user} />
 
-          <ProfileAboutCard
-            emptyBioKey="userProfile.aboutEmpty"
-            emptySocialKey="userProfile.socialEmpty"
-            user={data.user}
-          />
+              <ProfileAboutCard
+                emptyBioKey="userProfile.aboutEmpty"
+                emptySocialKey="userProfile.socialEmpty"
+                user={data.user}
+              />
 
-          <ProfileRecentPhotos photoUrls={data.recentPhotos} />
+              <ProfileRecentPhotos photoUrls={data.recentPhotos} />
+            </>
+          )}
         </ScrollView>
       )}
     </LinearGradient>

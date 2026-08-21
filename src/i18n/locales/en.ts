@@ -212,6 +212,8 @@ export const en: TranslationSchema = {
     UNAUTHORIZED: 'Authentication required',
     VALIDATION_ERROR: 'Please check the entered data',
     STING_VALIDATION_FAILED: 'Photo failed authenticity check. Take a new one with the camera.',
+    CONTENT_MODERATION_FAILED: 'Photo failed the safety check.',
+    MODERATION_UNAVAILABLE: 'Photo safety check is temporarily unavailable. Try again later.',
     STING_NOT_FOUND: 'Sting expired or not found',
     INTERNAL_ERROR: 'Internal server error. Please try again later.',
     STORAGE_NOT_CONFIGURED: 'Server cannot store photos right now',

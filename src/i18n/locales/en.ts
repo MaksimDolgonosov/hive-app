@@ -171,6 +171,13 @@ export const en: TranslationSchema = {
     reactFailedTitle: 'Could not react',
     reactFailedMessage: 'Please try again later.',
     viewAuthorProfile: "View {{username}}'s profile",
+    delete: 'Delete',
+    deleteAccessibilityLabel: 'Delete photo',
+    deleteConfirmTitle: 'Delete photo?',
+    deleteConfirmMessage: 'The photo will disappear from the map and feed. This cannot be undone.',
+    deleteCancel: 'Cancel',
+    deleteFailedTitle: 'Could not delete photo',
+    deleteFailedMessage: 'Please try again later.',
   },
   camera: {
     title: 'Camera',

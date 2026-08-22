@@ -1,10 +1,10 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Heart, X } from 'lucide-react-native';
+import { Heart, Trash2, X } from 'lucide-react-native';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getProfileInitials } from '@/src/components/profile/ProfileAvatar';
 import { Timer } from '@/src/components/ui/Timer';
+import { useDeleteSting } from '@/src/hooks/useDeleteSting';
 import { useStingDetail } from '@/src/hooks/useStingDetail';
 import { useStingReaction } from '@/src/hooks/useStingReaction';
 import { useAuthStore } from '@/src/stores/authStore';
@@ -29,6 +30,9 @@ import { showApiErrorToast } from '@/src/utils/show-toast';
 const AUTHOR_AVATAR_SIZE = 40;
 const DISMISS_THRESHOLD = 120;
 const DISMISS_VELOCITY = 900;
+const DELETE_ICON_COLOR = '#FCA5A5';
+const DELETE_BUTTON_BG = 'rgba(127, 29, 29, 0.55)';
+const DELETE_BUTTON_BORDER = 'rgba(248, 113, 113, 0.45)';
 
 export default function StingDetailScreen() {
   const { t } = useTranslation();
@@ -40,9 +44,11 @@ export default function StingDetailScreen() {
   const stingId = typeof id === 'string' ? id : null;
   const { data, isLoading, isError } = useStingDetail(stingId);
   const reactToSting = useStingReaction(stingId ?? '');
+  const deleteSting = useDeleteSting(stingId ?? '');
 
   const sting = data?.sting;
   const isLiked = sting?.hasLiked ?? false;
+  const isOwnSting = Boolean(sting && currentUser && sting.authorId === currentUser.id);
   const author = sting ? resolveStingAuthor(sting, currentUser) : null;
   const authorAvatarUri = author?.avatarUrl
     ? buildAvatarDisplayUri(author.avatarUrl, avatarCacheVersion)
@@ -118,6 +124,37 @@ export default function StingDetailScreen() {
     }
   }
 
+  async function handleDelete() {
+    if (!stingId || deleteSting.isPending) {
+      return;
+    }
+
+    try {
+      await deleteSting.mutateAsync();
+      handleClose();
+    } catch (error) {
+      showApiErrorToast(error, {
+        titleKey: 'sting.deleteFailedTitle',
+        fallbackKey: 'sting.deleteFailedMessage',
+      });
+    }
+  }
+
+  function handleDeletePress() {
+    if (deleteSting.isPending) {
+      return;
+    }
+
+    Alert.alert(t('sting.deleteConfirmTitle'), t('sting.deleteConfirmMessage'), [
+      { text: t('sting.deleteCancel'), style: 'cancel' },
+      {
+        text: t('sting.delete'),
+        style: 'destructive',
+        onPress: () => void handleDelete(),
+      },
+    ]);
+  }
+
   if (!stingId) {
     return (
       <View className="flex-1 items-center justify-center bg-black">
@@ -156,12 +193,15 @@ export default function StingDetailScreen() {
           author={author}
           authorAvatarUri={authorAvatarUri}
           authorInitials={authorInitials}
+          deleteSting={deleteSting}
           insets={insets}
           isLiked={isLiked}
+          isOwnSting={isOwnSting}
           reactToSting={reactToSting}
           sting={sting}
           t={t}
           onClose={handleClose}
+          onDelete={handleDeletePress}
           onOpenAuthorProfile={handleOpenAuthorProfile}
           onReact={() => void handleReact()}
         />
@@ -177,9 +217,12 @@ type StingDetailBodyProps = {
   authorInitials: string;
   insets: { top: number; bottom: number };
   isLiked: boolean;
+  isOwnSting: boolean;
   reactToSting: { isPending: boolean };
+  deleteSting: { isPending: boolean };
   t: ReturnType<typeof useTranslation>['t'];
   onClose: () => void;
+  onDelete: () => void;
   onOpenAuthorProfile: () => void;
   onReact: () => void;
 };
@@ -191,9 +234,12 @@ function StingDetailBody({
   authorInitials,
   insets,
   isLiked,
+  isOwnSting,
   reactToSting,
+  deleteSting,
   t,
   onClose,
+  onDelete,
   onOpenAuthorProfile,
   onReact,
 }: StingDetailBodyProps) {
@@ -216,6 +262,28 @@ function StingDetailBody({
           <X color="#FFFFFF" size={22} />
         </Pressable>
       </View>
+
+      {isOwnSting ? (
+        <View className="absolute right-4" style={{ top: insets.top + 8 }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('sting.deleteAccessibilityLabel')}
+            className="h-10 w-10 items-center justify-center rounded-full border"
+            disabled={deleteSting.isPending}
+            onPress={onDelete}
+            style={{
+              backgroundColor: DELETE_BUTTON_BG,
+              borderColor: DELETE_BUTTON_BORDER,
+            }}
+          >
+            {deleteSting.isPending ? (
+              <ActivityIndicator color={DELETE_ICON_COLOR} size="small" />
+            ) : (
+              <Trash2 color={DELETE_ICON_COLOR} size={20} />
+            )}
+          </Pressable>
+        </View>
+      ) : null}
 
       <View
         className="absolute bottom-0 left-0 right-0 gap-3 bg-black/60 px-6 pt-4"

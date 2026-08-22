@@ -163,6 +163,13 @@ export type TranslationSchema = {
     reactFailedTitle: string;
     reactFailedMessage: string;
     viewAuthorProfile: string;
+    delete: string;
+    deleteAccessibilityLabel: string;
+    deleteConfirmTitle: string;
+    deleteConfirmMessage: string;
+    deleteCancel: string;
+    deleteFailedTitle: string;
+    deleteFailedMessage: string;
   };
   camera: {
     title: string;

@@ -54,6 +54,10 @@ export async function react(id: string, type: 'like' = 'like'): Promise<StingRea
   return data;
 }
 
+export async function remove(id: string): Promise<void> {
+  await apiClient.delete(`/stings/${id}`);
+}
+
 export async function create(input: PublishStingInput): Promise<{ sting: Sting }> {
   const photoFile = new File(input.photoUri);
 

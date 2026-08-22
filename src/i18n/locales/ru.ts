@@ -173,6 +173,13 @@ export const ru: TranslationSchema = {
     reactFailedTitle: 'Не удалось поставить реакцию',
     reactFailedMessage: 'Попробуйте ещё раз позже.',
     viewAuthorProfile: 'Профиль {{username}}',
+    delete: 'Удалить',
+    deleteAccessibilityLabel: 'Удалить фото',
+    deleteConfirmTitle: 'Удалить фото?',
+    deleteConfirmMessage: 'Фото исчезнет с карты и из ленты. Это действие нельзя отменить.',
+    deleteCancel: 'Отмена',
+    deleteFailedTitle: 'Не удалось удалить фото',
+    deleteFailedMessage: 'Попробуйте ещё раз позже.',
   },
   camera: {
     title: 'Съёмка',

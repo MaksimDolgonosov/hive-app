@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { Link, router, type Href } from 'expo-router';
-import { Apple, Globe, Lock, Mail } from 'lucide-react-native';
+import { Apple, Lock, Mail } from 'lucide-react-native';
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
@@ -101,7 +101,7 @@ export default function LoginScreen() {
               <Apple color="#2C1810" size={22} strokeWidth={2} />
             </SocialButton>
             <SocialButton>
-              <Globe color="#2C1810" size={22} strokeWidth={2} />
+              <FontAwesome color="#2C1810" name="google" size={22} />
             </SocialButton>
             <SocialButton>
               <FontAwesome color="#2C1810" name="facebook" size={22} />

@@ -1,21 +1,31 @@
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
-import { impactCapture } from '@/src/utils/haptics';
-
 type CaptureButtonProps = {
   onPress: () => void;
+  onPressIn?: () => void;
   disabled?: boolean;
   loading?: boolean;
 };
 
-export function CaptureButton({ onPress, disabled = false, loading = false }: CaptureButtonProps) {
+export function CaptureButton({
+  onPress,
+  onPressIn,
+  disabled = false,
+  loading = false,
+}: CaptureButtonProps) {
   const isDisabled = disabled || loading;
 
-  async function handlePress() {
+  function handlePressIn() {
     if (isDisabled) {
       return;
     }
-    await impactCapture();
+    onPressIn?.();
+  }
+
+  function handlePress() {
+    if (isDisabled) {
+      return;
+    }
     onPress();
   }
 
@@ -24,6 +34,7 @@ export function CaptureButton({ onPress, disabled = false, loading = false }: Ca
       accessibilityRole="button"
       accessibilityLabel="Capture photo"
       disabled={isDisabled}
+      onPressIn={handlePressIn}
       onPress={() => void handlePress()}
       className="items-center justify-center"
     >

@@ -1,8 +1,10 @@
-import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Platform, Pressable, StyleSheet } from 'react-native';
 
 const LOCATE_ICON = require('../../../assets/icons/bee100.png');
+
+const BUTTON_SIZE = 52;
+const ICON_SIZE = 34;
 
 type MapLocationButtonProps = {
   onPress: () => void;
@@ -25,31 +27,32 @@ export function MapLocationButton({ onPress, disabled = false }: MapLocationButt
         pressed && !disabled && styles.pressed,
       ]}
     >
-      <View style={styles.iconCircle}>
-        <Image
-          accessibilityIgnoresInvertColors
-          contentFit="contain"
-          source={LOCATE_ICON}
-          style={styles.icon}
-        />
-      </View>
+      <Image resizeMode="contain" source={LOCATE_ICON} style={styles.icon} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    width: 57,
-    height: 57,
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 28.5,
-    backgroundColor: 'rgba(255, 255, 255, 0.94)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.16,
-    shadowRadius: 6,
-    elevation: 4,
+    borderRadius: BUTTON_SIZE / 2,
+    backgroundColor: '#FFF4E0',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 166, 35, 0.35)',
+    ...(Platform.OS === 'android'
+      ? {
+          elevation: 16,
+        }
+      : {
+          backgroundColor: 'rgba(255, 255, 255, 0.94)',
+          shadowColor: '#000000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.16,
+          shadowRadius: 6,
+        }),
   },
   pressed: {
     opacity: 0.85,
@@ -58,20 +61,8 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: 0.45,
   },
-  iconCircle: {
-    width: 55,
-    height: 55,
-    borderRadius: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    backgroundColor: '#FFF4E0',
-    borderWidth: 1,
-    borderColor: 'rgba(245, 166, 35, 0.35)',
-    marginBottom: 10,
-  },
   icon: {
-    width: 45,
-    height: 45,
+    width: ICON_SIZE,
+    height: ICON_SIZE,
   },
 });

@@ -35,6 +35,13 @@ export const en: TranslationSchema = {
     passwordMinLength: 'Password must be at least 8 characters',
     loginFailed: 'Could not log in',
     registerFailed: 'Could not sign up',
+    loginWithGoogle: 'Sign in with Google',
+    loginWithApple: 'Sign in with Apple',
+    loginWithFacebook: 'Sign in with Facebook',
+    googleLoginFailed: 'Could not sign in with Google',
+    googleNotConfigured: 'Google Sign-In is not configured. Add Client ID to .env',
+    googleRequiresDevBuild:
+      'Google Sign-In does not work in Expo Go. Build a dev client: eas build --profile development',
   },
   home: {
     greeting: 'Hello, {{name}}!',
@@ -230,5 +237,9 @@ export const en: TranslationSchema = {
     EXIF_GPS_MISMATCH: 'Photo GPS did not match your location. Please retake.',
     TIMESTAMP_MISMATCH: 'The photo is too old — publish right after capture or retake.',
     RATE_LIMITED: 'Too many publications. Please try again later.',
+    GOOGLE_AUTH_FAILED: 'Could not verify Google sign-in',
+    GOOGLE_EMAIL_NOT_VERIFIED: 'Google email is not verified',
+    GOOGLE_AUTH_NOT_CONFIGURED: 'Google Sign-In is not configured on the server',
+    GOOGLE_ACCOUNT_CONFLICT: 'This email is already linked to another Google account',
   },
 };

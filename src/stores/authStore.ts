@@ -29,6 +29,7 @@ interface AuthState {
   resetOnboarding: () => Promise<void>;
   register: (input: { email: string; password: string; username: string }) => Promise<void>;
   login: (input: { email: string; password: string }) => Promise<void>;
+  loginWithGoogle: (input: { idToken: string }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -134,6 +135,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (input) => {
     await get().clearSession();
     const { user, tokens } = await authApi.login(input);
+    await get().setSession(user, tokens);
+  },
+
+  loginWithGoogle: async (input) => {
+    await get().clearSession();
+    const { user, tokens } = await authApi.loginWithGoogle(input);
     await get().setSession(user, tokens);
   },
 

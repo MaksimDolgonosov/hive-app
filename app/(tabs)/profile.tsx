@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Heart, Hexagon, Image as ImageIcon, LogOut, Settings } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileAboutCard } from '@/src/components/profile/ProfileAboutCard';
@@ -17,6 +17,7 @@ import { LanguageSelect } from '@/src/components/ui/LanguageSelect';
 import { useProfileOverview } from '@/src/hooks/useProfileOverview';
 import { useAuthStore } from '@/src/stores/authStore';
 import type { ProfileStats } from '@/src/types';
+import { debugIosHapticTest, playIosShutterClick } from '@/src/utils/ios-feedback-sound';
 
 const EMPTY_STATS: ProfileStats = {
   photos: 0,
@@ -161,6 +162,35 @@ export default function ProfileScreen() {
               {t('profile.menuSettings')}
             </Text>
             <LanguageSelect />
+            {__DEV__ && Platform.OS === 'ios' ? (
+              <View className="mt-4 gap-2">
+                <Text className="font-inter text-xs text-hive-muted">
+                  Dev: проверка feedback на iOS (вне камеры)
+                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  className="items-center rounded-hive-md border border-hive-primary/40 py-3"
+                  onPressIn={() => {
+                    void debugIosHapticTest();
+                  }}
+                >
+                  <Text className="font-inter text-sm font-semibold text-hive-primary">
+                    Test Taptic (Heavy)
+                  </Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  className="items-center rounded-hive-md border border-hive-primary/40 py-3"
+                  onPress={() => {
+                    void playIosShutterClick();
+                  }}
+                >
+                  <Text className="font-inter text-sm font-semibold text-hive-primary">
+                    Test shutter sound
+                  </Text>
+                </Pressable>
+              </View>
+            ) : null}
             <Pressable
               accessibilityRole="button"
               className="mt-6 items-center rounded-hive-md bg-hive-primary py-3"

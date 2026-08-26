@@ -35,6 +35,13 @@ export const ru: TranslationSchema = {
     passwordMinLength: 'Пароль должен содержать минимум 8 символов',
     loginFailed: 'Не удалось войти',
     registerFailed: 'Не удалось зарегистрироваться',
+    loginWithGoogle: 'Войти через Google',
+    loginWithApple: 'Войти через Apple',
+    loginWithFacebook: 'Войти через Facebook',
+    googleLoginFailed: 'Не удалось войти через Google',
+    googleNotConfigured: 'Google Sign-In не настроен. Добавьте Client ID в .env',
+    googleRequiresDevBuild:
+      'Google Sign-In не работает в Expo Go. Соберите dev build: eas build --profile development',
   },
   home: {
     greeting: 'Привет, {{name}}!',
@@ -232,5 +239,9 @@ export const ru: TranslationSchema = {
     EXIF_GPS_MISMATCH: 'GPS в фото не совпал с вашим местоположением. Переснимите.',
     TIMESTAMP_MISMATCH: 'Снимок устарел — опубликуйте сразу после съёмки или переснимите.',
     RATE_LIMITED: 'Слишком много публикаций. Попробуйте позже.',
+    GOOGLE_AUTH_FAILED: 'Не удалось проверить вход через Google',
+    GOOGLE_EMAIL_NOT_VERIFIED: 'Email Google не подтверждён',
+    GOOGLE_AUTH_NOT_CONFIGURED: 'Google Sign-In не настроен на сервере',
+    GOOGLE_ACCOUNT_CONFLICT: 'Этот email уже привязан к другому Google-аккаунту',
   },
 };

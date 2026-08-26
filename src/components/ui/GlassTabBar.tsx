@@ -5,14 +5,7 @@ import { router, type Href } from 'expo-router';
 import { Camera, List, Map, User, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  LayoutChangeEvent,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { LayoutChangeEvent, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -201,11 +194,7 @@ export function GlassTabBar({ state, navigation }: BottomTabBarProps) {
 
   const activeRouteName = state.routes[state.index]?.name;
   const activeTab: TabKey =
-    activeRouteName === 'profile'
-      ? 'profile'
-      : activeRouteName === 'nearby'
-        ? 'nearby'
-        : 'map';
+    activeRouteName === 'profile' ? 'profile' : activeRouteName === 'nearby' ? 'nearby' : 'map';
 
   function handlePress(tab: TabConfig) {
     if (tab.key === 'camera') {
@@ -223,7 +212,7 @@ export function GlassTabBar({ state, navigation }: BottomTabBarProps) {
       pointerEvents="box-none"
       style={[styles.wrapper, { paddingBottom: insets.bottom + GLASS_TAB_BAR_BOTTOM_GAP }]}
     >
-      <View style={styles.shadow}>
+      <View style={styles.barContainer}>
         <GlassSurface>
           <TabBarContent activeTab={activeTab} onPress={handlePress} />
         </GlassSurface>
@@ -241,15 +230,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
   },
-  shadow: {
+  barContainer: {
     width: '100%',
     maxWidth: 358,
     borderRadius: GLASS_CORNER_RADIUS,
-    shadowColor: '#F5A623',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 24,
-    elevation: 8,
   },
   glass: {
     height: GLASS_TAB_BAR_HEIGHT,

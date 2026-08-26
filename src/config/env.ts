@@ -4,7 +4,12 @@ import { Platform } from 'react-native';
 type AppExtra = {
   apiUrl: string;
   wsUrl: string;
+  googleWebClientId?: string;
+  googleIosClientId?: string;
+  googleAndroidClientId?: string;
 };
+
+export type EnvConfig = AppExtra;
 
 function readExtra(): Partial<AppExtra> | undefined {
   return (
@@ -23,7 +28,7 @@ function adaptUrlForPlatform(url: string): string {
   return url.replace('://localhost', '://10.0.2.2').replace('://127.0.0.1', '://10.0.2.2');
 }
 
-function getExtra(): AppExtra {
+function getExtra(): EnvConfig {
   const extra = readExtra();
 
   if (!extra?.apiUrl || !extra?.wsUrl) {
@@ -32,12 +37,29 @@ function getExtra(): AppExtra {
 
   const apiUrl = adaptUrlForPlatform(extra.apiUrl);
   const wsUrl = adaptUrlForPlatform(extra.wsUrl);
+  const googleWebClientId =
+    extra.googleWebClientId ?? process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '';
+  const googleIosClientId =
+    extra.googleIosClientId ?? process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? '';
+  const googleAndroidClientId =
+    extra.googleAndroidClientId ?? process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? '';
 
   if (__DEV__) {
-    console.log('[env]', { apiUrl, wsUrl, platform: Platform.OS });
+    console.log('[env]', {
+      apiUrl,
+      wsUrl,
+      platform: Platform.OS,
+      googleConfigured: Boolean(googleWebClientId),
+    });
   }
 
-  return { apiUrl, wsUrl };
+  return {
+    apiUrl,
+    wsUrl,
+    googleWebClientId,
+    googleIosClientId,
+    googleAndroidClientId,
+  };
 }
 
 export const env = getExtra();

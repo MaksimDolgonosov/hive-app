@@ -11,11 +11,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CameraControls, cycleFlash } from '@/src/components/camera/CameraControls';
 import { CaptureButton } from '@/src/components/camera/CaptureButton';
 import { HiveCameraView } from '@/src/components/camera/CameraView';
+import { ShutterFlash } from '@/src/components/camera/ShutterFlash';
 import { ZoomPresets } from '@/src/components/camera/ZoomPresets';
 import { useCamera } from '@/src/hooks/useCamera';
 import { useCameraZoom } from '@/src/hooks/useCameraZoom';
 import { useCameraStore } from '@/src/stores/cameraStore';
+import { impactCapture } from '@/src/utils/haptics';
 import { showMessageToast } from '@/src/utils/show-toast';
+
+const SHUTTER_FLASH_MS = 120;
 
 export default function CameraScreen() {
   const { t } = useTranslation();
@@ -25,6 +29,8 @@ export default function CameraScreen() {
 
   const [facing, setFacing] = useState<CameraType>('back');
   const [flash, setFlash] = useState<FlashMode>('off');
+  const [shutterFlashVisible, setShutterFlashVisible] = useState(false);
+  const shutterFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const beginPublishFlow = useCameraStore((state) => state.beginPublishFlow);
   const clearCapture = useCameraStore((state) => state.clearCapture);
@@ -44,6 +50,27 @@ export default function CameraScreen() {
   useEffect(() => {
     beginPublishFlow();
   }, [beginPublishFlow]);
+
+  useEffect(() => {
+    return () => {
+      if (shutterFlashTimerRef.current) {
+        clearTimeout(shutterFlashTimerRef.current);
+      }
+    };
+  }, []);
+
+  function triggerShutterFeedback() {
+    setShutterFlashVisible(true);
+    if (shutterFlashTimerRef.current) {
+      clearTimeout(shutterFlashTimerRef.current);
+    }
+    shutterFlashTimerRef.current = setTimeout(() => {
+      setShutterFlashVisible(false);
+      shutterFlashTimerRef.current = null;
+    }, SHUTTER_FLASH_MS);
+
+    void impactCapture();
+  }
 
   async function handleCameraReady() {
     setIsReady(true);
@@ -100,6 +127,7 @@ export default function CameraScreen() {
             onAvailableLensesChanged={onAvailableLensesChanged}
             onCameraReady={() => void handleCameraReady()}
           />
+          <ShutterFlash visible={shutterFlashVisible} />
         </View>
       </GestureDetector>
 
@@ -137,6 +165,7 @@ export default function CameraScreen() {
         <CaptureButton
           disabled={!isReady}
           loading={isCapturing}
+          onPressIn={triggerShutterFeedback}
           onPress={() => void handleCapture()}
         />
       </View>

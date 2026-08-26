@@ -31,6 +31,13 @@ export async function login(input: { email: string; password: string }): Promise
   return data;
 }
 
+export async function loginWithGoogle(input: { idToken: string }): Promise<AuthSession> {
+  const { data } = await apiClient.post<AuthSession>('/auth/google', input, {
+    skipAuthRefresh: true,
+  });
+  return data;
+}
+
 export async function refresh(refreshToken: string): Promise<{ tokens: AuthTokens }> {
   const { data } = await apiClient.post<{ tokens: AuthTokens }>(
     '/auth/refresh',

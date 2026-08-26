@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router, type Href } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -21,7 +21,7 @@ import { useCameraStore } from '@/src/stores/cameraStore';
 import { logApiError } from '@/src/utils/api-error';
 import { showApiErrorToast } from '@/src/utils/show-toast';
 import { normalizeAccuracy } from '@/src/utils/exif';
-import { notifyPublishError, notifyPublishSuccess } from '@/src/utils/haptics';
+import { notifyCaptureShutter, notifyPublishError, notifyPublishSuccess } from '@/src/utils/haptics';
 
 const LOW_ACCURACY_THRESHOLD_M = 50;
 const STALE_CAPTURE_THRESHOLD_MS = 90_000;
@@ -40,6 +40,7 @@ export default function PreviewScreen() {
   const isCameraCapture = useCameraStore((state) => state.isCameraCapture);
   const clearPhoto = useCameraStore((state) => state.clearPhoto);
   const clearCapture = useCameraStore((state) => state.clearCapture);
+  const captureHapticPlayedRef = useRef(false);
 
   const isLowAccuracy = captureAccuracy !== null && captureAccuracy > LOW_ACCURACY_THRESHOLD_M;
 
@@ -48,6 +49,18 @@ export default function PreviewScreen() {
       router.replace('/(modals)/camera' as Href);
     }
   }, [captureCoords, capturedAt, capturedUri, idempotencyKey, isCameraCapture]);
+
+  useEffect(() => {
+    if (Platform.OS !== 'ios' || captureHapticPlayedRef.current) {
+      return;
+    }
+    if (!capturedUri || !isCameraCapture) {
+      return;
+    }
+
+    captureHapticPlayedRef.current = true;
+    void notifyCaptureShutter();
+  }, [capturedUri, isCameraCapture]);
 
   if (!capturedUri || !captureCoords || !capturedAt || !idempotencyKey || !isCameraCapture) {
     return (
@@ -98,7 +111,7 @@ export default function PreviewScreen() {
         comment: comment.trim() || undefined,
       });
 
-      void notifyPublishSuccess();
+      await notifyPublishSuccess();
       clearCapture();
       router.dismissAll();
       router.replace('/(tabs)/' as Href);

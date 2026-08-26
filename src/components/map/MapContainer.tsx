@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Linking, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { type Region } from 'react-native-maps';
 import { router, type Href } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HiveCircle } from '@/src/components/map/HiveCircle';
+import { HiveMarkerCapture } from '@/src/components/map/HiveMarkerCapture';
 import { MapLocationButton } from '@/src/components/map/MapLocationButton';
 import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
@@ -48,6 +49,17 @@ export function MapContainer() {
   const clearPendingMapFocus = useMapStore((state) => state.clearPendingMapFocus);
 
   const [debouncedBounds, setDebouncedBounds] = useState<MapBounds | null>(null);
+  const [hiveMarkerImages, setHiveMarkerImages] = useState<Record<string, string>>({});
+
+  const handleHiveMarkerCaptured = useCallback((hiveId: string, uri: string) => {
+    setHiveMarkerImages((previous) => {
+      if (previous[hiveId] === uri) {
+        return previous;
+      }
+
+      return { ...previous, [hiveId]: uri };
+    });
+  }, []);
 
   const { data, isFetching, isError } = useStingsNearby(debouncedBounds);
 
@@ -192,58 +204,73 @@ export function MapContainer() {
     <View className="flex-1">
       <MapView
         ref={mapRef}
-        style={{ flex: 1 }}
+        style={styles.mapLayer}
         initialRegion={initialRegion}
         onRegionChangeComplete={handleRegionChangeComplete}
         showsUserLocation
         showsMyLocationButton={false}
         userInterfaceStyle="light"
+        {...(Platform.OS === 'android' ? { googleRenderer: 'LEGACY' as const } : {})}
       >
         {data?.stings.map((sting) => (
           <StingMarker key={sting.id} sting={sting} onPress={() => openSting(sting.id)} />
         ))}
         {data?.hives.filter((hive) => isActiveHive(hive.activeStingsCount)).map((hive) => (
-          <HiveCircle key={hive.id} hive={hive} onPress={() => openHive(hive.id)} />
+          <HiveCircle
+            key={hive.id}
+            hive={hive}
+            imageUri={hiveMarkerImages[hive.id]}
+            onPress={() => openHive(hive.id)}
+          />
         ))}
       </MapView>
 
-      {isEmpty && (
-        <View
-          pointerEvents="none"
-          className="absolute left-4 right-4 rounded-hive-md bg-hive-surface/95 px-4 py-3 shadow-sm"
-          style={{ top: insets.top + 16 }}
-        >
-          <Text className="text-center font-inter text-sm font-semibold text-hive-foreground">
-            {t('map.emptyTitle')}
-          </Text>
-          <Text className="mt-1 text-center font-inter text-xs text-hive-muted">
-            {t('map.emptyMessage')}
-          </Text>
-        </View>
-      )}
+      <View pointerEvents="box-none" style={styles.overlayLayer}>
+        {Platform.OS === 'android' &&
+          activeHives.map((hive) => (
+            <HiveMarkerCapture
+              key={`${hive.id}:${hive.activeStingsCount}`}
+              count={hive.activeStingsCount}
+              hiveId={hive.id}
+              onCaptured={handleHiveMarkerCaptured}
+            />
+          ))}
 
-      {isFetching && (
-        <View className="absolute right-4 top-14 rounded-full bg-hive-surface px-3 py-2 shadow-sm">
-          <ActivityIndicator size="small" color="#F5A623" />
-        </View>
-      )}
+        {isEmpty && (
+          <View
+            pointerEvents="none"
+            className="absolute left-4 right-4 rounded-hive-md bg-hive-surface/95 px-4 py-3 shadow-sm"
+            style={{ top: insets.top + 16 }}
+          >
+            <Text className="text-center font-inter text-sm font-semibold text-hive-foreground">
+              {t('map.emptyTitle')}
+            </Text>
+            <Text className="mt-1 text-center font-inter text-xs text-hive-muted">
+              {t('map.emptyMessage')}
+            </Text>
+          </View>
+        )}
 
-      {isError && (
-        <View
-          className="absolute left-4 right-4 rounded-hive-md bg-hive-surface px-4 py-3 shadow-sm"
-          style={{ bottom: getGlassTabBarInset(insets.bottom) + 12 }}
-        >
-          <Text className="text-center font-inter text-sm text-hive-foreground">
-            {t('map.loadError')}
-          </Text>
-        </View>
-      )}
+        {isFetching && (
+          <View style={[styles.fetchingBadge, { top: insets.top + 56 }]}>
+            <ActivityIndicator size="small" color="#F5A623" />
+          </View>
+        )}
 
-      <View
-        className="absolute right-4"
-        style={{ bottom: getGlassTabBarInset(insets.bottom) + 12 }}
-      >
-        <MapLocationButton disabled={!coords} onPress={centerOnUserLocation} />
+        {isError && (
+          <View
+            className="absolute left-4 right-4 rounded-hive-md bg-hive-surface px-4 py-3 shadow-sm"
+            style={{ bottom: getGlassTabBarInset(insets.bottom) + 12 }}
+          >
+            <Text className="text-center font-inter text-sm text-hive-foreground">
+              {t('map.loadError')}
+            </Text>
+          </View>
+        )}
+
+        <View style={[styles.locationButton, { bottom: getGlassTabBarInset(insets.bottom) + 12 }]}>
+          <MapLocationButton disabled={!coords} onPress={centerOnUserLocation} />
+        </View>
       </View>
 
       {selectedHiveId && (
@@ -252,3 +279,40 @@ export function MapContainer() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  mapLayer: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  overlayLayer: {
+    ...StyleSheet.absoluteFillObject,
+    ...(Platform.OS === 'android'
+      ? {
+          zIndex: 2,
+          elevation: 2,
+        }
+      : null),
+  },
+  fetchingBadge: {
+    position: 'absolute',
+    right: 16,
+    borderRadius: 999,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    ...(Platform.OS === 'android'
+      ? {
+          elevation: 12,
+        }
+      : null),
+  },
+  locationButton: {
+    position: 'absolute',
+    right: 16,
+    ...(Platform.OS === 'android'
+      ? {
+          elevation: 24,
+        }
+      : null),
+  },
+});

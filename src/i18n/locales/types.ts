@@ -33,6 +33,12 @@ export type TranslationSchema = {
     passwordMinLength: string;
     loginFailed: string;
     registerFailed: string;
+    loginWithGoogle: string;
+    loginWithApple: string;
+    loginWithFacebook: string;
+    googleLoginFailed: string;
+    googleNotConfigured: string;
+    googleRequiresDevBuild: string;
   };
   home: {
     greeting: string;
@@ -221,5 +227,9 @@ export type TranslationSchema = {
     EXIF_GPS_MISMATCH: string;
     TIMESTAMP_MISMATCH: string;
     RATE_LIMITED: string;
+    GOOGLE_AUTH_FAILED: string;
+    GOOGLE_EMAIL_NOT_VERIFIED: string;
+    GOOGLE_AUTH_NOT_CONFIGURED: string;
+    GOOGLE_ACCOUNT_CONFLICT: string;
   };
 };

@@ -6,7 +6,9 @@ import {
 } from 'expo-camera';
 import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Linking, Pressable, Text, View } from 'react-native';
+import { Linking, Pressable, Text, View } from 'react-native';
+
+import { HiveLoader } from '@/src/components/ui/HiveLoader';
 
 type HiveCameraViewProps = {
   cameraRef: RefObject<ExpoCameraView | null>;
@@ -35,7 +37,7 @@ export function HiveCameraView({
   if (!permission) {
     return (
       <View className="flex-1 items-center justify-center bg-black">
-        <ActivityIndicator color="#F5A623" size="large" />
+        <HiveLoader size="large" />
       </View>
     );
   }

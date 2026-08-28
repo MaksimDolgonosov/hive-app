@@ -1,22 +1,23 @@
+import { router, type Href } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { type Region } from 'react-native-maps';
-import { router, type Href } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HiveCircle } from '@/src/components/map/HiveCircle';
 import { HiveMarkerCapture } from '@/src/components/map/HiveMarkerCapture';
 import { MapLocationButton } from '@/src/components/map/MapLocationButton';
-import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
+import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
+import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { useLocation } from '@/src/hooks/useLocation';
 import { useMapWebSocket } from '@/src/hooks/useMapWebSocket';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
 import { useMapStore } from '@/src/stores/mapStore';
 import type { MapBounds, MapRegion } from '@/src/types';
-import { DEFAULT_MAP_REGION, regionToBounds } from '@/src/utils/map';
 import { isActiveHive } from '@/src/utils/hive';
+import { DEFAULT_MAP_REGION, regionToBounds } from '@/src/utils/map';
 
 import { StingMarker } from './StingMarker';
 
@@ -50,6 +51,7 @@ export function MapContainer() {
 
   const [debouncedBounds, setDebouncedBounds] = useState<MapBounds | null>(null);
   const [hiveMarkerImages, setHiveMarkerImages] = useState<Record<string, string>>({});
+  const [mapInteractionsEnabled, setMapInteractionsEnabled] = useState(true);
 
   const handleHiveMarkerCaptured = useCallback((hiveId: string, uri: string) => {
     setHiveMarkerImages((previous) => {
@@ -119,13 +121,7 @@ export function MapContainer() {
     }
 
     clearPendingMapFocus();
-  }, [
-    clearPendingMapFocus,
-    pendingMapFocus,
-    setRegion,
-    setSelectedHiveId,
-    setSelectedStingId,
-  ]);
+  }, [clearPendingMapFocus, pendingMapFocus, setRegion, setSelectedHiveId, setSelectedStingId]);
 
   function handleRegionChangeComplete(nextRegion: Region) {
     setRegion(toMapRegion(nextRegion));
@@ -142,6 +138,13 @@ export function MapContainer() {
 
   function closeHiveSheet() {
     setSelectedHiveId(null);
+
+    if (Platform.OS === 'ios') {
+      setMapInteractionsEnabled(false);
+      requestAnimationFrame(() => {
+        setMapInteractionsEnabled(true);
+      });
+    }
   }
 
   function centerOnUserLocation() {
@@ -164,7 +167,7 @@ export function MapContainer() {
   if (locationStatus === 'loading' || locationStatus === 'idle') {
     return (
       <View className="flex-1 items-center justify-center bg-hive-bg">
-        <ActivityIndicator size="large" color="#F5A623" />
+        <HiveLoader size="large" />
         <Text className="mt-3 font-inter text-sm text-hive-muted">{t('map.loadingLocation')}</Text>
       </View>
     );
@@ -207,6 +210,10 @@ export function MapContainer() {
         style={styles.mapLayer}
         initialRegion={initialRegion}
         onRegionChangeComplete={handleRegionChangeComplete}
+        scrollEnabled={mapInteractionsEnabled}
+        zoomEnabled={mapInteractionsEnabled}
+        rotateEnabled={mapInteractionsEnabled}
+        pitchEnabled={mapInteractionsEnabled}
         showsUserLocation
         showsMyLocationButton={false}
         userInterfaceStyle="light"
@@ -215,14 +222,16 @@ export function MapContainer() {
         {data?.stings.map((sting) => (
           <StingMarker key={sting.id} sting={sting} onPress={() => openSting(sting.id)} />
         ))}
-        {data?.hives.filter((hive) => isActiveHive(hive.activeStingsCount)).map((hive) => (
-          <HiveCircle
-            key={hive.id}
-            hive={hive}
-            imageUri={hiveMarkerImages[hive.id]}
-            onPress={() => openHive(hive.id)}
-          />
-        ))}
+        {data?.hives
+          .filter((hive) => isActiveHive(hive.activeStingsCount))
+          .map((hive) => (
+            <HiveCircle
+              key={hive.id}
+              hive={hive}
+              imageUri={hiveMarkerImages[hive.id]}
+              onPress={() => openHive(hive.id)}
+            />
+          ))}
       </MapView>
 
       <View pointerEvents="box-none" style={styles.overlayLayer}>
@@ -253,7 +262,7 @@ export function MapContainer() {
 
         {isFetching && (
           <View style={[styles.fetchingBadge, { top: insets.top + 56 }]}>
-            <ActivityIndicator size="small" color="#F5A623" />
+            <HiveLoader size="small" strokeWidth={3} />
           </View>
         )}
 
@@ -273,9 +282,7 @@ export function MapContainer() {
         </View>
       </View>
 
-      {selectedHiveId && (
-        <HiveBottomSheet hiveId={selectedHiveId} onClose={closeHiveSheet} />
-      )}
+      {selectedHiveId && <HiveBottomSheet hiveId={selectedHiveId} onClose={closeHiveSheet} />}
     </View>
   );
 }
@@ -297,14 +304,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     borderRadius: 999,
-    backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    ...(Platform.OS === 'android'
-      ? {
-          elevation: 12,
-        }
-      : null),
   },
   locationButton: {
     position: 'absolute',

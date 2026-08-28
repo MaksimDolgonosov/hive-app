@@ -92,6 +92,8 @@ export const ru: TranslationSchema = {
     recentPhotos: 'Недавние фото',
     viewAll: 'Все →',
     closeSettings: 'Готово',
+    publishBuzzLabel: 'Вибрация при публикации',
+    publishBuzzHint: 'Вибрация, когда фото появляется на карте',
     avatarPickerTitle: 'Фото профиля',
     avatarTakePhoto: 'Сделать фото',
     avatarChooseGallery: 'Выбрать из галереи',
@@ -211,6 +213,7 @@ export const ru: TranslationSchema = {
     publishFailedMessage: 'Попробуйте ещё раз позже.',
     flipCamera: 'Переключить камеру',
     toggleFlash: 'Вспышка',
+    verifyingPhoto: 'Идет проверка фото…',
   },
   userProfile: {
     back: 'Назад',

@@ -20,6 +20,7 @@ import { AppShell } from '@/src/components/ui/AppShell';
 import { QueryProvider } from '@/src/components/providers/QueryProvider';
 import { LoadingScreen } from '@/src/components/ui/LoadingScreen';
 import i18n from '@/src/i18n';
+import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import { useLocaleStore } from '@/src/stores/localeStore';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -33,6 +34,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const localeReady = useLocaleStore((state) => state.isReady);
   const hydrateLocale = useLocaleStore((state) => state.hydrate);
+  const hydratePreferences = usePreferencesStore((state) => state.hydrate);
   const [fontsLoaded, fontError] = useFonts({
     Inter: Inter_400Regular,
     'Inter-SemiBold': Inter_600SemiBold,
@@ -41,7 +43,8 @@ export default function RootLayout() {
 
   useEffect(() => {
     void hydrateLocale();
-  }, [hydrateLocale]);
+    void hydratePreferences();
+  }, [hydrateLocale, hydratePreferences]);
 
   useEffect(() => {
     if ((fontsLoaded || fontError) && localeReady) {

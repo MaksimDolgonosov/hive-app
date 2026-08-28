@@ -43,11 +43,16 @@ function resolvePhotoUploadUri(photoUri: string): string {
 }
 
 function isRetryablePublishError(error: unknown): boolean {
-  return (
-    isAxiosError(error) &&
-    !error.response &&
-    (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED')
-  );
+  if (!isAxiosError(error) || error.response) {
+    return false;
+  }
+
+  if (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
+    return true;
+  }
+
+  const message = error.message.toLowerCase();
+  return message.includes('network request failed') || message.includes('network error');
 }
 
 export async function getNearby(bounds: MapBounds): Promise<StingsNearbyResponse> {

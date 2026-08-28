@@ -63,7 +63,9 @@ export function logApiError(scope: string, error: unknown): void {
     console.warn(`[${scope}] API error`, {
       code: error.code,
       status: error.response?.status,
-      url: error.config?.url,
+      url: error.config?.baseURL
+        ? `${error.config.baseURL.replace(/\/$/, '')}${error.config.url ?? ''}`
+        : error.config?.url,
       apiError: error.response?.data?.error,
       message: error.message,
     });

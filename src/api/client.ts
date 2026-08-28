@@ -1,4 +1,5 @@
 import { create, isAxiosError } from 'axios';
+import { Platform } from 'react-native';
 
 import { getAccessToken, refreshAccessTokenViaSession } from '@/src/api/auth-session';
 import { env } from '@/src/config/env';
@@ -6,6 +7,8 @@ import { env } from '@/src/config/env';
 export const apiClient = create({
   baseURL: env.apiUrl,
   timeout: 15_000,
+  // RN Android: xhr-адаптер иногда даёт ERR_NETWORK без response; fetch стабильнее.
+  ...(Platform.OS !== 'web' ? { adapter: 'fetch' as const } : {}),
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -24,15 +27,22 @@ function getOrCreateRefreshPromise(): Promise<string | null> {
   return refreshPromise;
 }
 
+function isFormDataPayload(data: unknown): boolean {
+  return typeof FormData !== 'undefined' && data instanceof FormData;
+}
+
 apiClient.interceptors.request.use((config) => {
-  if (config.skipAuthRefresh) {
-    return config;
+  if (!config.skipAuthRefresh) {
+    const accessToken = getAccessToken();
+
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
   }
 
-  const accessToken = getAccessToken();
-
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
+  // fetch-адаптер не отправляет file:// multipart в RN — для FormData нужен xhr.
+  if (Platform.OS !== 'web' && isFormDataPayload(config.data)) {
+    config.adapter = 'xhr';
   }
 
   return config;

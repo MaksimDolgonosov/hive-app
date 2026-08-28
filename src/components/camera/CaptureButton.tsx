@@ -1,4 +1,6 @@
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+
+import { HiveLoader } from '@/src/components/ui/HiveLoader';
 
 type CaptureButtonProps = {
   onPress: () => void;
@@ -40,7 +42,7 @@ export function CaptureButton({
     >
       <View className="h-20 w-20 items-center justify-center rounded-full border-4 border-white/90">
         {loading ? (
-          <ActivityIndicator color="#FFFFFF" />
+          <HiveLoader color="#FFFFFF" size="small" />
         ) : (
           <View
             className={`h-16 w-16 rounded-full bg-white ${isDisabled ? 'opacity-50' : 'opacity-100'}`}

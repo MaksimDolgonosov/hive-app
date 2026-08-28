@@ -57,9 +57,3 @@ export async function playIosShutterBuzz(clicks: number, gapMs: number) {
     }
   }
 }
-
-/** Dev: проверка, что expo-haptics живой вне камеры. */
-export async function debugIosHapticTest() {
-  const Haptics = await import('expo-haptics');
-  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-}

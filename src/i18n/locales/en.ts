@@ -90,6 +90,8 @@ export const en: TranslationSchema = {
     recentPhotos: 'Recent photos',
     viewAll: 'View all →',
     closeSettings: 'Done',
+    publishBuzzLabel: 'Vibration on publish',
+    publishBuzzHint: 'Vibration when your photo is added to the map',
     avatarPickerTitle: 'Profile photo',
     avatarTakePhoto: 'Take photo',
     avatarChooseGallery: 'Choose from gallery',
@@ -209,6 +211,7 @@ export const en: TranslationSchema = {
     publishFailedMessage: 'Please try again later.',
     flipCamera: 'Flip camera',
     toggleFlash: 'Flash',
+    verifyingPhoto: 'Verifying photo…',
   },
   userProfile: {
     back: 'Back',

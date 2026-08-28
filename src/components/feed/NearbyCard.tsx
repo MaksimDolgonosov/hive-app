@@ -15,9 +15,10 @@ type NearbyCardProps = {
   sting: Sting;
   distanceM: number;
   onPress: () => void;
+  onAuthorPress?: (authorId: string) => void;
 };
 
-export function NearbyCard({ sting, distanceM, onPress }: NearbyCardProps) {
+export function NearbyCard({ sting, distanceM, onPress, onAuthorPress }: NearbyCardProps) {
   const { t } = useTranslation();
   const currentUser = useAuthStore((state) => state.user);
   const avatarCacheVersion = useAuthStore((state) => state.avatarCacheVersion);
@@ -72,7 +73,14 @@ export function NearbyCard({ sting, distanceM, onPress }: NearbyCardProps) {
         avatarCacheVersion={avatarCacheVersion}
         avatarUrl={author.avatarUrl}
         username={author.username}
-        onPress={() => openUserProfile(sting.authorId, currentUser?.id)}
+        onPress={() => {
+          if (onAuthorPress) {
+            onAuthorPress(sting.authorId);
+            return;
+          }
+
+          openUserProfile(sting.authorId, currentUser?.id);
+        }}
       />
     </Pressable>
   );

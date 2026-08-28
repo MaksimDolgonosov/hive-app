@@ -1,25 +1,23 @@
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import type { CameraView, CameraType, FlashMode } from 'expo-camera';
+import { Image } from 'expo-image';
 import { router, type Href } from 'expo-router';
-import { useIsFocused } from '@react-navigation/native';
 import { X } from 'lucide-react-native';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CameraControls, cycleFlash } from '@/src/components/camera/CameraControls';
 import { CaptureButton } from '@/src/components/camera/CaptureButton';
 import { HiveCameraView } from '@/src/components/camera/CameraView';
-import { ShutterFlash } from '@/src/components/camera/ShutterFlash';
 import { ZoomPresets } from '@/src/components/camera/ZoomPresets';
+import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { useCamera } from '@/src/hooks/useCamera';
 import { useCameraZoom } from '@/src/hooks/useCameraZoom';
 import { useCameraStore } from '@/src/stores/cameraStore';
-import { impactCapture } from '@/src/utils/haptics';
 import { showMessageToast } from '@/src/utils/show-toast';
-
-const SHUTTER_FLASH_MS = 120;
 
 export default function CameraScreen() {
   const { t } = useTranslation();
@@ -29,13 +27,12 @@ export default function CameraScreen() {
 
   const [facing, setFacing] = useState<CameraType>('back');
   const [flash, setFlash] = useState<FlashMode>('off');
-  const [shutterFlashVisible, setShutterFlashVisible] = useState(false);
-  const shutterFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const beginPublishFlow = useCameraStore((state) => state.beginPublishFlow);
   const clearCapture = useCameraStore((state) => state.clearCapture);
 
-  const { isReady, setIsReady, isCapturing, capture } = useCamera(cameraRef);
+  const { isReady, setIsReady, isCapturing, capturePreviewUri, clearCapturePreview, capture } =
+    useCamera(cameraRef);
   const {
     zoom,
     activePreset,
@@ -51,25 +48,19 @@ export default function CameraScreen() {
     beginPublishFlow();
   }, [beginPublishFlow]);
 
-  useEffect(() => {
-    return () => {
-      if (shutterFlashTimerRef.current) {
-        clearTimeout(shutterFlashTimerRef.current);
+  useFocusEffect(
+    useCallback(() => {
+      if (!useCameraStore.getState().capturedUri) {
+        clearCapturePreview();
       }
-    };
-  }, []);
+    }, [clearCapturePreview]),
+  );
 
-  function triggerShutterFeedback() {
-    setShutterFlashVisible(true);
-    if (shutterFlashTimerRef.current) {
-      clearTimeout(shutterFlashTimerRef.current);
-    }
-    shutterFlashTimerRef.current = setTimeout(() => {
-      setShutterFlashVisible(false);
-      shutterFlashTimerRef.current = null;
-    }, SHUTTER_FLASH_MS);
+  const showCaptureControls = !isCapturing && !capturePreviewUri;
+  const showCaptureOverlay = Boolean(capturePreviewUri);
 
-    void impactCapture();
+  function resetCaptureProcessing() {
+    clearCapturePreview();
   }
 
   async function handleCameraReady() {
@@ -97,12 +88,19 @@ export default function CameraScreen() {
   }
 
   async function handleCapture() {
+    if (isCapturing || capturePreviewUri) {
+      return;
+    }
+
     const result = await capture();
+
     if (result.ok) {
+      resetCaptureProcessing();
       router.push('/(modals)/preview' as Href);
       return;
     }
 
+    resetCaptureProcessing();
     showMessageToast(
       result.reason === 'location_denied'
         ? 'map.locationDeniedMessage'
@@ -119,7 +117,7 @@ export default function CameraScreen() {
         <View className="flex-1">
           <HiveCameraView
             cameraRef={cameraRef}
-            isActive={isFocused}
+            isActive={isFocused && !capturePreviewUri}
             facing={facing}
             flash={flash}
             zoom={zoom}
@@ -127,13 +125,31 @@ export default function CameraScreen() {
             onAvailableLensesChanged={onAvailableLensesChanged}
             onCameraReady={() => void handleCameraReady()}
           />
-          <ShutterFlash visible={shutterFlashVisible} />
+
+          {showCaptureOverlay ? (
+            <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
+              <Image
+                accessibilityLabel={t('camera.previewAlt')}
+                contentFit="cover"
+                source={{ uri: capturePreviewUri! }}
+                style={StyleSheet.absoluteFillObject}
+              />
+              <View style={StyleSheet.absoluteFillObject} className="bg-black/55" />
+              <View style={StyleSheet.absoluteFillObject} className="items-center justify-center gap-5 px-8">
+                <HiveLoader size={88} strokeWidth={3} />
+                <Text className="text-center font-inter text-base font-medium text-hive-primary">
+                  {t('camera.verifyingPhoto')}
+                </Text>
+              </View>
+            </View>
+          ) : null}
         </View>
       </GestureDetector>
 
       <View
+        pointerEvents={showCaptureControls ? 'box-none' : 'none'}
         className="absolute left-0 right-0 top-0 flex-row items-center justify-between px-4"
-        style={{ paddingTop: insets.top + 8 }}
+        style={{ opacity: showCaptureControls ? 1 : 0, paddingTop: insets.top + 8 }}
       >
         <Pressable
           accessibilityRole="button"
@@ -153,8 +169,9 @@ export default function CameraScreen() {
       </View>
 
       <View
+        pointerEvents={showCaptureControls ? 'box-none' : 'none'}
         className="absolute bottom-0 left-0 right-0 items-center pb-8"
-        style={{ paddingBottom: insets.bottom + 24 }}
+        style={{ opacity: showCaptureControls ? 1 : 0, paddingBottom: insets.bottom + 24 }}
       >
         <ZoomPresets
           activePreset={activePreset}
@@ -163,9 +180,7 @@ export default function CameraScreen() {
           onSelect={setPreset}
         />
         <CaptureButton
-          disabled={!isReady}
-          loading={isCapturing}
-          onPressIn={triggerShutterFeedback}
+          disabled={!isReady || isCapturing}
           onPress={() => void handleCapture()}
         />
       </View>

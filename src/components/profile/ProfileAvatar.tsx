@@ -2,7 +2,9 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Camera } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Linking, Pressable, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, Text, View } from 'react-native';
+
+import { HiveLoader } from '@/src/components/ui/HiveLoader';
 
 import { useAvatarUpload } from '@/src/hooks/useAvatarUpload';
 import { useAuthStore } from '@/src/stores/authStore';
@@ -196,7 +198,7 @@ export function ProfileAvatar({
             className="absolute inset-0 items-center justify-center rounded-full bg-black/45"
             style={{ borderRadius: size / 2 }}
           >
-            <ActivityIndicator color="#FFFFFF" size="small" />
+            <HiveLoader color="#FFFFFF" size="small" />
           </View>
         ) : null}
 

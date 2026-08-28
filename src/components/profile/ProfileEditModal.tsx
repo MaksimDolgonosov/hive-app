@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -14,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/src/components/auth/AuthButton';
+import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { SOCIAL_LINK_META } from '@/src/constants/social-links';
 import { useUpdateProfile } from '@/src/hooks/useUpdateProfile';
 import {
@@ -190,7 +190,7 @@ export function ProfileEditModal({ visible, user, onClose }: ProfileEditModalPro
                 onPress={onClose}
               >
                 {updateProfile.isPending ? (
-                  <ActivityIndicator color="#8B7355" size="small" />
+                  <HiveLoader color="#8B7355" size="small" />
                 ) : (
                   <Text className="font-inter text-sm font-semibold text-hive-muted">
                     {t('profile.avatarCancel')}

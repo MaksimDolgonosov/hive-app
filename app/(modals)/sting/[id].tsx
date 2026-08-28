@@ -1,10 +1,10 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Heart, Trash2, X } from 'lucide-react-native';
+import { Trash2, X } from 'lucide-react-native';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -16,6 +16,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getProfileInitials } from '@/src/components/profile/ProfileAvatar';
+import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { Timer } from '@/src/components/ui/Timer';
 import { useDeleteSting } from '@/src/hooks/useDeleteSting';
 import { useStingDetail } from '@/src/hooks/useStingDetail';
@@ -25,6 +26,7 @@ import type { Sting } from '@/src/types';
 import { buildAvatarDisplayUri } from '@/src/utils/avatar-url';
 import { openUserProfile } from '@/src/utils/open-user-profile';
 import { resolveStingAuthor } from '@/src/utils/resolve-sting-author';
+import { StingLikeButton } from '@/src/components/feed/StingLikeButton';
 import { showApiErrorToast } from '@/src/utils/show-toast';
 
 const AUTHOR_AVATAR_SIZE = 40;
@@ -109,19 +111,19 @@ export default function StingDetailScreen() {
     };
   });
 
-  async function handleReact() {
+  function handleReact() {
     if (!stingId || reactToSting.isPending) {
       return;
     }
 
-    try {
-      await reactToSting.mutateAsync();
-    } catch (error) {
-      showApiErrorToast(error, {
-        titleKey: 'sting.reactFailedTitle',
-        fallbackKey: 'sting.reactFailedMessage',
-      });
-    }
+    reactToSting.mutate(undefined, {
+      onError: (error) => {
+        showApiErrorToast(error, {
+          titleKey: 'sting.reactFailedTitle',
+          fallbackKey: 'sting.reactFailedMessage',
+        });
+      },
+    });
   }
 
   async function handleDelete() {
@@ -166,7 +168,7 @@ export default function StingDetailScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-black">
-        <ActivityIndicator color="#F5A623" size="large" />
+        <HiveLoader size={88} strokeWidth={3} />
       </View>
     );
   }
@@ -203,7 +205,7 @@ export default function StingDetailScreen() {
           onClose={handleClose}
           onDelete={handleDeletePress}
           onOpenAuthorProfile={handleOpenAuthorProfile}
-          onReact={() => void handleReact()}
+          onReact={handleReact}
         />
       </Animated.View>
     </GestureDetector>
@@ -277,7 +279,7 @@ function StingDetailBody({
             }}
           >
             {deleteSting.isPending ? (
-              <ActivityIndicator color={DELETE_ICON_COLOR} size="small" />
+              <HiveLoader color={DELETE_ICON_COLOR} size="small" />
             ) : (
               <Trash2 color={DELETE_ICON_COLOR} size={20} />
             )}
@@ -350,25 +352,14 @@ function StingDetailBody({
               </Pressable>
             ) : null}
 
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={isLiked ? t('sting.unlike') : t('sting.like')}
-              accessibilityState={{ selected: isLiked }}
-              className={`flex-row items-center gap-2 rounded-full px-5 py-3 ${
-                isLiked ? 'bg-hive-primary' : 'border border-white/30 bg-black/40'
-              }`}
+            <StingLikeButton
               disabled={reactToSting.isPending}
+              isLiked={isLiked}
+              likeLabel={t('sting.like')}
+              reactionsCount={sting.reactionsCount}
+              unlikeLabel={t('sting.unlike')}
               onPress={onReact}
-            >
-              {reactToSting.isPending ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : (
-                <Heart color="#FFFFFF" fill={isLiked ? '#FFFFFF' : 'transparent'} size={20} />
-              )}
-              <Text className="font-inter text-base font-semibold text-white">
-                {sting.reactionsCount}
-              </Text>
-            </Pressable>
+            />
           </View>
         </View>
       </View>

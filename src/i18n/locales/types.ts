@@ -87,6 +87,8 @@ export type TranslationSchema = {
     recentPhotos: string;
     viewAll: string;
     closeSettings: string;
+    publishBuzzLabel: string;
+    publishBuzzHint: string;
     avatarPickerTitle: string;
     avatarTakePhoto: string;
     avatarChooseGallery: string;
@@ -199,6 +201,7 @@ export type TranslationSchema = {
     publishFailedMessage: string;
     flipCamera: string;
     toggleFlash: string;
+    verifyingPhoto: string;
   };
   userProfile: {
     back: string;

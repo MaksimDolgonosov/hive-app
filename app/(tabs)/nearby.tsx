@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActivityIndicator,
   FlatList,
   Linking,
   Pressable,
@@ -16,6 +15,7 @@ import { HiveNearbyCard } from '@/src/components/feed/HiveNearbyCard';
 import { NearbyCard } from '@/src/components/feed/NearbyCard';
 import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
+import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { useLocation } from '@/src/hooks/useLocation';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
 import { useMapStore } from '@/src/stores/mapStore';
@@ -112,7 +112,7 @@ export default function NearbyScreen() {
   if (locationStatus === 'loading' || locationStatus === 'idle') {
     return (
       <View className="flex-1 items-center justify-center bg-hive-bg">
-        <ActivityIndicator size="large" color="#F5A623" />
+        <HiveLoader size="large" />
         <Text className="mt-3 font-inter text-sm text-hive-muted">{t('map.loadingLocation')}</Text>
       </View>
     );
@@ -187,7 +187,7 @@ export default function NearbyScreen() {
         ListEmptyComponent={
           isFetching ? (
             <View className="flex-1 items-center justify-center py-16">
-              <ActivityIndicator size="large" color="#F5A623" />
+              <HiveLoader size="large" />
             </View>
           ) : isError ? (
             <View className="flex-1 items-center justify-center px-6 py-16">
@@ -219,7 +219,7 @@ export default function NearbyScreen() {
 
       {isFetching && feedItems.length > 0 && (
         <View className="absolute right-4 top-2 rounded-full bg-hive-surface px-3 py-2 shadow-sm">
-          <ActivityIndicator size="small" color="#F5A623" />
+          <HiveLoader size="small" />
         </View>
       )}
 

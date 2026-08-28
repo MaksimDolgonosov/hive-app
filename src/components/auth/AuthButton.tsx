@@ -1,14 +1,23 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
+
+import { HiveLoader } from '@/src/components/ui/HiveLoader';
 
 type AuthButtonProps = {
   title: string;
   onPress: () => void;
+  onPressIn?: () => void;
   loading?: boolean;
   disabled?: boolean;
 };
 
-export function AuthButton({ title, onPress, loading = false, disabled = false }: AuthButtonProps) {
+export function AuthButton({
+  title,
+  onPress,
+  onPressIn,
+  loading = false,
+  disabled = false,
+}: AuthButtonProps) {
   const isDisabled = disabled || loading;
 
   return (
@@ -16,6 +25,7 @@ export function AuthButton({ title, onPress, loading = false, disabled = false }
       accessibilityRole="button"
       disabled={isDisabled}
       onPress={onPress}
+      onPressIn={onPressIn}
       style={[styles.pressable, isDisabled && styles.pressableDisabled]}
     >
       <LinearGradient
@@ -24,9 +34,7 @@ export function AuthButton({ title, onPress, loading = false, disabled = false }
         start={{ x: 0, y: 0.5 }}
         style={styles.gradient}
       >
-        {loading ? (
-          <ActivityIndicator color="#FFFFFF" />
-        ) : (
+        {loading ? <HiveLoader color="#FFFFFF" size="small" /> : (
           <Text style={styles.label}>{title}</Text>
         )}
       </LinearGradient>

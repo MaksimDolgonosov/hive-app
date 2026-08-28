@@ -1,16 +1,10 @@
+import { isPublishBuzzEnabled } from '@/src/stores/preferencesStore';
 import * as Haptics from 'expo-haptics';
-import { InteractionManager, Platform, Vibration } from 'react-native';
-
-import { playIosShutterBuzz, playIosShutterClick } from '@/src/utils/ios-feedback-sound';
+import { Platform, Vibration } from 'react-native';
 
 const BUZZ_GAP_MS = 40;
 /** iOS: пауза после паттерна, чтобы Taptic Engine успел отработать до unmount экрана. */
 const IOS_POST_BUZZ_SETTLE_MS = 80;
-/**
- * iOS: после unmount CameraView AVFoundation ещё кратко держит сессию —
- * Taptic Engine молча no-op, пока «камера активна» (см. expo-haptics docs).
- */
-const IOS_CAMERA_RELEASE_DELAY_MS = 100;
 const IOS_BUZZ_PULSES: Haptics.ImpactFeedbackStyle[] = [
   Haptics.ImpactFeedbackStyle.Heavy,
   Haptics.ImpactFeedbackStyle.Rigid,
@@ -25,17 +19,6 @@ function delay(ms: number): Promise<void> {
   });
 }
 
-async function waitForIosHapticsReady() {
-  if (Platform.OS !== 'ios') {
-    return;
-  }
-
-  await new Promise<void>((resolve) => {
-    InteractionManager.runAfterInteractions(() => resolve());
-  });
-  await delay(IOS_CAMERA_RELEASE_DELAY_MS);
-}
-
 async function playBuzzImpacts(pulses: Haptics.ImpactFeedbackStyle[], gapMs: number) {
   for (let pulse = 0; pulse < pulses.length; pulse += 1) {
     await Haptics.impactAsync(pulses[pulse]);
@@ -45,53 +28,60 @@ async function playBuzzImpacts(pulses: Haptics.ImpactFeedbackStyle[], gapMs: num
   }
 }
 
-/**
- * Feedback в момент нажатия затвора.
- * iOS: короткий звук (Taptic блокируется активной камерой / AVAudioSession).
- * Android: вибрация через expo-haptics.
- */
-export async function impactCapture() {
+/** Короткий «точечный» отклик при постановке лайка. Вызывать синхронно в onPressIn. */
+export function notifyLikeTap() {
   try {
-    if (Platform.OS === 'ios') {
-      await playIosShutterClick();
-      // Пробуем Taptic — на части устройств/версий iOS может сработать.
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    if (Platform.OS === 'android') {
+      // Scalar vibrate(ms) на Android 8+ часто игнорируется — нужен паттерн [pause, duration].
+      Vibration.vibrate([0, 40]);
       return;
     }
 
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   } catch {
-    // optional
+    if (Platform.OS === 'android') {
+      Vibration.vibrate([0, 40]);
+    }
   }
 }
 
-/**
- * iOS: дополнительный Taptic на preview, когда CameraView уже размонтирован.
- * Звук затвора уже проигран на press — здесь только попытка вибрации.
- */
-export async function notifyCaptureShutter() {
+/** Синхронный вызов в onPressIn — iOS игнорирует haptic после await в том же обработчике. */
+export function triggerIosHapticHeavy() {
+  if (Platform.OS !== 'ios') {
+    return;
+  }
+
+  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+}
+
+/** Dev: дополнительные паттерны после первого sync-импульса. */
+export async function runIosHapticDevTest() {
   if (Platform.OS !== 'ios') {
     return;
   }
 
   try {
-    await waitForIosHapticsReady();
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-  } catch {
-    // optional
+    await delay(80);
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+    await delay(80);
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  } catch (error) {
+    if (__DEV__) {
+      console.warn('[runIosHapticDevTest]', error);
+    }
   }
 }
 
-/** «Жужжание пчелы» после успешной публикации. */
+/** Вибрация после успешной публикации на карту. */
 export async function notifyPublishSuccess() {
+  if (!isPublishBuzzEnabled()) {
+    return;
+  }
+
   try {
     if (Platform.OS === 'ios') {
-      await waitForIosHapticsReady();
-      await playIosShutterBuzz(IOS_BUZZ_PULSES.length, BUZZ_GAP_MS);
-    }
-
-    if (Platform.OS === 'ios') {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       await delay(25);
       await playBuzzImpacts(IOS_BUZZ_PULSES, BUZZ_GAP_MS);
       await delay(IOS_POST_BUZZ_SETTLE_MS);
@@ -99,7 +89,18 @@ export async function notifyPublishSuccess() {
     }
 
     if (Platform.OS === 'android') {
-      Vibration.vibrate([0, 55, BUZZ_GAP_MS, 55, BUZZ_GAP_MS, 55]);
+      Vibration.vibrate([
+        0,
+        55,
+        BUZZ_GAP_MS,
+        55,
+        BUZZ_GAP_MS,
+        55,
+        BUZZ_GAP_MS,
+        55,
+        BUZZ_GAP_MS,
+        55,
+      ]);
     }
 
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -108,21 +109,11 @@ export async function notifyPublishSuccess() {
         Haptics.ImpactFeedbackStyle.Medium,
         Haptics.ImpactFeedbackStyle.Medium,
         Haptics.ImpactFeedbackStyle.Medium,
+        Haptics.ImpactFeedbackStyle.Medium,
+        Haptics.ImpactFeedbackStyle.Medium,
       ],
       BUZZ_GAP_MS,
     );
-  } catch {
-    // optional
-  }
-}
-
-export async function notifyPublishError() {
-  try {
-    if (Platform.OS === 'ios') {
-      await waitForIosHapticsReady();
-      await playIosShutterClick();
-    }
-    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   } catch {
     // optional
   }

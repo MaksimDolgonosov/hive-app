@@ -1,29 +1,29 @@
 import { router, type Href } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { type Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HiveCircle } from '@/src/components/map/HiveCircle';
 import { HiveMarkerCapture } from '@/src/components/map/HiveMarkerCapture';
+import { LocationAccessGate } from '@/src/components/map/LocationAccessGate';
 import { MapLocationButton } from '@/src/components/map/MapLocationButton';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { useLocation } from '@/src/hooks/useLocation';
-import { useMapWebSocket } from '@/src/hooks/useMapWebSocket';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
 import { useMapStore } from '@/src/stores/mapStore';
+import { useLocationStore } from '@/src/stores/locationStore';
 import type { MapBounds, MapRegion } from '@/src/types';
 import { isActiveHive } from '@/src/utils/hive';
-import { DEFAULT_MAP_REGION, regionToBounds } from '@/src/utils/map';
+import { DEFAULT_MAP_REGION, coordsToUserMapRegion, regionToBounds } from '@/src/utils/map';
 
 import { StingMarker } from './StingMarker';
 
 const REGION_DEBOUNCE_MS = 300;
 const PUBLISH_FOCUS_DELTA = 0.008;
-const USER_REGION_DELTA = 0.01;
 
 function toMapRegion(region: Region): MapRegion {
   return {
@@ -39,8 +39,9 @@ export function MapContainer() {
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
   const hasCenteredOnUser = useRef(false);
+  const hasRestoredCachedRegion = useRef(false);
 
-  const { coords, status: locationStatus } = useLocation();
+  const { coords, status: locationStatus, requestPermission } = useLocation();
   const region = useMapStore((state) => state.region);
   const setRegion = useMapStore((state) => state.setRegion);
   const setSelectedStingId = useMapStore((state) => state.setSelectedStingId);
@@ -65,21 +66,27 @@ export function MapContainer() {
 
   const { data, isFetching, isError } = useStingsNearby(debouncedBounds);
 
-  useMapWebSocket(debouncedBounds);
+  useEffect(() => {
+    if (region || hasRestoredCachedRegion.current) {
+      return;
+    }
+
+    const lastKnownCoords = useLocationStore.getState().lastKnownCoords;
+    if (!lastKnownCoords) {
+      return;
+    }
+
+    hasRestoredCachedRegion.current = true;
+    setRegion(coordsToUserMapRegion(lastKnownCoords.latitude, lastKnownCoords.longitude));
+  }, [region, setRegion]);
 
   useEffect(() => {
     if (!coords || hasCenteredOnUser.current) {
       return;
     }
 
-    const userRegion: MapRegion = {
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-      latitudeDelta: USER_REGION_DELTA,
-      longitudeDelta: USER_REGION_DELTA,
-    };
-
     hasCenteredOnUser.current = true;
+    const userRegion = coordsToUserMapRegion(coords.latitude, coords.longitude);
     setRegion(userRegion);
     mapRef.current?.animateToRegion(userRegion, 500);
   }, [coords, setRegion]);
@@ -152,44 +159,19 @@ export function MapContainer() {
       return;
     }
 
-    const userRegion: MapRegion = {
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-      latitudeDelta: USER_REGION_DELTA,
-      longitudeDelta: USER_REGION_DELTA,
-    };
+    const userRegion = coordsToUserMapRegion(coords.latitude, coords.longitude);
 
     setRegion(userRegion);
     setDebouncedBounds(regionToBounds(userRegion));
     mapRef.current?.animateToRegion(userRegion, 500);
   }
 
-  if (locationStatus === 'loading' || locationStatus === 'idle') {
+  if (locationStatus !== 'granted') {
     return (
-      <View className="flex-1 items-center justify-center bg-hive-bg">
-        <HiveLoader size="large" />
-        <Text className="mt-3 font-inter text-sm text-hive-muted">{t('map.loadingLocation')}</Text>
-      </View>
-    );
-  }
-
-  if (locationStatus === 'denied') {
-    return (
-      <View className="flex-1 items-center justify-center bg-hive-bg px-8">
-        <Text className="text-center font-inter text-lg font-semibold text-hive-foreground">
-          {t('map.locationDeniedTitle')}
-        </Text>
-        <Text className="mt-2 text-center font-inter text-sm text-hive-muted">
-          {t('map.locationDeniedMessage')}
-        </Text>
-        <Pressable
-          accessibilityRole="button"
-          className="mt-6 rounded-hive-md bg-hive-primary px-6 py-3"
-          onPress={() => void Linking.openSettings()}
-        >
-          <Text className="font-inter text-base font-bold text-white">{t('map.openSettings')}</Text>
-        </Pressable>
-      </View>
+      <LocationAccessGate
+        status={locationStatus}
+        onRequestPermission={() => void requestPermission()}
+      />
     );
   }
 

@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   FlatList,
-  Linking,
   Pressable,
   RefreshControl,
   Text,
@@ -13,31 +12,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HiveNearbyCard } from '@/src/components/feed/HiveNearbyCard';
 import { NearbyCard } from '@/src/components/feed/NearbyCard';
+import { LocationAccessGate } from '@/src/components/map/LocationAccessGate';
 import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { useLocation } from '@/src/hooks/useLocation';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
+import { useLocationStore } from '@/src/stores/locationStore';
 import { useMapStore } from '@/src/stores/mapStore';
-import type { Hive, MapBounds, Sting } from '@/src/types';
+import type { Hive, Sting } from '@/src/types';
 import { haversineDistance } from '@/src/utils/geo';
 import { isActiveHive } from '@/src/utils/hive';
-import { regionToBounds } from '@/src/utils/map';
-
-const FEED_REGION_DELTA = 0.05;
+import { coordsToFeedBounds, regionToBounds } from '@/src/utils/map';
 
 type FeedItem =
   | { key: string; type: 'sting'; sting: Sting; distanceM: number }
   | { key: string; type: 'hive'; hive: Hive; distanceM: number };
-
-function coordsToBounds(lat: number, lng: number): MapBounds {
-  return regionToBounds({
-    latitude: lat,
-    longitude: lng,
-    latitudeDelta: FEED_REGION_DELTA,
-    longitudeDelta: FEED_REGION_DELTA,
-  });
-}
 
 function buildFeedItems(
   stings: Sting[],
@@ -69,7 +59,8 @@ function buildFeedItems(
 export default function NearbyScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { coords, status: locationStatus } = useLocation();
+  const { coords, status: locationStatus, requestPermission } = useLocation();
+  const lastKnownCoords = useLocationStore((state) => state.lastKnownCoords);
   const mapRegion = useMapStore((state) => state.region);
   const [selectedHiveId, setSelectedHiveId] = useState<string | null>(null);
 
@@ -79,21 +70,32 @@ export default function NearbyScreen() {
     }
 
     if (coords) {
-      return coordsToBounds(coords.latitude, coords.longitude);
+      return coordsToFeedBounds(coords.latitude, coords.longitude);
+    }
+
+    if (lastKnownCoords) {
+      return coordsToFeedBounds(lastKnownCoords.latitude, lastKnownCoords.longitude);
     }
 
     return null;
-  }, [coords, mapRegion]);
+  }, [coords, lastKnownCoords, mapRegion]);
+
+  const effectiveCoords = coords ?? lastKnownCoords;
 
   const { data, isFetching, isError, refetch, isRefetching } = useStingsNearby(bounds);
 
   const feedItems = useMemo(() => {
-    if (!coords || !data) {
+    if (!effectiveCoords || !data) {
       return [];
     }
 
-    return buildFeedItems(data.stings, data.hives, coords.latitude, coords.longitude);
-  }, [coords, data]);
+    return buildFeedItems(
+      data.stings,
+      data.hives,
+      effectiveCoords.latitude,
+      effectiveCoords.longitude,
+    );
+  }, [data, effectiveCoords]);
 
   function openSting(stingId: string) {
     router.push(`/(modals)/sting/${stingId}` as Href);
@@ -109,35 +111,14 @@ export default function NearbyScreen() {
 
   const listBottomInset = getGlassTabBarInset(insets.bottom) + 16;
 
-  if (locationStatus === 'loading' || locationStatus === 'idle') {
+  if (locationStatus !== 'granted') {
     return (
-      <View className="flex-1 items-center justify-center bg-hive-bg">
-        <HiveLoader size="large" />
-        <Text className="mt-3 font-inter text-sm text-hive-muted">{t('map.loadingLocation')}</Text>
-      </View>
-    );
-  }
-
-  if (locationStatus === 'denied') {
-    return (
-      <View
-        className="flex-1 items-center justify-center bg-hive-bg px-8"
-        style={{ paddingBottom: listBottomInset }}
-      >
-        <Text className="text-center font-inter text-lg font-semibold text-hive-foreground">
-          {t('map.locationDeniedTitle')}
-        </Text>
-        <Text className="mt-2 text-center font-inter text-sm text-hive-muted">
-          {t('nearby.locationDeniedMessage')}
-        </Text>
-        <Pressable
-          accessibilityRole="button"
-          className="mt-6 rounded-hive-md bg-hive-primary px-6 py-3"
-          onPress={() => void Linking.openSettings()}
-        >
-          <Text className="font-inter text-base font-bold text-white">{t('map.openSettings')}</Text>
-        </Pressable>
-      </View>
+      <LocationAccessGate
+        bottomInset={listBottomInset}
+        deniedMessageKey="nearby"
+        status={locationStatus}
+        onRequestPermission={() => void requestPermission()}
+      />
     );
   }
 

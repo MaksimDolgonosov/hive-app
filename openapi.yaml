@@ -158,6 +158,95 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /auth/me/stats:
+    get:
+      tags: [auth]
+      summary: Статистика и превью профиля текущего пользователя
+      responses:
+        '200':
+          description: Статистика и недавние фото
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileOverview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me/stings:
+    get:
+      tags: [auth]
+      summary: Опубликованные жала текущего пользователя
+      parameters:
+        - in: query
+          name: cursor
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+            maximum: 50
+      responses:
+        '200':
+          description: Пагинированный список жал автора
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StingsPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me/hives:
+    get:
+      tags: [auth]
+      summary: Ульи, в которых есть фото текущего пользователя
+      parameters:
+        - in: query
+          name: cursor
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+            maximum: 50
+      responses:
+        '200':
+          description: Пагинированный список ульев пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserHivesPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me/liked-stings:
+    get:
+      tags: [auth]
+      summary: Жала, которые текущий пользователь лайкнул
+      parameters:
+        - in: query
+          name: cursor
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+            maximum: 50
+      responses:
+        '200':
+          description: Пагинированный список лайкнутых жал
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StingsPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
   # ---------------------------------------------------------------------
   # STINGS
   # ---------------------------------------------------------------------
@@ -630,6 +719,59 @@ components:
         - activeStingsCount
         - createdAt
         - updatedAt
+
+    ProfileOverview:
+      type: object
+      properties:
+        stats:
+          type: object
+          properties:
+            photos:
+              type: integer
+            hives:
+              type: integer
+            likes:
+              type: integer
+          required: [photos, hives, likes]
+        recentPhotos:
+          type: array
+          items:
+            type: string
+            format: uri
+      required: [stats, recentPhotos]
+
+    StingsPage:
+      type: object
+      properties:
+        stings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sting'
+        nextCursor:
+          type: string
+          nullable: true
+      required: [stings, nextCursor]
+
+    UserHiveSummary:
+      allOf:
+        - $ref: '#/components/schemas/Hive'
+        - type: object
+          properties:
+            userStingsCount:
+              type: integer
+          required: [userStingsCount]
+
+    UserHivesPage:
+      type: object
+      properties:
+        hives:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserHiveSummary'
+        nextCursor:
+          type: string
+          nullable: true
+      required: [hives, nextCursor]
 
     ErrorResponse:
       type: object

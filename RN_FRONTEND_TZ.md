@@ -149,7 +149,7 @@ sting-app/
 **Задачи:**
 
 - `src/hooks/useCamera.ts` — permissions, вызов `expo-camera`, запись временного файла.
-- `src/components/camera/CameraView.tsx`, `CaptureButton.tsx` (с haptic через `src/utils/haptics.ts`).
+- `src/components/camera/CameraView.tsx`, `CaptureButton.tsx`.
 - `src/stores/cameraStore.ts` — `capturedUri`, `captureCoords`, `captureAccuracy`.
 - `app/(modals)/camera.tsx` → `app/(modals)/preview.tsx` — флоу съёмки и подтверждения.
 - `src/api/stings.ts` — `POST /stings` через `multipart/form-data`, с заголовком `Idempotency-Key` (генерировать `uuid` на старте флоу публикации, не на каждый retry).

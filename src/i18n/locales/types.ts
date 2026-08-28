@@ -126,6 +126,17 @@ export type TranslationSchema = {
     saveProfile: string;
     updateFailedTitle: string;
     updateFailedMessage: string;
+    collections: {
+      loadError: string;
+      retry: string;
+      photosEmptyTitle: string;
+      photosEmptyMessage: string;
+      hivesEmptyTitle: string;
+      hivesEmptyMessage: string;
+      favoritesEmptyTitle: string;
+      favoritesEmptyMessage: string;
+      hiveYourPhotos: string;
+    };
   };
   onboarding: {
     next: string;

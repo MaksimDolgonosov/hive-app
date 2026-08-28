@@ -58,6 +58,9 @@ export function useStingReaction(stingId: string) {
         reactionsCount: response.reactionsCount,
         hasLiked: response.hasLiked,
       });
+
+      void queryClient.invalidateQueries({ queryKey: ['profile', 'liked-stings'] });
+      void queryClient.invalidateQueries({ queryKey: ['profile', 'overview'] });
     },
   });
 }

@@ -131,6 +131,17 @@ export const ru: TranslationSchema = {
     saveProfile: 'Сохранить',
     updateFailedTitle: 'Не удалось сохранить профиль',
     updateFailedMessage: 'Попробуйте ещё раз позже.',
+    collections: {
+      loadError: 'Не удалось загрузить список',
+      retry: 'Повторить',
+      photosEmptyTitle: 'Пока нет фото',
+      photosEmptyMessage: 'Сделайте первое фото камерой — оно появится здесь.',
+      hivesEmptyTitle: 'Пока нет ульев',
+      hivesEmptyMessage: 'Когда ваши фото соберутся с другими в кластер, улей появится здесь.',
+      favoritesEmptyTitle: 'Пока пусто',
+      favoritesEmptyMessage: 'Лайкайте фото на карте или в ленте — они появятся здесь.',
+      hiveYourPhotos: '{{yours}} ваших · {{total}} всего',
+    },
   },
   onboarding: {
     next: 'Далее',

@@ -13,6 +13,8 @@ import {
 
 const RECONNECT_BASE_MS = 1_000;
 const RECONNECT_MAX_MS = 30_000;
+const PING_INTERVAL_MS = 25_000;
+const PONG_TIMEOUT_MS = 5_000;
 
 const SERVER_EVENTS = [
   'sting:created',
@@ -58,6 +60,8 @@ class WebSocketManager {
   private shouldConnect = false;
   private reconnectAttempt = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private pingInterval: ReturnType<typeof setInterval> | null = null;
+  private pongTimeout: ReturnType<typeof setTimeout> | null = null;
 
   connect(accessToken: string): void {
     const tokenChanged = this.accessToken !== accessToken;
@@ -121,10 +125,13 @@ class WebSocketManager {
       if (this.subscribedBounds) {
         this.emit('subscribe:region', this.subscribedBounds);
       }
+
+      this.startKeepalive();
     });
 
     this.socket.on('disconnect', (reason) => {
       logDev('disconnected', { reason });
+      this.stopKeepalive();
 
       if (this.shouldConnect) {
         this.scheduleReconnect();
@@ -150,11 +157,18 @@ class WebSocketManager {
         return;
       }
 
+      if (message.type === 'pong') {
+        this.handlePong();
+        return;
+      }
+
       this.handleEvent(message.type as ServerEvent, message.payload);
     });
   }
 
   private closeSocket(): void {
+    this.stopKeepalive();
+
     if (!this.socket) {
       return;
     }
@@ -169,7 +183,67 @@ class WebSocketManager {
       return;
     }
 
-    this.socket.emit(type, payload);
+    this.socket.emit('message', { type, payload });
+  }
+
+  private startKeepalive(): void {
+    this.stopKeepalive();
+    this.sendPing();
+
+    this.pingInterval = setInterval(() => {
+      this.sendPing();
+    }, PING_INTERVAL_MS);
+  }
+
+  private stopKeepalive(): void {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
+
+    this.clearPongTimeout();
+  }
+
+  private sendPing(): void {
+    if (!this.socket?.connected) {
+      return;
+    }
+
+    if (this.pongTimeout) {
+      this.handleDeadConnection('pong timeout (previous ping unanswered)');
+      return;
+    }
+
+    this.socket.emit('message', { type: 'ping', payload: {} });
+    logDev('ping');
+
+    this.pongTimeout = setTimeout(() => {
+      this.pongTimeout = null;
+      this.handleDeadConnection('pong timeout');
+    }, PONG_TIMEOUT_MS);
+  }
+
+  private handlePong(): void {
+    this.clearPongTimeout();
+    logDev('pong');
+  }
+
+  private clearPongTimeout(): void {
+    if (!this.pongTimeout) {
+      return;
+    }
+
+    clearTimeout(this.pongTimeout);
+    this.pongTimeout = null;
+  }
+
+  private handleDeadConnection(reason: string): void {
+    logDev(reason);
+    this.closeSocket();
+
+    if (this.shouldConnect) {
+      this.scheduleReconnect();
+    }
   }
 
   private scheduleReconnect(): void {

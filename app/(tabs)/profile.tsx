@@ -1,5 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router, type Href } from 'expo-router';
 import { Heart, Hexagon, Image as ImageIcon, LogOut, Settings } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -129,18 +130,18 @@ export default function ProfileScreen() {
             badge={stats.photos > 0 ? stats.photos : undefined}
             icon={ImageIcon}
             label={t('profile.menuPhotos')}
-            onPress={() => undefined}
+            onPress={() => router.push('/(modals)/profile/photos' as Href)}
           />
           <ProfileMenuRow
             badge={stats.hives > 0 ? stats.hives : undefined}
             icon={Hexagon}
             label={t('profile.menuHives')}
-            onPress={() => undefined}
+            onPress={() => router.push('/(modals)/profile/hives' as Href)}
           />
           <ProfileMenuRow
             icon={Heart}
             label={t('profile.menuFavorites')}
-            onPress={() => undefined}
+            onPress={() => router.push('/(modals)/profile/favorites' as Href)}
           />
           <ProfileMenuRow
             icon={Settings}
@@ -155,7 +156,10 @@ export default function ProfileScreen() {
           />
         </ProfileGlassCard>
 
-        <ProfileRecentPhotos photoUrls={recentPhotos} />
+        <ProfileRecentPhotos
+          photoUrls={recentPhotos}
+          onViewAll={() => router.push('/(modals)/profile/photos' as Href)}
+        />
       </ScrollView>
 
       <ProfileSettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)}>

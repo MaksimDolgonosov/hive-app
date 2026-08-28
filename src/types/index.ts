@@ -126,6 +126,20 @@ export interface HiveStingsPageResponse {
   nextCursor: string | null;
 }
 
+export interface StingsPage {
+  stings: Sting[];
+  nextCursor: string | null;
+}
+
+export interface UserHiveSummary extends Hive {
+  userStingsCount: number;
+}
+
+export interface UserHivesPage {
+  hives: UserHiveSummary[];
+  nextCursor: string | null;
+}
+
 export interface ApiErrorBody {
   error: {
     code: string;

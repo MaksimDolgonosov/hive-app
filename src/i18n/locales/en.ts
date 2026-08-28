@@ -129,6 +129,17 @@ export const en: TranslationSchema = {
     saveProfile: 'Save',
     updateFailedTitle: 'Could not save profile',
     updateFailedMessage: 'Please try again later.',
+    collections: {
+      loadError: 'Could not load list',
+      retry: 'Retry',
+      photosEmptyTitle: 'No photos yet',
+      photosEmptyMessage: 'Take your first photo with the camera — it will appear here.',
+      hivesEmptyTitle: 'No hives yet',
+      hivesEmptyMessage: 'When your photos cluster with others, the hive will show up here.',
+      favoritesEmptyTitle: 'Nothing saved yet',
+      favoritesEmptyMessage: 'Like photos on the map or in the feed — they will appear here.',
+      hiveYourPhotos: '{{yours}} of yours · {{total}} total',
+    },
   },
   onboarding: {
     next: 'Next',

@@ -39,6 +39,8 @@ export function usePublishSting() {
 
       void queryClient.invalidateQueries({ queryKey: ['stings'], refetchType: 'all' });
       void queryClient.invalidateQueries({ queryKey: ['profile', 'overview'] });
+      void queryClient.invalidateQueries({ queryKey: ['profile', 'my-stings'] });
+      void queryClient.invalidateQueries({ queryKey: ['profile', 'my-hives'] });
     },
   });
 }

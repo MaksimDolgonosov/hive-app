@@ -1,7 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, type Href } from 'expo-router';
-import { Heart, Hexagon, Image as ImageIcon, LogOut, Settings } from 'lucide-react-native';
+import { Bookmark, Heart, Hexagon, Image as ImageIcon, LogOut, Settings } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -20,6 +20,7 @@ import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { LanguageSelect } from '@/src/components/ui/LanguageSelect';
 import { useProfileOverview } from '@/src/hooks/useProfileOverview';
 import { useAuthStore } from '@/src/stores/authStore';
+import { useSavedMapPlacesStore } from '@/src/stores/savedMapPlacesStore';
 import type { ProfileStats } from '@/src/types';
 
 const EMPTY_STATS: ProfileStats = {
@@ -69,6 +70,7 @@ export default function ProfileScreen() {
 
   const stats = profileOverview?.stats ?? EMPTY_STATS;
   const recentPhotos = profileOverview?.recentPhotos ?? [];
+  const savedPlacesCount = useSavedMapPlacesStore((state) => state.places.length);
 
   async function handleLogout() {
     if (isLoggingOut) {
@@ -137,6 +139,12 @@ export default function ProfileScreen() {
             icon={Hexagon}
             label={t('profile.menuHives')}
             onPress={() => router.push('/(modals)/profile/hives' as Href)}
+          />
+          <ProfileMenuRow
+            badge={savedPlacesCount > 0 ? savedPlacesCount : undefined}
+            icon={Bookmark}
+            label={t('profile.menuSavedPlaces')}
+            onPress={() => router.push('/(modals)/profile/saved-places' as Href)}
           />
           <ProfileMenuRow
             icon={Heart}

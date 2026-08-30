@@ -53,6 +53,23 @@ export type TranslationSchema = {
     loadError: string;
     capturePhoto: string;
     centerOnUser: string;
+    saveFavorite: string;
+    savePlaceTitle: string;
+    savePlaceDescription: string;
+    savePlaceNameLabel: string;
+    savePlaceNamePlaceholder: string;
+    savePlaceNameCounter: string;
+    savePlaceDefaultName: string;
+    savePlaceConfirm: string;
+    savePlaceCancel: string;
+    savePlaceSuccess: string;
+    savePlaceFailed: string;
+    savePlaceLimitReached: string;
+    savePlaceRegionUnavailable: string;
+    savedPlacesCoords: string;
+    savedPlacesDeleteTitle: string;
+    savedPlacesDeleteMessage: string;
+    savedPlacesDeleteConfirm: string;
     emptyTitle: string;
     emptyMessage: string;
   };
@@ -81,6 +98,7 @@ export type TranslationSchema = {
     statsLikes: string;
     menuPhotos: string;
     menuHives: string;
+    menuSavedPlaces: string;
     menuFavorites: string;
     menuSettings: string;
     menuLogout: string;
@@ -135,6 +153,8 @@ export type TranslationSchema = {
       hivesEmptyMessage: string;
       favoritesEmptyTitle: string;
       favoritesEmptyMessage: string;
+      savedPlacesEmptyTitle: string;
+      savedPlacesEmptyMessage: string;
       hiveYourPhotos: string;
     };
   };
@@ -219,6 +239,11 @@ export type TranslationSchema = {
     notFound: string;
     aboutEmpty: string;
     socialEmpty: string;
+  };
+  notFound: {
+    title: string;
+    message: string;
+    goHome: string;
   };
   errors: {
     generic: string;

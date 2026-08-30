@@ -1,31 +1,33 @@
-import { useTranslation } from 'react-i18next';
-import { Image, Platform, Pressable, StyleSheet, View } from 'react-native';
-
-// bee100.png — с непрозрачным чёрным фоном, перекрывает стили кнопки; bee.png — с альфой.
-const LOCATE_ICON = require('../../../assets/icons/bee.png');
+import type { LucideIcon } from 'lucide-react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 const BUTTON_SIZE = 52;
-const ICON_SIZE = 34;
+const ICON_SIZE = 22;
 
-type MapLocationButtonProps = {
+type MapOverlayButtonProps = {
+  icon: LucideIcon;
+  accessibilityLabel: string;
   onPress: () => void;
   disabled?: boolean;
 };
 
-export function MapLocationButton({ onPress, disabled = false }: MapLocationButtonProps) {
-  const { t } = useTranslation();
-
+export function MapOverlayButton({
+  icon: Icon,
+  accessibilityLabel,
+  onPress,
+  disabled = false,
+}: MapOverlayButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t('map.centerOnUser')}
+      accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [disabled && styles.disabled, pressed && !disabled && styles.pressed]}
     >
       <View style={styles.button}>
-        <Image resizeMode="contain" source={LOCATE_ICON} style={styles.icon} />
+        <Icon color="#F5A623" size={ICON_SIZE} strokeWidth={2.25} />
       </View>
     </Pressable>
   );
@@ -59,9 +61,5 @@ const styles = StyleSheet.create({
   },
   disabled: {
     opacity: 0.45,
-  },
-  icon: {
-    width: ICON_SIZE,
-    height: ICON_SIZE,
   },
 });

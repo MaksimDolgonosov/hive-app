@@ -104,6 +104,16 @@ export interface MapRegion {
   longitudeDelta: number;
 }
 
+export interface SavedMapPlace {
+  id: UUID;
+  name: string;
+  region: MapRegion;
+  createdAt: string;
+}
+
+export const SAVED_MAP_PLACE_NAME_MAX_LENGTH = 60;
+export const SAVED_MAP_PLACES_MAX = 30;
+
 export interface MapBounds {
   swLat: number;
   swLng: number;

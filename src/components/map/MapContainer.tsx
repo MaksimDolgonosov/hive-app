@@ -8,7 +8,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HiveCircle } from '@/src/components/map/HiveCircle';
 import { HiveMarkerCapture } from '@/src/components/map/HiveMarkerCapture';
 import { LocationAccessGate } from '@/src/components/map/LocationAccessGate';
+import { MapBookmarkButton } from '@/src/components/map/MapBookmarkButton';
 import { MapLocationButton } from '@/src/components/map/MapLocationButton';
+import { SaveMapPlaceModal } from '@/src/components/map/SaveMapPlaceModal';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
@@ -16,14 +18,20 @@ import { useLocation } from '@/src/hooks/useLocation';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
 import { useMapStore } from '@/src/stores/mapStore';
 import { useLocationStore } from '@/src/stores/locationStore';
+import { useSavedMapPlacesStore } from '@/src/stores/savedMapPlacesStore';
 import type { MapBounds, MapRegion } from '@/src/types';
+import { SAVED_MAP_PLACES_MAX } from '@/src/types';
 import { isActiveHive } from '@/src/utils/hive';
 import { DEFAULT_MAP_REGION, coordsToUserMapRegion, regionToBounds } from '@/src/utils/map';
+import { resolveMapViewRegion } from '@/src/utils/resolve-map-view-region';
+import { showInfoToast, showErrorToast } from '@/src/stores/toastStore';
+import { showMessageToast } from '@/src/utils/show-toast';
 
 import { StingMarker } from './StingMarker';
 
 const REGION_DEBOUNCE_MS = 300;
 const PUBLISH_FOCUS_DELTA = 0.008;
+const EMPTY_BANNER_HEIGHT = 72;
 
 function toMapRegion(region: Region): MapRegion {
   return {
@@ -38,6 +46,7 @@ export function MapContainer() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
+  const liveRegionRef = useRef<MapRegion | null>(null);
   const hasCenteredOnUser = useRef(false);
   const hasRestoredCachedRegion = useRef(false);
 
@@ -49,10 +58,37 @@ export function MapContainer() {
   const selectedHiveId = useMapStore((state) => state.selectedHiveId);
   const pendingMapFocus = useMapStore((state) => state.pendingMapFocus);
   const clearPendingMapFocus = useMapStore((state) => state.clearPendingMapFocus);
+  const pendingSavedRegion = useMapStore((state) => state.pendingSavedRegion);
+  const clearPendingSavedRegion = useMapStore((state) => state.clearPendingSavedRegion);
 
+  const savedPlaces = useSavedMapPlacesStore((state) => state.places);
+  const addSavedPlace = useSavedMapPlacesStore((state) => state.addPlace);
+
+  const [savePlaceModalVisible, setSavePlaceModalVisible] = useState(false);
+  const [draftRegion, setDraftRegion] = useState<MapRegion | null>(null);
+  const [isSavingPlace, setIsSavingPlace] = useState(false);
   const [debouncedBounds, setDebouncedBounds] = useState<MapBounds | null>(null);
   const [hiveMarkerImages, setHiveMarkerImages] = useState<Record<string, string>>({});
   const [mapInteractionsEnabled, setMapInteractionsEnabled] = useState(true);
+  const [viewRegion, setViewRegion] = useState<MapRegion>(
+    () => useMapStore.getState().pendingSavedRegion ?? useMapStore.getState().region ?? DEFAULT_MAP_REGION,
+  );
+
+  const applyMapRegion = useCallback(
+    (nextRegion: MapRegion, options?: { syncStore?: boolean; updateView?: boolean }) => {
+      const syncStore = options?.syncStore ?? true;
+      const updateView = options?.updateView ?? true;
+
+      liveRegionRef.current = nextRegion;
+      if (updateView) {
+        setViewRegion(nextRegion);
+      }
+      if (syncStore) {
+        setRegion(nextRegion);
+      }
+    },
+    [setRegion],
+  );
 
   const handleHiveMarkerCaptured = useCallback((hiveId: string, uri: string) => {
     setHiveMarkerImages((previous) => {
@@ -77,19 +113,24 @@ export function MapContainer() {
     }
 
     hasRestoredCachedRegion.current = true;
-    setRegion(coordsToUserMapRegion(lastKnownCoords.latitude, lastKnownCoords.longitude));
-  }, [region, setRegion]);
+    applyMapRegion(coordsToUserMapRegion(lastKnownCoords.latitude, lastKnownCoords.longitude));
+  }, [applyMapRegion, region, setRegion]);
 
   useEffect(() => {
     if (!coords || hasCenteredOnUser.current) {
       return;
     }
 
+    if (useMapStore.getState().pendingSavedRegion) {
+      hasCenteredOnUser.current = true;
+      return;
+    }
+
     hasCenteredOnUser.current = true;
     const userRegion = coordsToUserMapRegion(coords.latitude, coords.longitude);
-    setRegion(userRegion);
+    applyMapRegion(userRegion);
     mapRef.current?.animateToRegion(userRegion, 500);
-  }, [coords, setRegion]);
+  }, [applyMapRegion, coords]);
 
   useEffect(() => {
     if (!region) {
@@ -115,7 +156,7 @@ export function MapContainer() {
       longitudeDelta: PUBLISH_FOCUS_DELTA,
     };
 
-    setRegion(focusRegion);
+    applyMapRegion(focusRegion);
     setDebouncedBounds(regionToBounds(focusRegion));
     mapRef.current?.animateToRegion(focusRegion, 450);
 
@@ -128,10 +169,60 @@ export function MapContainer() {
     }
 
     clearPendingMapFocus();
-  }, [clearPendingMapFocus, pendingMapFocus, setRegion, setSelectedHiveId, setSelectedStingId]);
+  }, [applyMapRegion, clearPendingMapFocus, pendingMapFocus, setSelectedHiveId, setSelectedStingId]);
+
+  useEffect(() => {
+    if (!pendingSavedRegion) {
+      return;
+    }
+
+    hasCenteredOnUser.current = true;
+    applyMapRegion(pendingSavedRegion);
+    setDebouncedBounds(regionToBounds(pendingSavedRegion));
+    setSelectedStingId(null);
+    setSelectedHiveId(null);
+
+    const targetRegion = pendingSavedRegion;
+    const animate = () => {
+      mapRef.current?.animateToRegion(targetRegion, 500);
+    };
+
+    animate();
+    const retryTimer = setTimeout(animate, 200);
+    clearPendingSavedRegion();
+
+    return () => {
+      clearTimeout(retryTimer);
+    };
+  }, [
+    applyMapRegion,
+    clearPendingSavedRegion,
+    pendingSavedRegion,
+    setSelectedHiveId,
+    setSelectedStingId,
+  ]);
+
+  function handleRegionChange(nextRegion: Region, details?: { isGesture?: boolean }) {
+    const mapped = toMapRegion(nextRegion);
+    liveRegionRef.current = mapped;
+
+    if (details?.isGesture ?? true) {
+      setViewRegion(mapped);
+    }
+  }
 
   function handleRegionChangeComplete(nextRegion: Region) {
-    setRegion(toMapRegion(nextRegion));
+    const mapped = toMapRegion(nextRegion);
+    applyMapRegion(mapped);
+  }
+
+  async function readVisibleMapRegion(): Promise<MapRegion | null> {
+    const fallback = liveRegionRef.current ?? viewRegion ?? region ?? DEFAULT_MAP_REGION;
+    const resolved = await resolveMapViewRegion(mapRef, fallback);
+    if (resolved) {
+      liveRegionRef.current = resolved;
+    }
+    return resolved;
   }
 
   function openSting(stingId: string) {
@@ -161,10 +252,69 @@ export function MapContainer() {
 
     const userRegion = coordsToUserMapRegion(coords.latitude, coords.longitude);
 
-    setRegion(userRegion);
+    applyMapRegion(userRegion);
     setDebouncedBounds(regionToBounds(userRegion));
     mapRef.current?.animateToRegion(userRegion, 500);
   }
+
+  async function openSavePlaceModal() {
+    const currentRegion = await readVisibleMapRegion();
+    if (!currentRegion) {
+      showMessageToast('map.savePlaceRegionUnavailable');
+      return;
+    }
+
+    if (savedPlaces.length >= SAVED_MAP_PLACES_MAX) {
+      showErrorToast({
+        message: t('map.savePlaceLimitReached', { max: SAVED_MAP_PLACES_MAX }),
+      });
+      return;
+    }
+
+    setDraftRegion(currentRegion);
+    setSavePlaceModalVisible(true);
+  }
+
+  function closeSavePlaceModal() {
+    if (isSavingPlace) {
+      return;
+    }
+
+    setSavePlaceModalVisible(false);
+    setDraftRegion(null);
+  }
+
+  async function handleSavePlace(name: string) {
+    if (isSavingPlace) {
+      return;
+    }
+
+    setIsSavingPlace(true);
+
+    try {
+      const regionToSave = (await readVisibleMapRegion()) ?? draftRegion;
+      if (!regionToSave) {
+        showMessageToast('map.savePlaceFailed');
+        return;
+      }
+
+      const saved = await addSavedPlace({ name, region: regionToSave });
+      if (!saved) {
+        showMessageToast('map.savePlaceFailed');
+        return;
+      }
+
+      setSavePlaceModalVisible(false);
+      setDraftRegion(null);
+      showInfoToast({ message: t('map.savePlaceSuccess') });
+    } finally {
+      setIsSavingPlace(false);
+    }
+  }
+
+  const savePlaceDefaultName = t('map.savePlaceDefaultName', {
+    index: savedPlaces.length + 1,
+  });
 
   if (locationStatus !== 'granted') {
     return (
@@ -175,7 +325,6 @@ export function MapContainer() {
     );
   }
 
-  const initialRegion = region ?? DEFAULT_MAP_REGION;
   const activeHives = data?.hives.filter((hive) => isActiveHive(hive.activeStingsCount)) ?? [];
   const isEmpty =
     debouncedBounds !== null &&
@@ -185,13 +334,20 @@ export function MapContainer() {
     data.stings.length === 0 &&
     activeHives.length === 0;
 
+  const emptyBannerTop = insets.top + 16;
+  const bookmarkTop = emptyBannerTop + EMPTY_BANNER_HEIGHT + 12;
+
   return (
     <View className="flex-1">
       <MapView
         ref={mapRef}
         style={styles.mapLayer}
-        initialRegion={initialRegion}
+        region={viewRegion}
+        onRegionChange={handleRegionChange}
         onRegionChangeComplete={handleRegionChangeComplete}
+        onMapReady={() => {
+          void readVisibleMapRegion();
+        }}
         scrollEnabled={mapInteractionsEnabled}
         zoomEnabled={mapInteractionsEnabled}
         rotateEnabled={mapInteractionsEnabled}
@@ -231,7 +387,7 @@ export function MapContainer() {
           <View
             pointerEvents="none"
             className="absolute left-4 right-4 rounded-hive-md bg-hive-surface/95 px-4 py-3 shadow-sm"
-            style={{ top: insets.top + 16 }}
+            style={{ top: emptyBannerTop }}
           >
             <Text className="text-center font-inter text-sm font-semibold text-hive-foreground">
               {t('map.emptyTitle')}
@@ -243,10 +399,14 @@ export function MapContainer() {
         )}
 
         {isFetching && (
-          <View style={[styles.fetchingBadge, { top: insets.top + 56 }]}>
+          <View style={[styles.fetchingBadge, { top: bookmarkTop + 60 }]}>
             <HiveLoader size="small" strokeWidth={3} />
           </View>
         )}
+
+        <View style={[styles.bookmarkButton, { top: bookmarkTop }]}>
+          <MapBookmarkButton onPress={() => void openSavePlaceModal()} />
+        </View>
 
         {isError && (
           <View
@@ -265,6 +425,14 @@ export function MapContainer() {
       </View>
 
       {selectedHiveId && <HiveBottomSheet hiveId={selectedHiveId} onClose={closeHiveSheet} />}
+
+      <SaveMapPlaceModal
+        initialName={savePlaceDefaultName}
+        saving={isSavingPlace}
+        visible={savePlaceModalVisible}
+        onClose={closeSavePlaceModal}
+        onSave={(name) => void handleSavePlace(name)}
+      />
     </View>
   );
 }
@@ -288,6 +456,15 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
+  },
+  bookmarkButton: {
+    position: 'absolute',
+    left: 16,
+    ...(Platform.OS === 'android'
+      ? {
+          elevation: 24,
+        }
+      : null),
   },
   locationButton: {
     position: 'absolute',

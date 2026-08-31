@@ -1,6 +1,7 @@
 export type TranslationSchema = {
   common: {
     loading: string;
+    appTagline: string;
     email: string;
     password: string;
     guest: string;
@@ -46,7 +47,6 @@ export type TranslationSchema = {
     logout: string;
   };
   map: {
-    loadingLocation: string;
     locationDeniedTitle: string;
     locationDeniedMessage: string;
     openSettings: string;

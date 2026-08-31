@@ -22,7 +22,7 @@ import { useSavedMapPlacesStore } from '@/src/stores/savedMapPlacesStore';
 import type { MapBounds, MapRegion } from '@/src/types';
 import { SAVED_MAP_PLACES_MAX } from '@/src/types';
 import { isActiveHive } from '@/src/utils/hive';
-import { DEFAULT_MAP_REGION, coordsToUserMapRegion, regionToBounds } from '@/src/utils/map';
+import { coordsToUserMapRegion, isDefaultMapRegion, regionToBounds } from '@/src/utils/map';
 import { resolveMapViewRegion } from '@/src/utils/resolve-map-view-region';
 import { showInfoToast, showErrorToast } from '@/src/stores/toastStore';
 import { showMessageToast } from '@/src/utils/show-toast';
@@ -32,6 +32,25 @@ import { StingMarker } from './StingMarker';
 const REGION_DEBOUNCE_MS = 300;
 const PUBLISH_FOCUS_DELTA = 0.008;
 const EMPTY_BANNER_HEIGHT = 72;
+
+function resolveStartupRegion(): MapRegion | null {
+  const pendingSaved = useMapStore.getState().pendingSavedRegion;
+  if (pendingSaved) {
+    return pendingSaved;
+  }
+
+  const stored = useMapStore.getState().region;
+  if (stored && !isDefaultMapRegion(stored)) {
+    return stored;
+  }
+
+  const lastKnown = useLocationStore.getState().lastKnownCoords;
+  if (lastKnown) {
+    return coordsToUserMapRegion(lastKnown.latitude, lastKnown.longitude);
+  }
+
+  return null;
+}
 
 function toMapRegion(region: Region): MapRegion {
   return {
@@ -49,6 +68,7 @@ export function MapContainer() {
   const liveRegionRef = useRef<MapRegion | null>(null);
   const hasCenteredOnUser = useRef(false);
   const hasRestoredCachedRegion = useRef(false);
+  const hasRecoveredFromDefaultRegion = useRef(false);
 
   const { coords, status: locationStatus, requestPermission } = useLocation();
   const region = useMapStore((state) => state.region);
@@ -70,21 +90,21 @@ export function MapContainer() {
   const [debouncedBounds, setDebouncedBounds] = useState<MapBounds | null>(null);
   const [hiveMarkerImages, setHiveMarkerImages] = useState<Record<string, string>>({});
   const [mapInteractionsEnabled, setMapInteractionsEnabled] = useState(true);
-  const [viewRegion, setViewRegion] = useState<MapRegion>(
-    () => useMapStore.getState().pendingSavedRegion ?? useMapStore.getState().region ?? DEFAULT_MAP_REGION,
-  );
+  const [initialRegion, setInitialRegion] = useState<MapRegion | null>(resolveStartupRegion);
 
   const applyMapRegion = useCallback(
-    (nextRegion: MapRegion, options?: { syncStore?: boolean; updateView?: boolean }) => {
+    (nextRegion: MapRegion, options?: { syncStore?: boolean; programmatic?: boolean }) => {
       const syncStore = options?.syncStore ?? true;
-      const updateView = options?.updateView ?? true;
 
       liveRegionRef.current = nextRegion;
-      if (updateView) {
-        setViewRegion(nextRegion);
-      }
       if (syncStore) {
         setRegion(nextRegion);
+      }
+
+      setInitialRegion((current) => current ?? nextRegion);
+
+      if (options?.programmatic) {
+        mapRef.current?.animateToRegion(nextRegion, 500);
       }
     },
     [setRegion],
@@ -103,7 +123,13 @@ export function MapContainer() {
   const { data, isFetching, isError } = useStingsNearby(debouncedBounds);
 
   useEffect(() => {
-    if (region || hasRestoredCachedRegion.current) {
+    if (initialRegion || hasRestoredCachedRegion.current) {
+      return;
+    }
+
+    if (region && !isDefaultMapRegion(region)) {
+      hasRestoredCachedRegion.current = true;
+      applyMapRegion(region, { programmatic: true, syncStore: false });
       return;
     }
 
@@ -113,11 +139,13 @@ export function MapContainer() {
     }
 
     hasRestoredCachedRegion.current = true;
-    applyMapRegion(coordsToUserMapRegion(lastKnownCoords.latitude, lastKnownCoords.longitude));
-  }, [applyMapRegion, region, setRegion]);
+    applyMapRegion(coordsToUserMapRegion(lastKnownCoords.latitude, lastKnownCoords.longitude), {
+      programmatic: true,
+    });
+  }, [applyMapRegion, initialRegion, region]);
 
   useEffect(() => {
-    if (!coords || hasCenteredOnUser.current) {
+    if (!coords) {
       return;
     }
 
@@ -126,10 +154,16 @@ export function MapContainer() {
       return;
     }
 
+    if (hasCenteredOnUser.current) {
+      const currentRegion = liveRegionRef.current;
+      if (!currentRegion || !isDefaultMapRegion(currentRegion)) {
+        return;
+      }
+    }
+
     hasCenteredOnUser.current = true;
     const userRegion = coordsToUserMapRegion(coords.latitude, coords.longitude);
-    applyMapRegion(userRegion);
-    mapRef.current?.animateToRegion(userRegion, 500);
+    applyMapRegion(userRegion, { programmatic: true });
   }, [applyMapRegion, coords]);
 
   useEffect(() => {
@@ -156,9 +190,8 @@ export function MapContainer() {
       longitudeDelta: PUBLISH_FOCUS_DELTA,
     };
 
-    applyMapRegion(focusRegion);
+    applyMapRegion(focusRegion, { programmatic: true });
     setDebouncedBounds(regionToBounds(focusRegion));
-    mapRef.current?.animateToRegion(focusRegion, 450);
 
     if (pendingMapFocus.stingId) {
       setSelectedStingId(pendingMapFocus.stingId);
@@ -177,7 +210,7 @@ export function MapContainer() {
     }
 
     hasCenteredOnUser.current = true;
-    applyMapRegion(pendingSavedRegion);
+    applyMapRegion(pendingSavedRegion, { programmatic: true });
     setDebouncedBounds(regionToBounds(pendingSavedRegion));
     setSelectedStingId(null);
     setSelectedHiveId(null);
@@ -202,27 +235,46 @@ export function MapContainer() {
     setSelectedStingId,
   ]);
 
-  function handleRegionChange(nextRegion: Region, details?: { isGesture?: boolean }) {
+  function handleRegionChange(nextRegion: Region) {
     const mapped = toMapRegion(nextRegion);
-    liveRegionRef.current = mapped;
-
-    if (details?.isGesture ?? true) {
-      setViewRegion(mapped);
+    if (isDefaultMapRegion(mapped)) {
+      return;
     }
+
+    liveRegionRef.current = mapped;
   }
 
   function handleRegionChangeComplete(nextRegion: Region) {
     const mapped = toMapRegion(nextRegion);
-    applyMapRegion(mapped);
+
+    if (isDefaultMapRegion(mapped)) {
+      if (hasRecoveredFromDefaultRegion.current) {
+        return;
+      }
+
+      const lastKnown = useLocationStore.getState().lastKnownCoords;
+      const target = coords ?? lastKnown;
+      if (!target) {
+        return;
+      }
+
+      hasRecoveredFromDefaultRegion.current = true;
+      mapRef.current?.animateToRegion(coordsToUserMapRegion(target.latitude, target.longitude), 350);
+      return;
+    }
+
+    liveRegionRef.current = mapped;
+    setRegion(mapped);
   }
 
   async function readVisibleMapRegion(): Promise<MapRegion | null> {
-    const fallback = liveRegionRef.current ?? viewRegion ?? region ?? DEFAULT_MAP_REGION;
+    const fallback = liveRegionRef.current ?? initialRegion ?? region;
     const resolved = await resolveMapViewRegion(mapRef, fallback);
-    if (resolved) {
+    if (resolved && !isDefaultMapRegion(resolved)) {
       liveRegionRef.current = resolved;
+      return resolved;
     }
-    return resolved;
+    return fallback;
   }
 
   function openSting(stingId: string) {
@@ -252,9 +304,8 @@ export function MapContainer() {
 
     const userRegion = coordsToUserMapRegion(coords.latitude, coords.longitude);
 
-    applyMapRegion(userRegion);
+    applyMapRegion(userRegion, { programmatic: true });
     setDebouncedBounds(regionToBounds(userRegion));
-    mapRef.current?.animateToRegion(userRegion, 500);
   }
 
   async function openSavePlaceModal() {
@@ -316,10 +367,23 @@ export function MapContainer() {
     index: savedPlaces.length + 1,
   });
 
+  const tabBarInset = getGlassTabBarInset(insets.bottom);
+
   if (locationStatus !== 'granted') {
     return (
       <LocationAccessGate
+        bottomInset={tabBarInset}
         status={locationStatus}
+        onRequestPermission={() => void requestPermission()}
+      />
+    );
+  }
+
+  if (!initialRegion) {
+    return (
+      <LocationAccessGate
+        bottomInset={tabBarInset}
+        status="loading"
         onRequestPermission={() => void requestPermission()}
       />
     );
@@ -342,7 +406,7 @@ export function MapContainer() {
       <MapView
         ref={mapRef}
         style={styles.mapLayer}
-        region={viewRegion}
+        initialRegion={initialRegion}
         onRegionChange={handleRegionChange}
         onRegionChangeComplete={handleRegionChangeComplete}
         onMapReady={() => {

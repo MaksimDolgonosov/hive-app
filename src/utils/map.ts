@@ -12,6 +12,7 @@ export function regionToBounds(region: MapRegion): MapBounds {
   };
 }
 
+/** Не использовать как стартовую камеру: SDK карт часто шлёт этот кадр до GPS. */
 export const DEFAULT_MAP_REGION: MapRegion = {
   latitude: 55.7558,
   longitude: 37.6173,
@@ -21,6 +22,13 @@ export const DEFAULT_MAP_REGION: MapRegion = {
 
 export const FEED_REGION_DELTA = 0.05;
 export const USER_MAP_REGION_DELTA = 0.01;
+
+export function isDefaultMapRegion(region: MapRegion): boolean {
+  return (
+    Math.abs(region.latitude - DEFAULT_MAP_REGION.latitude) < 0.0001 &&
+    Math.abs(region.longitude - DEFAULT_MAP_REGION.longitude) < 0.0001
+  );
+}
 
 export function coordsToFeedBounds(lat: number, lng: number): MapBounds {
   return regionToBounds({

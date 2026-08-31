@@ -3,6 +3,7 @@ import type { TranslationSchema } from './types';
 export const ru: TranslationSchema = {
   common: {
     loading: 'Загрузка…',
+    appTagline: 'Социальная карта моментов',
     email: 'Email',
     password: 'Пароль',
     guest: 'гость',
@@ -49,7 +50,6 @@ export const ru: TranslationSchema = {
     logout: 'Выйти',
   },
   map: {
-    loadingLocation: 'Определяем ваше местоположение…',
     locationDeniedTitle: 'Нет доступа к геолокации',
     locationDeniedMessage:
       'Разрешите доступ к геолокации в настройках, чтобы видеть фото рядом на карте.',

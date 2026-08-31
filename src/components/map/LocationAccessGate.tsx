@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
 import { Linking, Pressable, Text, View } from 'react-native';
 
-import { HiveLoader } from '@/src/components/ui/HiveLoader';
+import { LoadingScreen } from '@/src/components/ui/LoadingScreen';
 import type { LocationStatus } from '@/src/hooks/useLocation';
 
 type LocationAccessGateProps = {
@@ -21,12 +21,7 @@ export function LocationAccessGate({
   const { t } = useTranslation();
 
   if (status === 'loading' || status === 'idle') {
-    return (
-      <View className="flex-1 items-center justify-center bg-hive-bg">
-        <HiveLoader size="large" />
-        <Text className="mt-3 font-inter text-sm text-hive-muted">{t('map.loadingLocation')}</Text>
-      </View>
-    );
+    return <LoadingScreen bottomOffset={bottomInset} />;
   }
 
   if (status === 'undetermined') {

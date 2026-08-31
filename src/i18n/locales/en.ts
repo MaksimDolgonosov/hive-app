@@ -3,6 +3,7 @@ import type { TranslationSchema } from './types';
 export const en: TranslationSchema = {
   common: {
     loading: 'Loading…',
+    appTagline: 'A social map of moments',
     email: 'Email',
     password: 'Password',
     guest: 'guest',
@@ -49,7 +50,6 @@ export const en: TranslationSchema = {
     logout: 'Log out',
   },
   map: {
-    loadingLocation: 'Getting your location…',
     locationDeniedTitle: 'Location access denied',
     locationDeniedMessage: 'Allow location access in Settings to see nearby photos on the map.',
     openSettings: 'Open Settings',

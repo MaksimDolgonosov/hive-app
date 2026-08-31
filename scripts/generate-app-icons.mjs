@@ -1,5 +1,6 @@
 /**
- * Generates all app icon assets from assets/images/Icon-2.png (source of truth).
+ * Generates all app icon assets from assets/images/Icon-2.png
+ * (Icon Composer export, 1024×1024, full-bleed).
  * Run: node scripts/generate-app-icons.mjs
  */
 import { mkdir } from 'node:fs/promises';

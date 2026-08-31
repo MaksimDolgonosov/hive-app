@@ -84,6 +84,17 @@ export function useLocation() {
     syncStatus('granted');
 
     try {
+      const lastKnown = await Location.getLastKnownPositionAsync({
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+      if (lastKnown) {
+        syncCoords(lastKnown.coords);
+      }
+    } catch {
+      // no cached OS fix
+    }
+
+    try {
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });

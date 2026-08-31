@@ -4318,7 +4318,7 @@
                   "type": "text",
                   "id": "igGmr",
                   "fill": "$--muted",
-                  "content": "фото на карте",
+                  "content": "Социальная карта моментов",
                   "fontFamily": "Inter",
                   "fontSize": 14,
                   "fontWeight": "normal"
@@ -4991,91 +4991,6 @@
               "fontFamily": "Inter",
               "fontSize": 12,
               "fontWeight": "normal"
-            },
-            {
-              "type": "frame",
-              "id": "hiUDS",
-              "clip": true,
-              "width": 256,
-              "height": 256,
-              "fill": {
-                "type": "gradient",
-                "gradientType": "linear",
-                "enabled": true,
-                "rotation": 145,
-                "size": {
-                  "height": 1
-                },
-                "colors": [
-                  {
-                    "color": "#FFE082",
-                    "position": 0
-                  },
-                  {
-                    "color": "#F5A623",
-                    "position": 0.4
-                  },
-                  {
-                    "color": "#E65100",
-                    "position": 1
-                  }
-                ]
-              },
-              "cornerRadius": 57,
-              "effect": {
-                "type": "shadow",
-                "shadowType": "outer",
-                "color": "#F5A62355",
-                "offset": {
-                  "x": 0,
-                  "y": 16
-                },
-                "blur": 40
-              },
-              "layout": "none",
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "lukpr",
-                  "x": 40,
-                  "y": 32,
-                  "width": 72,
-                  "height": 72,
-                  "fill": "#FFFFFF20",
-                  "cornerRadius": 16
-                },
-                {
-                  "type": "frame",
-                  "id": "VUIof",
-                  "x": 168,
-                  "y": 148,
-                  "width": 56,
-                  "height": 56,
-                  "fill": "#FFFFFF15",
-                  "cornerRadius": 12
-                },
-                {
-                  "type": "frame",
-                  "id": "vVLOj",
-                  "x": 24,
-                  "y": 168,
-                  "width": 48,
-                  "height": 48,
-                  "fill": "#FFFFFF10",
-                  "cornerRadius": 10
-                },
-                {
-                  "type": "icon",
-                  "id": "OQDAP",
-                  "x": 64,
-                  "y": 64,
-                  "width": 128,
-                  "height": 128,
-                  "icon": "hexagon",
-                  "library": "lucide",
-                  "fill": "#FFFFFF"
-                }
-              ]
             }
           ]
         }
@@ -7633,6 +7548,381 @@
               ]
             }
           ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "beWA4",
+      "x": 0,
+      "y": 1854,
+      "name": "Screen/Splash",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": [
+        "#FFF8ED",
+        {
+          "type": "gradient",
+          "gradientType": "linear",
+          "enabled": true,
+          "rotation": 180,
+          "size": {
+            "height": 1
+          },
+          "colors": [
+            {
+              "color": "#FFF8ED",
+              "position": 0
+            },
+            {
+              "color": "#FFE8B8",
+              "position": 0.55
+            },
+            {
+              "color": "#FFE082",
+              "position": 1
+            }
+          ]
+        }
+      ],
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "p71Gx",
+          "type": "ref",
+          "ref": "A5feoa",
+          "name": "StatusBar",
+          "width": "fill_container",
+          "enabled": true
+        },
+        {
+          "type": "frame",
+          "id": "e70Hr",
+          "name": "Content",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 20,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "KNhqN",
+              "name": "LogoMark",
+              "width": 120,
+              "height": 120,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 135,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "$--primary",
+                    "position": 0
+                  },
+                  {
+                    "color": "$--accent",
+                    "position": 1
+                  }
+                ]
+              },
+              "cornerRadius": 34,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#F5A62355",
+                "offset": {
+                  "x": 0,
+                  "y": 10
+                },
+                "blur": 28
+              },
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "v6GV9",
+                  "name": "Hexagon",
+                  "width": 60,
+                  "height": 60,
+                  "icon": "hexagon",
+                  "library": "lucide",
+                  "fill": "#FFFFFF"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gInv1",
+              "name": "Wordmark",
+              "layout": "vertical",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "W4Xhf",
+                  "name": "AppName",
+                  "fill": "$--foreground",
+                  "content": "Hive",
+                  "fontFamily": "Inter",
+                  "fontSize": 36,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "nLLBR",
+                  "name": "Tagline",
+                  "fill": "$--muted",
+                  "content": "Социальная карта моментов",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "uCGTq",
+          "name": "Footer",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            0,
+            24,
+            48,
+            24
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "hJpdo",
+              "name": "Loader",
+              "width": 28,
+              "height": 28,
+              "icon": "hexagon",
+              "library": "lucide",
+              "fill": "$--primary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "hiUDS",
+      "x": 3245,
+      "y": 1811,
+      "clip": true,
+      "width": 256,
+      "height": 256,
+      "fill": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "enabled": true,
+        "rotation": 145,
+        "size": {
+          "height": 1
+        },
+        "colors": [
+          {
+            "color": "#FFE082",
+            "position": 0
+          },
+          {
+            "color": "#F5A623",
+            "position": 0.4
+          },
+          {
+            "color": "#E65100",
+            "position": 1
+          }
+        ]
+      },
+      "cornerRadius": 57,
+      "effect": {
+        "type": "shadow",
+        "shadowType": "outer",
+        "color": "#F5A62355",
+        "offset": {
+          "x": 0,
+          "y": 16
+        },
+        "blur": 40
+      },
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "lukpr",
+          "x": 40,
+          "y": 32,
+          "width": 72,
+          "height": 72,
+          "fill": "#FFFFFF20",
+          "cornerRadius": 16
+        },
+        {
+          "type": "frame",
+          "id": "VUIof",
+          "x": 168,
+          "y": 148,
+          "width": 56,
+          "height": 56,
+          "fill": "#FFFFFF15",
+          "cornerRadius": 12
+        },
+        {
+          "type": "frame",
+          "id": "vVLOj",
+          "x": 24,
+          "y": 168,
+          "width": 48,
+          "height": 48,
+          "fill": "#FFFFFF10",
+          "cornerRadius": 10
+        },
+        {
+          "type": "icon",
+          "id": "OQDAP",
+          "x": 64,
+          "y": 64,
+          "width": 128,
+          "height": 128,
+          "icon": "hexagon",
+          "library": "lucide",
+          "fill": "#FFFFFF"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "avXhx",
+      "x": 2675,
+      "y": 582,
+      "name": "Logo/iOS-1024",
+      "clip": true,
+      "width": 1104,
+      "fill": "$--bg",
+      "cornerRadius": 24,
+      "stroke": "$--border",
+      "strokeWidth": 1,
+      "strokeAlignment": "inner",
+      "layout": "vertical",
+      "gap": 20,
+      "padding": 40,
+      "children": [
+        {
+          "type": "text",
+          "id": "CYxKR",
+          "name": "Label",
+          "fill": "$--muted",
+          "content": "iOS · 1024 × 1024 SVG",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "600",
+          "letterSpacing": 1
+        },
+        {
+          "type": "frame",
+          "id": "JkkET",
+          "name": "iOSIcon1024",
+          "clip": true,
+          "width": 1024,
+          "height": 1024,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 145,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#FFE082",
+                "position": 0
+              },
+              {
+                "color": "#F5A623",
+                "position": 0.4
+              },
+              {
+                "color": "#E65100",
+                "position": 1
+              }
+            ]
+          },
+          "cornerRadius": 228,
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "zTgVk",
+              "x": 160,
+              "y": 128,
+              "name": "GlowTopLeft",
+              "width": 288,
+              "height": 288,
+              "fill": "#FFFFFF20",
+              "cornerRadius": 64
+            },
+            {
+              "type": "frame",
+              "id": "WSWTI",
+              "x": 672,
+              "y": 592,
+              "name": "GlowBottomRight",
+              "width": 224,
+              "height": 224,
+              "fill": "#FFFFFF15",
+              "cornerRadius": 48
+            },
+            {
+              "type": "frame",
+              "id": "h6Ud3K",
+              "x": 96,
+              "y": 672,
+              "name": "GlowBottomLeft",
+              "width": 192,
+              "height": 192,
+              "fill": "#FFFFFF10",
+              "cornerRadius": 40
+            },
+            {
+              "type": "icon",
+              "id": "D6Jpdr",
+              "x": 256,
+              "y": 256,
+              "name": "Hexagon",
+              "width": 512,
+              "height": 512,
+              "icon": "hexagon",
+              "library": "lucide",
+              "fill": "#FFFFFF"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "QMyi0",
+          "name": "FileHint",
+          "fill": "$--muted",
+          "content": "assets/images/ios-icon-1024.svg",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "normal"
         }
       ]
     }

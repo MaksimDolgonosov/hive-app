@@ -399,7 +399,7 @@ export function MapContainer() {
         )}
 
         {isFetching && (
-          <View style={[styles.fetchingBadge, { top: bookmarkTop + 60 }]}>
+          <View style={[styles.fetchingBadge, { top: bookmarkTop }]}>
             <HiveLoader size="small" strokeWidth={3} />
           </View>
         )}
@@ -453,9 +453,11 @@ const styles = StyleSheet.create({
   fetchingBadge: {
     position: 'absolute',
     right: 16,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 26,
   },
   bookmarkButton: {
     position: 'absolute',

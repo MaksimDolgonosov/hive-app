@@ -1,6 +1,6 @@
 /**
- * Generates all app icon assets from assets/images/Icon-2.png
- * (Icon Composer export, 1024×1024, full-bleed).
+ * Generates all app icon assets from assets/images/ios-icon-1024.svg
+ * (full-bleed square — OS applies the rounded mask).
  * Run: node scripts/generate-app-icons.mjs
  */
 import { mkdir } from 'node:fs/promises';
@@ -10,10 +10,15 @@ import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = path.join(__dirname, '../assets/images');
-const SOURCE = path.join(OUT_DIR, 'Icon-2.png');
+const SOURCE = path.join(OUT_DIR, 'ios-icon-1024.svg');
+const SVG_DENSITY = 384;
 
-// Matches the orange tone in Icon-2.png for Android adaptive background layer.
+// Matches the orange tone in the Hive mark for Android adaptive background layer.
 const ANDROID_BACKGROUND = '#F5A623';
+
+function sourceImage() {
+  return sharp(SOURCE, { density: SVG_DENSITY });
+}
 
 async function writeSolidBackground(outPath, size, color) {
   await sharp({
@@ -29,7 +34,7 @@ async function writeSolidBackground(outPath, size, color) {
 }
 
 async function writeMonochrome(outPath, size) {
-  const { data, info } = await sharp(SOURCE)
+  const { data, info } = await sourceImage()
     .resize(size, size)
     .ensureAlpha()
     .raw()
@@ -67,7 +72,7 @@ async function main() {
 
   for (const { name, size } of outputs) {
     const outPath = path.join(OUT_DIR, name);
-    await sharp(SOURCE).resize(size, size).png().toFile(outPath);
+    await sourceImage().resize(size, size).png().toFile(outPath);
     console.log(`Wrote ${outPath}`);
   }
 

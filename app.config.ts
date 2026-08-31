@@ -40,6 +40,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     scheme: 'hiveapp',
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
+    platforms: ['ios', 'android'],
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.hive.app',
@@ -55,10 +56,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
-    },
-    web: {
-      output: 'static',
-      favicon: './assets/images/favicon.png',
     },
     plugins: [
       'expo-router',

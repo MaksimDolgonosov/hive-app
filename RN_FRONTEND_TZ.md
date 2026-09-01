@@ -1,7 +1,8 @@
 # Sting App — ТЗ на разработку frontend (React Native)
 
-Версия: 0.1
-Стек backend (уже реализован): Node.js + Express + MongoDB + Socket.io, контракты — `openapi.yaml` / `TECH_DOCS.md`
+Версия: 0.2
+Стек backend: Node.js + Express + MongoDB + Socket.io, контракты — `openapi.yaml` / `TECH_DOCS.md`  
+Backend-ТЗ по email OTP и сбросу пароля: **`BACKEND_EMAIL_AUTH_TZ.md`** (реализуется отдельно от этого документа).
 
 ---
 
@@ -13,6 +14,7 @@
 4. [Требования к интеграции с API](#4-требования-к-интеграции-с-api)
 5. [Нефункциональные требования](#5-нефункциональные-требования)
 6. [Чек-лист готовности к сборке](#6-чек-лист-готовности-к-сборке)
+7. [Идентификация по email (OTP) и восстановление пароля](#7-идентификация-по-email-otp-и-восстановление-пароля)
 
 ---
 
@@ -45,6 +47,13 @@ sting-app/
 │   │   ├── index.tsx             # Карта
 │   │   ├── nearby.tsx            # Лента "Рядом"
 │   │   └── profile.tsx
+│   ├── (auth)/
+│   │   ├── _layout.tsx
+│   │   ├── login.tsx
+│   │   ├── register.tsx
+│   │   ├── verify-otp.tsx        # Ввод 6-значного кода (register / resume)
+│   │   ├── forgot-password.tsx   # Запрос кода на email
+│   │   └── reset-password.tsx    # Код + новый пароль
 │   ├── (modals)/
 │   │   ├── _layout.tsx
 │   │   ├── camera.tsx
@@ -60,11 +69,12 @@ sting-app/
 ├── src/
 │   ├── api/
 │   │   ├── client.ts
-│   │   ├── auth.ts
+│   │   ├── auth.ts               # + otp/verify, otp/resend, password/forgot|reset
 │   │   ├── stings.ts
 │   │   ├── hives.ts
 │   │   └── websocket.ts
 │   ├── components/
+│   │   ├── auth/                 # AuthInput, OtpInput, AuthButton, …
 │   │   ├── map/
 │   │   ├── camera/
 │   │   ├── ui/
@@ -102,27 +112,30 @@ sting-app/
 
 ---
 
-### Этап 1 — Авторизация
+### Этап 1 — Авторизация (email + OTP + восстановление пароля)
 
-**Задачи:**
+Детальное пошаговое ТЗ флоу — **[раздел 7](#7-идентификация-по-email-otp-и-восстановление-пароля)**. Контракты backend — `BACKEND_EMAIL_AUTH_TZ.md`.
 
-- `src/stores/authStore.ts` — `user`, `accessToken`, `refreshToken`, `status`.
-- `src/api/auth.ts` — обёртки над `/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/me`.
-- Интерцептор в `client.ts`: подстановка `Authorization: Bearer`, обработка 401 → попытка `refresh` → повтор запроса либо logout.
-- Экраны регистрации/входа (можно вне финального дизайна — форма с полями email/password/username).
-- `app/_layout.tsx` — auth-guard: редирект на экран логина, если `status !== 'authenticated'`.
-- Хранение токенов через `expo-secure-store`, восстановление сессии при перезапуске приложения.
+**Задачи (кратко):**
 
-**Зависимости:** Этап 0.
+- `src/stores/authStore.ts` — `user`, `accessToken`, `refreshToken`, `status`, плюс эфемерный `pendingEmail` / `otpPurpose` для экрана OTP.
+- `src/api/auth.ts` — `/auth/register`, `/auth/login`, `/auth/otp/verify`, `/auth/otp/resend`, `/auth/password/forgot`, `/auth/password/reset`, `/auth/refresh`, `/auth/logout`, `/auth/me`.
+- Интерцептор в `client.ts`: `Authorization: Bearer`, 401 → `refresh` → повтор или logout.
+- Экраны: `login`, `register`, `verify-otp`, `forgot-password`, `reset-password`.
+- Auth-guard: в приложение только при `status === 'authenticated'` (после успешного OTP или login).
+- Токены в `expo-secure-store`; восстановление сессии при старте.
+
+**Зависимости:** Этап 0; backend-шаги B2–B3 из `BACKEND_EMAIL_AUTH_TZ.md` (или mock/staging).
 
 **Definition of Done:**
 
-- Регистрация и вход реально создают/логинят пользователя на backend.
-- После перезапуска приложения пользователь остаётся авторизован (токен восстановился из `SecureStore`).
-- Истёкший `accessToken` автоматически обновляется через `refreshToken` без разлогина пользователя.
-- Namespace ошибок (`INVALID_CREDENTIALS`, `USER_ALREADY_EXISTS`) корректно показывается пользователю по `error.code` из ответа.
+- Регистрация → письмо с 6-значным кодом → ввод кода → пользователь авторизован.
+- Login с неподтверждённым email открывает OTP (`EMAIL_NOT_VERIFIED`).
+- Восстановление пароля: email → код → новый пароль → вход/сессия.
+- После перезапуска сессия восстанавливается из `SecureStore`.
+- Ошибки OTP/auth показываются по `error.code` (см. раздел 7.6).
 
-**Риски:** гонка при параллельных запросах во время истечения токена (два запроса одновременно ловят 401) — нужно, чтобы `refresh` вызывался один раз, а не параллельно на каждый упавший запрос (стандартный паттерн — "очередь" ожидающих запросов, пока идёт один `refresh`).
+**Риски:** гонка refresh при параллельных 401; зависимость от доставки почты на устройстве (нужен доступ к inbox / staging с `OTP_DEV_LOG`).
 
 ---
 
@@ -238,16 +251,18 @@ sting-app/
 
 **Зависимости:** все предыдущие этапы.
 
-**Definition of Done:** приложение собирается через `eas build` без ошибок, полный пользовательский флоу (онбординг → регистрация → карта → съёмка → просмотр улья → выход) проходится вручную без сбоев на реальном устройстве.
+**Definition of Done:** приложение собирается через `eas build` без ошибок, полный пользовательский флоу (онбординг → регистрация → OTP → карта → съёмка → просмотр улья → выход; отдельно — forgot/reset пароля) проходится вручную без сбоев на реальном устройстве.
 
 ---
 
 ## 4. Требования к интеграции с API
 
 - **Базовый URL** — берётся из `app.config.ts`/env, не хардкодится в `client.ts`.
-- **Формат ошибок** — все ответы 4xx/5xx приходят как `{ error: { code, message, details } }` (см. `openapi.yaml`, `ErrorResponse`). Frontend обязан читать `error.code` для логики (например, показать разные экраны для `INVALID_CREDENTIALS` и `RATE_LIMITED`), а `error.message` использовать только как fallback-текст, не как основной источник UX-копирайта.
+- **Формат ошибок** — все ответы 4xx/5xx приходят как `{ error: { code, message, details } }` (см. `openapi.yaml`, `ErrorResponse`). Frontend обязан читать `error.code` для логики (например, показать разные экраны для `INVALID_CREDENTIALS`, `EMAIL_NOT_VERIFIED`, `OTP_EXPIRED`, `RATE_LIMITED`), а `error.message` использовать только как fallback-текст, не как основной источник UX-копирайта.
+- **Auth без токена** — `register`, `login`, `otp/*`, `password/forgot`, `password/reset`, `refresh` вызываются с `skipAuthRefresh: true`.
 - **Idempotency-Key** — обязателен на `POST /stings`, генерируется один раз в начале флоу публикации (при входе на `camera.tsx`), не при каждой попытке отправки — иначе теряет смысл при ретрае после обрыва связи.
 - **Токены** — `accessToken` держится только в памяти (Zustand) + `SecureStore` для восстановления между запусками; `refreshToken` — только в `SecureStore`, никогда не логируется и не передаётся куда-либо кроме `POST /auth/refresh`.
+- **OTP** — код никогда не логируется на клиенте; не сохраняется в AsyncStorage дольше текущего флоу (достаточно state экрана / store до verify).
 
 ---
 
@@ -256,15 +271,180 @@ sting-app/
 - **Permissions UX** — разрешения на камеру/геолокацию запрашиваются только после экрана-объяснения (Этап 7), не сразу при первом запуске без контекста — так выше конверсия в "разрешить".
 - **Обработка низкой точности GPS** — если `accuracy` хуже порога (например, >50м), предупреждать пользователя перед публикацией, а не просто отправлять как есть (соответствует `useLocation.ts` из `TECH_DOCS.md`).
 - **Производительность карты** — при большом количестве маркеров в области экрана рендерить только видимые (или полагаться на кластеризацию backend, которая уже возвращает ульи вместо десятков отдельных точек — см. `TECH_DOCS.md`, раздел 3.2).
-- **Тестирование** — при одном разработчике полноценные E2E-тесты (Detox и т.п.) избыточны на MVP-этапе; приоритет — ручной чек-лист сквозного флоу перед каждым релизом (шаблон см. Этап 8).
+- **Тестирование** — при одном разработчике полноценные E2E-тесты (Detox и т.п.) избыточны на MVP-этапе; приоритет — ручной чек-лист сквозного флоу перед каждым релизом (шаблон см. Этап 8 и раздел 7.7).
+- **Auth UX** — поле OTP должно поддерживать автоподстановку из SMS/почты где платформа даёт (`textContentType="oneTimeCode"` / `autoComplete="sms-otp"` — для email-кода по возможности `oneTimeCode`); кнопка «Отправить снова» неактивна во время cooldown.
 
 ---
 
 ## 6. Чек-лист готовности к сборке
 
 - [ ] Все этапы 0–8 пройдены и вручную проверены на реальном устройстве
+- [ ] Флоу раздела 7 (register OTP + forgot/reset) пройден на staging с реальной почтой
 - [ ] `.env`/`app.config.ts` указывает на продакшен `API_URL`/`WS_URL`, не на localhost
-- [ ] Токены не логируются в консоль ни в одном месте кода
+- [ ] Токены и OTP-коды не логируются в консоль ни в одном месте кода
 - [ ] Иконка и splash screen на месте, `app.json` заполнен (name, slug, bundle identifiers)
 - [ ] `eas.json` содержит рабочий `production`-профиль
-- [ ] Пройден полный сценарий: регистрация → съёмка → появление на карте у второго пользователя в реальном времени → истечение через реальные (или ускоренные для теста) 4 часа
+- [ ] Пройден полный сценарий: регистрация → OTP → съёмка → появление на карте у второго пользователя в реальном времени → истечение через реальные (или ускоренные для теста) 4 часа
+
+---
+
+## 7. Идентификация по email (OTP) и восстановление пароля
+
+Пошаговое frontend-ТЗ. Backend-контракты, модель OTP, почта и rate limit — в **`BACKEND_EMAIL_AUTH_TZ.md`**. Не дублировать серверную логику в этом разделе.
+
+### 7.1. Цель продукта
+
+1. Пользователь регистрируется по email; приложение **не пускает в основной UI**, пока email не подтверждён **6-значным кодом** из письма. После верного кода пользователь **входит** (получает сессию).
+2. Обычный вход: email + пароль (только для подтверждённых аккаунтов).
+3. Если пароль забыт: запрос кода на email → ввод кода → новый пароль → вход/сессия.
+
+### 7.2. Пользовательские сценарии
+
+#### Сценарий A — Регистрация с подтверждением email
+
+```
+register → (backend шлёт OTP) → verify-otp → (tabs)
+```
+
+| Шаг | Экран | Действие пользователя | API | Успех |
+| --- | ----- | --------------------- | --- | ----- |
+| A1 | `register` | username, email, password → «Зарегистрироваться» | `POST /auth/register` | Сохранить `pendingEmail`, `otpPurpose=register`; **не** писать токены; `router.push` на `verify-otp` |
+| A2 | `verify-otp` | Ввод 6 цифр | `POST /auth/otp/verify` `{ email, code, purpose: "register" }` | Сохранить `user` + tokens → `status=authenticated` → `/(tabs)` |
+| A3 | `verify-otp` | «Отправить код снова» (после cooldown) | `POST /auth/otp/resend` | Сброс полей ввода, новый countdown |
+
+Клиентская валидация на A1: непустые поля; email-формат; password ≥ 8 символов.
+
+#### Сценарий B — Login при ещё не подтверждённом email
+
+```
+login → 403 EMAIL_NOT_VERIFIED → verify-otp → (tabs)
+```
+
+| Шаг | Действие | Поведение |
+| --- | -------- | --------- |
+| B1 | Верные credentials, email не verified | Показать OTP; `pendingEmail` из `error.details.email`; опционально сразу `otp/resend` |
+| B2 | Успешный verify | Как A2 |
+
+#### Сценарий C — Обычный login
+
+```
+login → (tabs)
+```
+
+`POST /auth/login` → сессия. Ошибка `INVALID_CREDENTIALS` — сообщение на форме.
+
+#### Сценарий D — Восстановление пароля
+
+```
+login → forgot-password → reset-password → (tabs) или login
+```
+
+| Шаг | Экран | Действие | API | Успех |
+| --- | ----- | -------- | --- | ----- |
+| D1 | `login` | Тап «Забыли пароль?» | — | `forgot-password` |
+| D2 | `forgot-password` | Email → «Отправить код» | `POST /auth/password/forgot` | Всегда успех UX (anti-enumeration); → `reset-password` с email |
+| D3 | `reset-password` | 6 цифр + newPassword (+ confirm) | `POST /auth/password/reset` | Если backend вернул tokens — сразу `(tabs)`; если 204 — `login` с тостом «Пароль обновлён» |
+| D4 | Resend | Как A3, `purpose=password_reset` | `POST /auth/otp/resend` | Новый countdown |
+
+### 7.3. Экраны и UI-требования
+
+| Экран | Ключевые элементы |
+| ----- | ----------------- |
+| `register` | username, email, password; ссылка на login; после submit — только переход на OTP, без «тихого» входа |
+| `login` | email, password; «Забыли пароль?»; ссылка на register; обработка `EMAIL_NOT_VERIFIED` |
+| `verify-otp` | маскированный email; `OtpInput` на 6 ячеек; таймер TTL (опционально); «Отправить снова» + countdown cooldown; назад на register/login |
+| `forgot-password` | email; CTA отправки кода; назад на login |
+| `reset-password` | OtpInput; newPassword; confirmPassword; resend |
+
+Общие правила UI:
+
+- Переиспользовать `AuthScreenLayout` / `AuthFormCard` / `AuthButton` / `AuthInput`.
+- Новый компонент `OtpInput`: 6 позиций, автофокус следующей, поддержка paste целиком (`123456`).
+- i18n: ключи в `ru.ts` / `en.ts` для всех новых строк и `error.code` из §7.6.
+- Не показывать сырой `error.message` с backend как основной копирайт.
+
+Параметры навигации (Expo Router):
+
+- `verify-otp?email=...&purpose=register|password_reset` (email дублировать в store на случай потери query).
+- `reset-password?email=...`.
+
+### 7.4. Состояние и API-слой
+
+#### `authStore` (дополнения)
+
+| Поле / action | Назначение |
+| ------------- | ---------- |
+| `pendingEmail: string \| null` | Email ожидающего OTP |
+| `otpPurpose: 'register' \| 'password_reset' \| null` | Контекст OTP-экрана |
+| `register()` | Вызов API register → выставить pending*, **без** tokens |
+| `verifyOtp({ email, code, purpose })` | При успехе — как текущий login (tokens + user + SecureStore) |
+| `resendOtp({ email, purpose })` | Обёртка resend |
+| `forgotPassword({ email })` | Запрос кода сброса |
+| `resetPassword({ email, code, newPassword })` | Сброс; при tokens — установить сессию |
+| `clearPendingOtp()` | Очистка pending при уходе с флоу |
+
+Существующие `login` / `logout` / `hydrate` сохранить; в `login` при `EMAIL_NOT_VERIFIED` пробрасывать ошибку на UI (не глотать в store).
+
+#### `src/api/auth.ts` (новые обёртки)
+
+```ts
+register(...)           // → { status, email, purpose, expiresInSec, resendAvailableInSec }
+verifyOtp(...)          // → AuthSession
+resendOtp(...)          // → { status, email, purpose, expiresInSec, resendAvailableInSec }
+forgotPassword(...)     // → otp_sent payload
+resetPassword(...)      // → AuthSession | void
+```
+
+Все с `skipAuthRefresh: true`.
+
+#### Типы
+
+Добавить в `src/types` DTO ответов OTP (`OtpChallengeResponse`, `OtpPurpose`) в соответствии с `BACKEND_EMAIL_AUTH_TZ.md` / OpenAPI.
+
+### 7.5. Пошаговый план реализации (frontend)
+
+| Шаг | Задачи | DoD |
+| --- | ------ | --- |
+| **F0** | Согласовать финальный контракт с `BACKEND_EMAIL_AUTH_TZ.md`; обновить типы | Типы компилируются; расхождений с backend-доком нет |
+| **F1** | `auth.ts`: новые методы; i18n-ключи ошибок OTP | Вызовы работают против staging/mock |
+| **F2** | `OtpInput` + экран `verify-otp` (UI + локальный state, без полного store) | Можно ввести/вставить 6 цифр, виден email и resend-кнопка |
+| **F3** | Переключить `register`: убрать мгновенный `replace('/(tabs)')`; store `pending*`; навигация на OTP; `verifyOtp` → сессия | Сценарий A end-to-end |
+| **F4** | Login: обработка `EMAIL_NOT_VERIFIED` → OTP (сценарий B) | Неconfirmed user доходит до tabs только после кода |
+| **F5** | `forgot-password` + `reset-password` + ссылка с login (сценарий D) | Сброс пароля работает; старый пароль на login не проходит |
+| **F6** | Cooldown resend (`resendAvailableInSec` / `details.retryAfterSec`); UX `OTP_EXPIRED` / `OTP_MAX_ATTEMPTS` (предложить resend) | Кнопка resend блокируется; ошибки понятны |
+| **F7** | Ручной регресс: A–D + перезапуск приложения после verify | Чек-лист §7.7 закрыт |
+
+### 7.6. Маппинг ошибок → UX
+
+| `error.code` | UX |
+| ------------ | --- |
+| `VALIDATION_ERROR` | Подсветка полей / «Проверьте данные» |
+| `USER_ALREADY_EXISTS` | На register: «Аккаунт уже есть» + ссылка на login |
+| `INVALID_CREDENTIALS` | На login: «Неверный email или пароль» |
+| `EMAIL_NOT_VERIFIED` | Редирект/навигация на `verify-otp` |
+| `OTP_INVALID` | «Неверный код» |
+| `OTP_EXPIRED` | «Код истёк» + акцент на resend |
+| `OTP_MAX_ATTEMPTS` | «Слишком много попыток» + resend нового кода |
+| `OTP_RESEND_COOLDOWN` | Заблокировать кнопку; взять `details.retryAfterSec` |
+| `OTP_RATE_LIMITED` | «Подождите и попробуйте позже» |
+| `EMAIL_SEND_FAILED` | «Не удалось отправить письмо, повторите» |
+
+### 7.7. Приёмочный чек-лист (ручной)
+
+- [ ] Новый email: register → код на почте → верный код → попал в tabs, `/auth/me` ок
+- [ ] Неверный код 1–2 раза — ошибка, аккаунт не активирован
+- [ ] Просроченный / исчерпанный код — понятное сообщение, resend помогает
+- [ ] Resend раньше cooldown — кнопка неактивна / ошибка с таймером
+- [ ] Login до verify → OTP → вход
+- [ ] Login после verify с паролем → tabs без OTP
+- [ ] Forgot → код → новый пароль → вход новым паролем; старый не работает
+- [ ] «Забыли пароль» для несуществующего email — тот же успех UI, без утечки
+- [ ] После успешного OTP перезапуск приложения сохраняет сессию
+- [ ] OTP и токены не печатаются в Metro/логах
+
+### 7.8. Вне скоупа (frontend)
+
+- Смена email в профиле
+- Вход только по OTP без пароля (passwordless)
+- Deep link из письма с кодом в query (можно добавить позже)
+- Капча на клиенте (если появится — отдельная задача)

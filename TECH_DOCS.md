@@ -146,7 +146,7 @@ interface AuthTokens {
 
 ## 3. API контракты
 
-Базовый префикс: `/api/v1`. Формат: JSON. Аутентификация — `Authorization: Bearer <accessToken>` для всех эндпоинтов, кроме `/auth/register`, `/auth/login`, `/auth/refresh`.
+Базовый префикс: `/api/v1`. Формат: JSON. Аутентификация — `Authorization: Bearer <accessToken>` для всех эндпоинтов, кроме `/auth/register`, `/auth/login`, `/auth/otp/*`, `/auth/password/forgot`, `/auth/password/reset`, `/auth/refresh`.
 
 Единый формат ошибки:
 
@@ -162,6 +162,8 @@ interface AuthTokens {
 
 ### 3.1 Auth
 
+Публичные эндпоинты OTP и сброса пароля вызываются **без Bearer**; на клиенте — с `skipAuthRefresh: true`. Регистрация **не** выдаёт сессию до успешного `otp/verify`.
+
 #### `POST /auth/register`
 
 ```json
@@ -169,8 +171,46 @@ interface AuthTokens {
 { "email": "user@example.com", "password": "string", "username": "string" }
 
 // Response 201
+{
+  "status": "otp_required",
+  "email": "user@example.com",
+  "purpose": "register",
+  "expiresInSec": 600,
+  "resendAvailableInSec": 60
+}
+
+// Response 409 USER_ALREADY_EXISTS — email уже подтверждён
+```
+
+#### `POST /auth/otp/verify`
+
+Только `purpose: "register"`. Успех активирует аккаунт и выдаёт сессию.
+
+```json
+// Request
+{ "email": "user@example.com", "code": "123456", "purpose": "register" }
+
+// Response 200
 { "user": User, "tokens": AuthTokens }
 ```
+
+#### `POST /auth/otp/resend`
+
+```json
+// Request
+{ "email": "user@example.com", "purpose": "register" | "password_reset" }
+
+// Response 200
+{
+  "status": "otp_sent",
+  "email": "user@example.com",
+  "purpose": "register",
+  "expiresInSec": 600,
+  "resendAvailableInSec": 60
+}
+```
+
+Для `password_reset` ответ одинаков, даже если email не найден (anti-enumeration).
 
 #### `POST /auth/login`
 
@@ -181,8 +221,47 @@ interface AuthTokens {
 // Response 200
 { "user": User, "tokens": AuthTokens }
 
-// Response 401
+// Response 401 INVALID_CREDENTIALS
 { "error": { "code": "INVALID_CREDENTIALS", "message": "..." } }
+
+// Response 403 EMAIL_NOT_VERIFIED — credentials верны, email не подтверждён
+{
+  "error": {
+    "code": "EMAIL_NOT_VERIFIED",
+    "message": "Email is not verified",
+    "details": { "email": "user@example.com", "purpose": "register" }
+  }
+}
+```
+
+#### `POST /auth/password/forgot`
+
+```json
+// Request
+{ "email": "user@example.com" }
+
+// Response 200 — всегда одинаковый UX, без утечки существования аккаунта
+{
+  "status": "otp_sent",
+  "email": "user@example.com",
+  "purpose": "password_reset",
+  "expiresInSec": 600,
+  "resendAvailableInSec": 60
+}
+```
+
+#### `POST /auth/password/reset`
+
+Один запрос: код + новый пароль (вариант A).
+
+```json
+// Request
+{ "email": "user@example.com", "code": "123456", "newPassword": "string" }
+
+// Response 200 — сессия выдана
+{ "user": User, "tokens": AuthTokens }
+
+// Response 204 — сессия не выдана, клиент ведёт на login
 ```
 
 #### `POST /auth/refresh`

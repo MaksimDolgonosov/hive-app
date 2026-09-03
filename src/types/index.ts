@@ -63,6 +63,39 @@ export interface AuthSession {
   tokens: AuthTokens;
 }
 
+export type OtpPurpose = 'register' | 'password_reset';
+
+export type OtpChallengeStatus = 'otp_required' | 'otp_sent';
+
+export interface OtpChallengeResponse {
+  status: OtpChallengeStatus;
+  email: string;
+  purpose: OtpPurpose;
+  expiresInSec: number;
+  resendAvailableInSec: number;
+}
+
+export interface VerifyOtpInput {
+  email: string;
+  code: string;
+  purpose: OtpPurpose;
+}
+
+export interface ResendOtpInput {
+  email: string;
+  purpose: OtpPurpose;
+}
+
+export interface ForgotPasswordInput {
+  email: string;
+}
+
+export interface ResetPasswordInput {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
 export type AuthStatus = 'idle' | 'authenticated' | 'unauthenticated';
 
 export interface GeoPoint {

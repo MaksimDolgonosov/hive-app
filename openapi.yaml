@@ -42,24 +42,69 @@ paths:
               $ref: '#/components/schemas/RegisterRequest'
       responses:
         '201':
-          description: Пользователь создан
+          description: Пользователь создан, требуется подтверждение email
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  user:
-                    $ref: '#/components/schemas/User'
-                  tokens:
-                    $ref: '#/components/schemas/AuthTokens'
+                $ref: '#/components/schemas/OtpChallengeResponse'
         '409':
-          description: Email или username уже заняты
+          description: Email уже подтверждён
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '422':
           $ref: '#/components/responses/ValidationError'
+
+  /auth/otp/verify:
+    post:
+      tags: [auth]
+      summary: Подтверждение OTP при регистрации
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOtpRequest'
+      responses:
+        '200':
+          description: Email подтверждён, сессия выдана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+        '400':
+          description: OTP_INVALID / OTP_EXPIRED / OTP_MAX_ATTEMPTS / VALIDATION_ERROR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/otp/resend:
+    post:
+      tags: [auth]
+      summary: Повторная отправка OTP
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendOtpRequest'
+      responses:
+        '200':
+          description: Новый код отправлен (или anti-enumeration для password_reset)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallengeResponse'
+        '429':
+          description: OTP_RESEND_COOLDOWN / OTP_RATE_LIMITED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /auth/login:
     post:
@@ -86,6 +131,58 @@ paths:
                     $ref: '#/components/schemas/AuthTokens'
         '401':
           description: Неверные учётные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Email не подтверждён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/password/forgot:
+    post:
+      tags: [auth]
+      summary: Запрос кода сброса пароля
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Всегда успешный ответ (anti-enumeration)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallengeResponse'
+
+  /auth/password/reset:
+    post:
+      tags: [auth]
+      summary: Сброс пароля по OTP-коду
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Пароль обновлён, сессия выдана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+        '204':
+          description: Пароль обновлён, сессия не выдана — клиент ведёт на login
+        '400':
+          description: OTP_INVALID / OTP_EXPIRED / OTP_MAX_ATTEMPTS / VALIDATION_ERROR
           content:
             application/json:
               schema:
@@ -609,6 +706,84 @@ components:
           format: date-time
           description: Срок действия accessToken
       required: [accessToken, refreshToken, expiresAt]
+
+    AuthSession:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        tokens:
+          $ref: '#/components/schemas/AuthTokens'
+      required: [user, tokens]
+
+    OtpPurpose:
+      type: string
+      enum: [register, password_reset]
+
+    OtpChallengeResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [otp_required, otp_sent]
+        email:
+          type: string
+          format: email
+        purpose:
+          $ref: '#/components/schemas/OtpPurpose'
+        expiresInSec:
+          type: integer
+          example: 600
+        resendAvailableInSec:
+          type: integer
+          example: 60
+      required: [status, email, purpose, expiresInSec, resendAvailableInSec]
+
+    VerifyOtpRequest:
+      type: object
+      required: [email, code, purpose]
+      properties:
+        email:
+          type: string
+          format: email
+        code:
+          type: string
+          pattern: '^[0-9]{6}$'
+        purpose:
+          $ref: '#/components/schemas/OtpPurpose'
+
+    ResendOtpRequest:
+      type: object
+      required: [email, purpose]
+      properties:
+        email:
+          type: string
+          format: email
+        purpose:
+          $ref: '#/components/schemas/OtpPurpose'
+
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+
+    ResetPasswordRequest:
+      type: object
+      required: [email, code, newPassword]
+      properties:
+        email:
+          type: string
+          format: email
+        code:
+          type: string
+          pattern: '^[0-9]{6}$'
+        newPassword:
+          type: string
+          format: password
+          minLength: 8
 
     RegisterRequest:
       type: object

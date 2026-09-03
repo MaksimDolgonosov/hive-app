@@ -53,6 +53,29 @@ export function getApiErrorCode(error: unknown): string | undefined {
   return error.response?.data?.error?.code;
 }
 
+export function getApiErrorDetails(error: unknown): Record<string, unknown> | undefined {
+  if (!isAxiosError<ApiErrorBody>(error)) {
+    return undefined;
+  }
+
+  return error.response?.data?.error?.details;
+}
+
+export function getApiErrorDetailString(error: unknown, key: string): string | undefined {
+  const value = getApiErrorDetails(error)?.[key];
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
+}
+
+export function getApiErrorRetryAfterSec(error: unknown): number | undefined {
+  const value = getApiErrorDetails(error)?.retryAfterSec;
+
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    return undefined;
+  }
+
+  return Math.ceil(value);
+}
+
 /** Логирует детали ошибки API в dev-сборке. */
 export function logApiError(scope: string, error: unknown): void {
   if (!__DEV__) {

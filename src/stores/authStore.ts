@@ -1,14 +1,27 @@
 import { create } from 'zustand';
 
 import * as authApi from '@/src/api/auth';
-import {
-  registerAuthSessionHandlers,
-  setAuthSessionTokens,
-} from '@/src/api/auth-session';
-import type { AuthStatus, AuthTokens, User } from '@/src/types';
+import { registerAuthSessionHandlers, setAuthSessionTokens } from '@/src/api/auth-session';
+import type {
+  AuthStatus,
+  AuthTokens,
+  ForgotPasswordInput,
+  OtpChallengeResponse,
+  OtpPurpose,
+  ResetPasswordInput,
+  User,
+  VerifyOtpInput,
+} from '@/src/types';
+import { getApiErrorCode, getApiErrorRetryAfterSec } from '@/src/utils/api-error';
 
-import { loadOnboardingCompleted, saveOnboardingCompleted, clearOnboardingCompleted } from './onboarding-storage';
+import {
+  loadOnboardingCompleted,
+  saveOnboardingCompleted,
+  clearOnboardingCompleted,
+} from './onboarding-storage';
 import { clearTokens, loadTokens, saveTokens } from './secure-storage';
+
+type ResetPasswordResult = 'session' | 'login_required';
 
 interface AuthState {
   user: User | null;
@@ -19,6 +32,10 @@ interface AuthState {
   isHydrated: boolean;
   /** Меняется при upload/remove аватара — сбрасывает кэш expo-image. */
   avatarCacheVersion: number;
+  pendingEmail: string | null;
+  otpPurpose: OtpPurpose | null;
+  otpExpiresAt: number | null;
+  otpResendAvailableAt: number | null;
   setSession: (user: User, tokens: AuthTokens) => Promise<void>;
   setUser: (user: User) => void;
   bumpAvatarCacheVersion: () => void;
@@ -27,12 +44,48 @@ interface AuthState {
   hydrate: () => Promise<void>;
   completeOnboarding: () => Promise<void>;
   resetOnboarding: () => Promise<void>;
+  setPendingOtp: (input: {
+    email: string;
+    purpose: OtpPurpose;
+    expiresInSec?: number;
+    resendAvailableInSec?: number;
+  }) => void;
+  setOtpResendAvailableAt: (availableAtMs: number) => void;
+  clearPendingOtp: () => void;
   register: (input: { email: string; password: string; username: string }) => Promise<void>;
   login: (input: { email: string; password: string }) => Promise<void>;
   loginWithGoogle: (input: { idToken: string }) => Promise<void>;
+  verifyOtp: (input: VerifyOtpInput) => Promise<void>;
+  resendOtp: (input: { email: string; purpose: OtpPurpose }) => Promise<void>;
+  forgotPassword: (input: ForgotPasswordInput) => Promise<void>;
+  resetPassword: (input: ResetPasswordInput) => Promise<ResetPasswordResult>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
+
+function toTimestamp(seconds: number | undefined): number | null {
+  if (seconds == null || !Number.isFinite(seconds)) {
+    return null;
+  }
+
+  return Date.now() + Math.max(0, seconds) * 1000;
+}
+
+function pendingFromChallenge(challenge: OtpChallengeResponse) {
+  return {
+    pendingEmail: challenge.email,
+    otpPurpose: challenge.purpose,
+    otpExpiresAt: toTimestamp(challenge.expiresInSec),
+    otpResendAvailableAt: toTimestamp(challenge.resendAvailableInSec),
+  };
+}
+
+const EMPTY_PENDING_OTP = {
+  pendingEmail: null,
+  otpPurpose: null,
+  otpExpiresAt: null,
+  otpResendAvailableAt: null,
+} as const;
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
@@ -42,6 +95,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   hasCompletedOnboarding: false,
   isHydrated: false,
   avatarCacheVersion: 0,
+  pendingEmail: null,
+  otpPurpose: null,
+  otpExpiresAt: null,
+  otpResendAvailableAt: null,
 
   setSession: async (user, tokens) => {
     await saveTokens(tokens.accessToken, tokens.refreshToken);
@@ -51,6 +108,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       status: 'authenticated',
+      ...EMPTY_PENDING_OTP,
     });
   },
 
@@ -127,9 +185,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ hasCompletedOnboarding: false });
   },
 
+  setPendingOtp: ({ email, purpose, expiresInSec, resendAvailableInSec }) => {
+    const sameEmail = get().pendingEmail === email;
+    set({
+      pendingEmail: email,
+      otpPurpose: purpose,
+      otpExpiresAt: toTimestamp(expiresInSec) ?? (sameEmail ? get().otpExpiresAt : null),
+      otpResendAvailableAt:
+        toTimestamp(resendAvailableInSec) ?? (sameEmail ? get().otpResendAvailableAt : null),
+    });
+  },
+
+  setOtpResendAvailableAt: (availableAtMs) => {
+    set({ otpResendAvailableAt: availableAtMs });
+  },
+
+  clearPendingOtp: () => {
+    set({ ...EMPTY_PENDING_OTP });
+  },
+
   register: async (input) => {
-    const { user, tokens } = await authApi.register(input);
-    await get().setSession(user, tokens);
+    const challenge = await authApi.register(input);
+    set(pendingFromChallenge(challenge));
   },
 
   login: async (input) => {
@@ -142,6 +219,43 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await get().clearSession();
     const { user, tokens } = await authApi.loginWithGoogle(input);
     await get().setSession(user, tokens);
+  },
+
+  verifyOtp: async (input) => {
+    const { user, tokens } = await authApi.verifyOtp(input);
+    await get().setSession(user, tokens);
+  },
+
+  resendOtp: async (input) => {
+    try {
+      const challenge = await authApi.resendOtp(input);
+      set(pendingFromChallenge(challenge));
+    } catch (error) {
+      if (getApiErrorCode(error) === 'OTP_RESEND_COOLDOWN') {
+        const retryAfterSec = getApiErrorRetryAfterSec(error);
+        if (retryAfterSec != null) {
+          set({ otpResendAvailableAt: toTimestamp(retryAfterSec) });
+        }
+      }
+      throw error;
+    }
+  },
+
+  forgotPassword: async (input) => {
+    const challenge = await authApi.forgotPassword(input);
+    set(pendingFromChallenge(challenge));
+  },
+
+  resetPassword: async (input) => {
+    const session = await authApi.resetPassword(input);
+    get().clearPendingOtp();
+
+    if (session) {
+      await get().setSession(session.user, session.tokens);
+      return 'session';
+    }
+
+    return 'login_required';
   },
 
   logout: async () => {

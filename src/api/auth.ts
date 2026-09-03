@@ -1,7 +1,18 @@
 import { File } from 'expo-file-system';
 import { Platform } from 'react-native';
 
-import type { AuthSession, AuthTokens, ProfileOverview, UpdateProfileInput, User } from '@/src/types';
+import type {
+  AuthSession,
+  AuthTokens,
+  ForgotPasswordInput,
+  OtpChallengeResponse,
+  ProfileOverview,
+  ResendOtpInput,
+  ResetPasswordInput,
+  UpdateProfileInput,
+  User,
+  VerifyOtpInput,
+} from '@/src/types';
 
 import { apiClient } from './client';
 
@@ -17,8 +28,8 @@ export async function register(input: {
   email: string;
   password: string;
   username: string;
-}): Promise<AuthSession> {
-  const { data } = await apiClient.post<AuthSession>('/auth/register', input, {
+}): Promise<OtpChallengeResponse> {
+  const { data } = await apiClient.post<OtpChallengeResponse>('/auth/register', input, {
     skipAuthRefresh: true,
   });
   return data;
@@ -28,6 +39,50 @@ export async function login(input: { email: string; password: string }): Promise
   const { data } = await apiClient.post<AuthSession>('/auth/login', input, {
     skipAuthRefresh: true,
   });
+  return data;
+}
+
+export async function verifyOtp(input: VerifyOtpInput): Promise<AuthSession> {
+  const { data } = await apiClient.post<AuthSession>('/auth/otp/verify', input, {
+    skipAuthRefresh: true,
+  });
+  return data;
+}
+
+export async function resendOtp(input: ResendOtpInput): Promise<OtpChallengeResponse> {
+  const { data } = await apiClient.post<OtpChallengeResponse>('/auth/otp/resend', input, {
+    skipAuthRefresh: true,
+  });
+  return data;
+}
+
+export async function forgotPassword(input: ForgotPasswordInput): Promise<OtpChallengeResponse> {
+  const { data } = await apiClient.post<OtpChallengeResponse>('/auth/password/forgot', input, {
+    skipAuthRefresh: true,
+  });
+  return data;
+}
+
+function isAuthSession(value: unknown): value is AuthSession {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const session = value as Partial<AuthSession>;
+  return Boolean(session.user && session.tokens?.accessToken && session.tokens.refreshToken);
+}
+
+export async function resetPassword(input: ResetPasswordInput): Promise<AuthSession | void> {
+  const { data, status } = await apiClient.post<AuthSession | string | undefined>(
+    '/auth/password/reset',
+    input,
+    { skipAuthRefresh: true },
+  );
+
+  if (status === 204 || !isAuthSession(data)) {
+    return undefined;
+  }
+
   return data;
 }
 
@@ -63,9 +118,7 @@ export async function getProfileOverview(): Promise<ProfileOverview> {
 
 export async function uploadAvatar(photoUri: string): Promise<{ user: User }> {
   const photoFile = new File(photoUri);
-  const uploadUri = photoFile.exists
-    ? resolveUploadUri(photoFile.uri)
-    : resolveUploadUri(photoUri);
+  const uploadUri = photoFile.exists ? resolveUploadUri(photoFile.uri) : resolveUploadUri(photoUri);
 
   const formData = new FormData();
   formData.append('avatar', {

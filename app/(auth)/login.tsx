@@ -11,7 +11,15 @@ import { AuthInput } from '@/src/components/auth/AuthInput';
 import { AuthLogo } from '@/src/components/auth/AuthLogo';
 import { AuthScreenLayout } from '@/src/components/auth/AuthScreenLayout';
 import { useAuthStore } from '@/src/stores/authStore';
-import { getApiErrorMessage, logApiError } from '@/src/utils/api-error';
+import {
+  getApiErrorCode,
+  getApiErrorDetailString,
+  getApiErrorMessage,
+  logApiError,
+} from '@/src/utils/api-error';
+import { forgotPasswordHref, verifyOtpHref } from '@/src/utils/auth-navigation';
+import { isValidEmail, normalizeEmail } from '@/src/utils/email';
+import { parseOtpPurpose } from '@/src/utils/otp';
 
 function SocialButton({ children }: { children: ReactNode }) {
   return (
@@ -24,6 +32,8 @@ function SocialButton({ children }: { children: ReactNode }) {
 export default function LoginScreen() {
   const { t } = useTranslation();
   const login = useAuthStore((state) => state.login);
+  const resendOtp = useAuthStore((state) => state.resendOtp);
+  const setPendingOtp = useAuthStore((state) => state.setPendingOtp);
   const resetOnboarding = useAuthStore((state) => state.resetOnboarding);
 
   const [email, setEmail] = useState('');
@@ -31,23 +41,55 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  async function openEmailVerification(
+    pendingEmail: string,
+    purpose: 'register' | 'password_reset',
+  ) {
+    setPendingOtp({ email: pendingEmail, purpose });
+
+    try {
+      await resendOtp({ email: pendingEmail, purpose });
+    } catch (err) {
+      logApiError('auth.loginResendOtp', err);
+    }
+
+    router.push(verifyOtpHref(pendingEmail, purpose));
+  }
+
   async function handleLogin() {
     setError(null);
 
-    if (!email.trim() || !password) {
+    const normalizedEmail = normalizeEmail(email);
+
+    if (!normalizedEmail || !password) {
       setError(t('auth.fillEmailPassword'));
+      return;
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
+      setError(t('auth.invalidEmail'));
       return;
     }
 
     setLoading(true);
     try {
       await login({
-        email: email.trim().toLowerCase(),
+        email: normalizedEmail,
         password,
       });
       router.replace('/(tabs)');
     } catch (err) {
       logApiError('auth.login', err);
+
+      if (getApiErrorCode(err) === 'EMAIL_NOT_VERIFIED') {
+        const pendingEmail = normalizeEmail(
+          getApiErrorDetailString(err, 'email') ?? normalizedEmail,
+        );
+        const purpose = parseOtpPurpose(getApiErrorDetailString(err, 'purpose')) ?? 'register';
+        await openEmailVerification(pendingEmail, purpose);
+        return;
+      }
+
       setError(getApiErrorMessage(err, 'auth.loginFailed'));
     } finally {
       setLoading(false);
@@ -82,7 +124,13 @@ export default function LoginScreen() {
           onChangeText={setPassword}
         />
 
-        <Pressable className="self-end">
+        <Pressable
+          accessibilityRole="link"
+          className="self-end"
+          onPress={() => {
+            router.push(forgotPasswordHref(normalizeEmail(email) || undefined));
+          }}
+        >
           <Text className="font-inter text-[13px] font-semibold text-hive-primary">
             {t('auth.forgotPassword')}
           </Text>
@@ -92,7 +140,7 @@ export default function LoginScreen() {
           <Text className="text-center font-inter text-sm text-red-500">{error}</Text>
         ) : null}
 
-        <AuthButton loading={loading} title={t('auth.login')} onPress={handleLogin} />
+        <AuthButton loading={loading} title={t('auth.login')} onPress={() => void handleLogin()} />
 
         <View className="items-center gap-3">
           <Text className="font-inter text-[13px] text-hive-muted">{t('auth.orLoginVia')}</Text>
@@ -131,7 +179,9 @@ export default function LoginScreen() {
             });
           }}
         >
-          <Text className="font-inter text-xs text-hive-muted underline">Dev: показать онбординг</Text>
+          <Text className="font-inter text-xs text-hive-muted underline">
+            Dev: показать онбординг
+          </Text>
         </Pressable>
       ) : null}
     </AuthScreenLayout>

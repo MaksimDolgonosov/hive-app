@@ -323,5 +323,6 @@ export const ru: TranslationSchema = {
     GOOGLE_EMAIL_NOT_VERIFIED: 'Email Google не подтверждён',
     GOOGLE_AUTH_NOT_CONFIGURED: 'Google Sign-In не настроен на сервере',
     GOOGLE_ACCOUNT_CONFLICT: 'Этот email уже привязан к другому Google-аккаунту',
+    ACCOUNT_DISABLED: 'Аккаунт заблокирован',
   },
 };

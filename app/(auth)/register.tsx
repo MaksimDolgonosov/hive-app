@@ -9,6 +9,7 @@ import { AuthFormCard } from '@/src/components/auth/AuthFormCard';
 import { AuthInput } from '@/src/components/auth/AuthInput';
 import { AuthLogo } from '@/src/components/auth/AuthLogo';
 import { AuthScreenLayout } from '@/src/components/auth/AuthScreenLayout';
+import { AuthSocialLogin } from '@/src/components/auth/AuthSocialLogin';
 import { useAuthStore } from '@/src/stores/authStore';
 import { getApiErrorCode, getApiErrorMessage } from '@/src/utils/api-error';
 import { verifyOtpHref } from '@/src/utils/auth-navigation';
@@ -161,6 +162,14 @@ export default function RegisterScreen() {
           loading={loading}
           title={t('auth.createAccount')}
           onPress={() => void handleRegister()}
+        />
+
+        <AuthSocialLogin
+          disabled={loading}
+          onError={(message) => {
+            setShowLoginHint(false);
+            setError(message);
+          }}
         />
       </AuthFormCard>
 

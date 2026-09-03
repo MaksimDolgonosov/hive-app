@@ -320,5 +320,6 @@ export const en: TranslationSchema = {
     GOOGLE_EMAIL_NOT_VERIFIED: 'Google email is not verified',
     GOOGLE_AUTH_NOT_CONFIGURED: 'Google Sign-In is not configured on the server',
     GOOGLE_ACCOUNT_CONFLICT: 'This email is already linked to another Google account',
+    ACCOUNT_DISABLED: 'This account is disabled',
   },
 };

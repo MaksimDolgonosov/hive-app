@@ -1,7 +1,6 @@
-import { FontAwesome } from '@expo/vector-icons';
 import { Link, router, type Href } from 'expo-router';
-import { Apple, Lock, Mail } from 'lucide-react-native';
-import { useState, type ReactNode } from 'react';
+import { Lock, Mail } from 'lucide-react-native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
@@ -10,6 +9,7 @@ import { AuthFormCard } from '@/src/components/auth/AuthFormCard';
 import { AuthInput } from '@/src/components/auth/AuthInput';
 import { AuthLogo } from '@/src/components/auth/AuthLogo';
 import { AuthScreenLayout } from '@/src/components/auth/AuthScreenLayout';
+import { AuthSocialLogin } from '@/src/components/auth/AuthSocialLogin';
 import { useAuthStore } from '@/src/stores/authStore';
 import {
   getApiErrorCode,
@@ -20,14 +20,6 @@ import {
 import { forgotPasswordHref, verifyOtpHref } from '@/src/utils/auth-navigation';
 import { isValidEmail, normalizeEmail } from '@/src/utils/email';
 import { parseOtpPurpose } from '@/src/utils/otp';
-
-function SocialButton({ children }: { children: ReactNode }) {
-  return (
-    <View className="h-[52px] w-[52px] items-center justify-center rounded-full border border-[#F5A62333] bg-hive-input-bg">
-      {children}
-    </View>
-  );
-}
 
 export default function LoginScreen() {
   const { t } = useTranslation();
@@ -142,20 +134,7 @@ export default function LoginScreen() {
 
         <AuthButton loading={loading} title={t('auth.login')} onPress={() => void handleLogin()} />
 
-        <View className="items-center gap-3">
-          <Text className="font-inter text-[13px] text-hive-muted">{t('auth.orLoginVia')}</Text>
-          <View className="flex-row items-center justify-center gap-3">
-            <SocialButton>
-              <Apple color="#2C1810" size={22} strokeWidth={2} />
-            </SocialButton>
-            <SocialButton>
-              <FontAwesome color="#2C1810" name="google" size={22} />
-            </SocialButton>
-            <SocialButton>
-              <FontAwesome color="#2C1810" name="facebook" size={22} />
-            </SocialButton>
-          </View>
-        </View>
+        <AuthSocialLogin disabled={loading} onError={setError} />
       </AuthFormCard>
 
       <View className="mt-6 flex-row items-center justify-center gap-1">

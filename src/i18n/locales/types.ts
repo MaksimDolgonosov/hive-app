@@ -308,5 +308,6 @@ export type TranslationSchema = {
     GOOGLE_EMAIL_NOT_VERIFIED: string;
     GOOGLE_AUTH_NOT_CONFIGURED: string;
     GOOGLE_ACCOUNT_CONFLICT: string;
+    ACCOUNT_DISABLED: string;
   };
 };

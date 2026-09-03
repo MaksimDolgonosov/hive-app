@@ -1,8 +1,9 @@
 # Sting App — ТЗ на разработку frontend (React Native)
 
-Версия: 0.2
+Версия: 0.3
 Стек backend: Node.js + Express + MongoDB + Socket.io, контракты — `openapi.yaml` / `TECH_DOCS.md`  
-Backend-ТЗ по email OTP и сбросу пароля: **`BACKEND_EMAIL_AUTH_TZ.md`** (реализуется отдельно от этого документа).
+Backend-ТЗ по email OTP и сбросу пароля: **`BACKEND_EMAIL_AUTH_TZ.md`** (реализуется отдельно от этого документа).  
+Вход через Google: контракт **`POST /auth/google`** уже есть на backend (`hive-backend-nodejs`); frontend-ТЗ — **[раздел 8](#8-вход-через-google)**.
 
 ---
 
@@ -15,6 +16,7 @@ Backend-ТЗ по email OTP и сбросу пароля: **`BACKEND_EMAIL_AUTH_
 5. [Нефункциональные требования](#5-нефункциональные-требования)
 6. [Чек-лист готовности к сборке](#6-чек-лист-готовности-к-сборке)
 7. [Идентификация по email (OTP) и восстановление пароля](#7-идентификация-по-email-otp-и-восстановление-пароля)
+8. [Вход через Google](#8-вход-через-google)
 
 ---
 
@@ -33,6 +35,7 @@ Backend-ТЗ по email OTP и сбросу пароля: **`BACKEND_EMAIL_AUTH_
 | Камера               | `expo-camera`                          | Официальный Expo-модуль, не требует prebuild на старте                     |
 | Геолокация           | `expo-location`                        | Аналогично                                                                 |
 | Хранение токенов     | `expo-secure-store`                    | `accessToken`/`refreshToken` не должны лежать в открытом AsyncStorage      |
+| Google Sign-In       | `expo-auth-session` (Google provider)  | OAuth в системном браузере; `idToken` уходит на backend. Native SDK — вне скоупа (§8.11) |
 | Карта                | `react-native-maps`                    | Google/Apple Maps под капотом                                              |
 
 ---
@@ -69,7 +72,7 @@ sting-app/
 ├── src/
 │   ├── api/
 │   │   ├── client.ts
-│   │   ├── auth.ts               # + otp/verify, otp/resend, password/forgot|reset
+│   │   ├── auth.ts               # + google, otp/verify, otp/resend, password/forgot|reset
 │   │   ├── stings.ts
 │   │   ├── hives.ts
 │   │   └── websocket.ts
@@ -79,7 +82,7 @@ sting-app/
 │   │   ├── camera/
 │   │   ├── ui/
 │   │   └── feed/
-│   ├── hooks/
+│   ├── hooks/                # + useGoogleSignIn.ts
 │   ├── stores/
 │   ├── utils/
 │   └── types/
@@ -119,7 +122,7 @@ sting-app/
 **Задачи (кратко):**
 
 - `src/stores/authStore.ts` — `user`, `accessToken`, `refreshToken`, `status`, плюс эфемерный `pendingEmail` / `otpPurpose` для экрана OTP.
-- `src/api/auth.ts` — `/auth/register`, `/auth/login`, `/auth/otp/verify`, `/auth/otp/resend`, `/auth/password/forgot`, `/auth/password/reset`, `/auth/refresh`, `/auth/logout`, `/auth/me`.
+- `src/api/auth.ts` — `/auth/register`, `/auth/login`, `/auth/google`, `/auth/otp/verify`, `/auth/otp/resend`, `/auth/password/forgot`, `/auth/password/reset`, `/auth/refresh`, `/auth/logout`, `/auth/me`.
 - Интерцептор в `client.ts`: `Authorization: Bearer`, 401 → `refresh` → повтор или logout.
 - Экраны: `login`, `register`, `verify-otp`, `forgot-password`, `reset-password`.
 - Auth-guard: в приложение только при `status === 'authenticated'` (после успешного OTP или login).
@@ -136,6 +139,25 @@ sting-app/
 - Ошибки OTP/auth показываются по `error.code` (см. раздел 7.6).
 
 **Риски:** гонка refresh при параллельных 401; зависимость от доставки почты на устройстве (нужен доступ к inbox / staging с `OTP_DEV_LOG`).
+
+---
+
+### Этап 1b — Вход через Google
+
+Детальное ТЗ — **[раздел 8](#8-вход-через-google)**. Backend: `POST /auth/google` (верификация `idToken`, find-or-create пользователя, те же JWT, что у email-login).
+
+**Задачи (кратко):**
+
+- Google Cloud: OAuth clients (Web + iOS + Android), consent screen, Client ID в `.env` / EAS secrets.
+- `useGoogleSignIn` → `authStore.loginWithGoogle({ idToken })` → `POST /auth/google` → та же сессия, что после email-login.
+- Кнопка Google на `login` и `register`; Apple/Facebook остаются заглушками.
+- OTP **не** показывать: Google-email считается подтверждённым на стороне Google.
+
+**Зависимости:** Этап 1 (authStore, сессия, auth-guard); native **dev client / production** (не Expo Go — §8.4).
+
+**Definition of Done:** новый и существующий пользователь входят через Google на реальном устройстве (dev build), попадают в `(tabs)`, после перезапуска сессия жива. Отмена диалога Google не показывает ошибку.
+
+**Риски:** несовпадение `audience` idToken с `GOOGLE_CLIENT_IDS` на backend; SHA-1 Android (debug vs upload keystore); App Store потребует Sign in with Apple, если в релизе останется Google без Apple (§8.8).
 
 ---
 
@@ -251,7 +273,7 @@ sting-app/
 
 **Зависимости:** все предыдущие этапы.
 
-**Definition of Done:** приложение собирается через `eas build` без ошибок, полный пользовательский флоу (онбординг → регистрация → OTP → карта → съёмка → просмотр улья → выход; отдельно — forgot/reset пароля) проходится вручную без сбоев на реальном устройстве.
+**Definition of Done:** приложение собирается через `eas build` без ошибок, полный пользовательский флоу (онбординг → регистрация → OTP → карта → съёмка → просмотр улья → выход; отдельно — forgot/reset пароля; отдельно — вход через Google) проходится вручную без сбоев на реальном устройстве.
 
 ---
 
@@ -259,7 +281,8 @@ sting-app/
 
 - **Базовый URL** — берётся из `app.config.ts`/env, не хардкодится в `client.ts`.
 - **Формат ошибок** — все ответы 4xx/5xx приходят как `{ error: { code, message, details } }` (см. `openapi.yaml`, `ErrorResponse`). Frontend обязан читать `error.code` для логики (например, показать разные экраны для `INVALID_CREDENTIALS`, `EMAIL_NOT_VERIFIED`, `OTP_EXPIRED`, `RATE_LIMITED`), а `error.message` использовать только как fallback-текст, не как основной источник UX-копирайта.
-- **Auth без токена** — `register`, `login`, `otp/*`, `password/forgot`, `password/reset`, `refresh` вызываются с `skipAuthRefresh: true`.
+- **Auth без токена** — `register`, `login`, `google`, `otp/*`, `password/forgot`, `password/reset`, `refresh` вызываются с `skipAuthRefresh: true`.
+- **Google `idToken`** — одноразовый proof для `POST /auth/google`. Не логировать, не класть в AsyncStorage/SecureStore, не передавать никуда кроме этого эндпоинта. После `setSession` клиент работает только со своими JWT.
 - **Idempotency-Key** — обязателен на `POST /stings`, генерируется один раз в начале флоу публикации (при входе на `camera.tsx`), не при каждой попытке отправки — иначе теряет смысл при ретрае после обрыва связи.
 - **Токены** — `accessToken` держится только в памяти (Zustand) + `SecureStore` для восстановления между запусками; `refreshToken` — только в `SecureStore`, никогда не логируется и не передаётся куда-либо кроме `POST /auth/refresh`.
 - **OTP** — код никогда не логируется на клиенте; не сохраняется в AsyncStorage дольше текущего флоу (достаточно state экрана / store до verify).
@@ -273,6 +296,7 @@ sting-app/
 - **Производительность карты** — при большом количестве маркеров в области экрана рендерить только видимые (или полагаться на кластеризацию backend, которая уже возвращает ульи вместо десятков отдельных точек — см. `TECH_DOCS.md`, раздел 3.2).
 - **Тестирование** — при одном разработчике полноценные E2E-тесты (Detox и т.п.) избыточны на MVP-этапе; приоритет — ручной чек-лист сквозного флоу перед каждым релизом (шаблон см. Этап 8 и раздел 7.7).
 - **Auth UX** — поле OTP должно поддерживать автоподстановку из SMS/почты где платформа даёт (`textContentType="oneTimeCode"` / `autoComplete="sms-otp"` — для email-кода по возможности `oneTimeCode`); кнопка «Отправить снова» неактивна во время cooldown.
+- **Google Sign-In runtime** — целевая среда: EAS development / preview / production. Expo Go не является поддерживаемым рантаймом для этого флоу (чужой bundle id / package name, Web-client не принимает `exp://` и custom scheme как redirect URI).
 
 ---
 
@@ -280,6 +304,8 @@ sting-app/
 
 - [ ] Все этапы 0–8 пройдены и вручную проверены на реальном устройстве
 - [ ] Флоу раздела 7 (register OTP + forgot/reset) пройден на staging с реальной почтой
+- [ ] Флоу раздела 8 (Google Sign-In) пройден на dev build / preview на iOS и Android
+- [ ] Client ID Google заданы в EAS secrets / `.env`, не закоммичены; `idToken` не логируется
 - [ ] `.env`/`app.config.ts` указывает на продакшен `API_URL`/`WS_URL`, не на localhost
 - [ ] Токены и OTP-коды не логируются в консоль ни в одном месте кода
 - [ ] Иконка и splash screen на месте, `app.json` заполнен (name, slug, bundle identifiers)
@@ -448,3 +474,231 @@ resetPassword(...)      // → AuthSession | void
 - Вход только по OTP без пароля (passwordless)
 - Deep link из письма с кодом в query (можно добавить позже)
 - Капча на клиенте (если появится — отдельная задача)
+- Вход через Google — **[раздел 8](#8-вход-через-google)** (не дублировать OTP-логику)
+
+---
+
+## 8. Вход через Google
+
+Пошаговое frontend-ТЗ. Верификация токена, find-or-create пользователя и выдача JWT — на backend (`POST /auth/google`). Не дублировать серверную логику в этом разделе.
+
+**Состояние репозитория на момент ТЗ:** слой частично есть (`useGoogleSignIn`, `authApi.loginWithGoogle`, `authStore.loginWithGoogle`, i18n, env). Кнопки на `login`/`register` ещё не обязаны быть подключены. Задача этапа — довести флоу до DoD, а не писать с нуля.
+
+### 8.1. Цель продукта
+
+1. Пользователь на экране входа или регистрации тапает «Google» и **сразу входит** в приложение: отдельный OTP для Google-email **не нужен** (email уже подтверждён у Google).
+2. Новый Google-аккаунт создаётся на backend автоматически (username из имени/email, опционально аватар из Google). Пользователь не заполняет форму регистрации.
+3. Если email уже есть (регистрация по паролю) — Google **привязывается** к этому пользователю, сессия выдаётся тому же аккаунту. Двух профилей с одним email быть не должно.
+4. После успеха — та же сессия Hive (`accessToken` / `refreshToken` в SecureStore), что после email-login. Auth-guard и hydrate не различают способ входа.
+
+### 8.2. Архитектура флоу
+
+```
+[login / register]
+        │ tap Google
+        ▼
+expo-auth-session (системный браузер / SFSafari / Chrome Custom Tabs)
+        │ idToken (JWT от Google)
+        ▼
+POST /auth/google { idToken }     skipAuthRefresh: true
+        │ backend: verifyIdToken(audience = GOOGLE_CLIENT_IDS)
+        │          findOrCreate(googleId / email) → issueTokens
+        ▼
+{ user, tokens }  →  authStore.setSession()  →  /(tabs)
+```
+
+Клиент **не** доверяет полям Google-профиля сам: username, email, avatar выставляет backend. Клиент передаёт только `idToken`.
+
+`audience` (`aud`) в idToken равен **тому Client ID, которым открыли OAuth** (Web / iOS / Android — разные). На backend в `GOOGLE_CLIENT_IDS` должны быть **все** Client ID приложения, иначе верификация падает с `GOOGLE_AUTH_FAILED`.
+
+### 8.3. Пользовательские сценарии
+
+#### Сценарий G1 — Новый пользователь
+
+```
+login|register → Google account picker → POST /auth/google → (tabs)
+```
+
+| Шаг | Действие | Поведение |
+| --- | -------- | --------- |
+| G1.1 | Тап по кнопке Google | Показать системный OAuth; кнопка в loading; email-форма не валидируется |
+| G1.2 | Пользователь выбирает аккаунт и подтверждает | Получить `idToken` → `loginWithGoogle` |
+| G1.3 | Backend создаёт user (`googleId`, `emailVerified=true`, `passwordHash=null`) | `setSession` → `router.replace('/(tabs)')`. OTP-экраны не открывать |
+
+Онбординг показывается по существующему флагу `hasCompletedOnboarding`, независимо от способа входа.
+
+#### Сценарий G2 — Повторный вход тем же Google
+
+`googleId === sub` → сессия, без создания второго пользователя.
+
+#### Сценарий G3 — Email уже зарегистрирован паролем (linking)
+
+Пользователь ранее прошёл §7 (email + OTP). Входит через Google с **тем же email**.
+
+Backend привязывает `googleId`, помечает email verified, выдаёт сессию **существующего** user. На клиенте это неотличимо от G1/G2: успех → tabs.
+
+Дальше пользователь может входить и паролем, и Google.
+
+#### Сценарий G4 — Конфликт аккаунтов
+
+Email уже привязан к **другому** `googleId` → `409 GOOGLE_ACCOUNT_CONFLICT`. Остаться на текущем экране, показать i18n по `error.code`. Сессию не писать.
+
+#### Сценарий G5 — Отмена / dismiss
+
+Пользователь закрыл sheet / браузер (`cancel` / `dismiss`). **Не** показывать ошибку, не вызывать API. Снять loading.
+
+#### Сценарий G6 — Google-only пользователь и пароль
+
+У такого user нет `passwordHash`. `POST /auth/login` с паролем даёт `INVALID_CREDENTIALS` (как неверный пароль — без утечки «это Google-аккаунт»).
+
+Frontend **не** обещает отдельный экран «создайте пароль». Forgot-password для Google-only — поведение backend; клиент не делает спец-ветки, пока API не вернёт отдельный `error.code`.
+
+#### Сценарий G7 — Не подтверждённый email у Google
+
+`401 GOOGLE_EMAIL_NOT_VERIFIED`. Сообщение на форме, сессии нет. Не уводить на `verify-otp` Hive: это не наш OTP.
+
+### 8.4. Конфигурация и рантайм
+
+#### Client ID
+
+| Переменная | Где | Зачем |
+| ---------- | --- | ----- |
+| `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` | `.env`, `app.config.ts` → `extra` | Обязателен. Часто `aud` idToken = Web client (`serverClientId`) |
+| `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` | то же | iOS OAuth client, bundle `com.hive.app` |
+| `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID` | то же | Android OAuth client, package `com.hive.app` + SHA-1 |
+
+Проброс уже есть в `app.config.ts` / `src/config/env.ts`. Значения **не** коммитить. Для EAS — secrets / `eas.json` env, не хардкод в git.
+
+На backend: `GOOGLE_CLIENT_IDS` (через запятую) **включает те же** Web, iOS и Android Client ID.
+
+#### Google Cloud Console (чеклист, не код)
+
+1. OAuth consent screen (External / Testing + test users на этапе разработки).
+2. **Web application** Client ID — для мобилки Authorized redirect URIs / JS origins можно оставить пустыми: Google Web-тип **не принимает** `exp://` и `hiveapp://`.
+3. **iOS** Client ID: bundle id `com.hive.app`.
+4. **Android** Client ID: package `com.hive.app` + SHA-1 **того keystore, которым подписана установленная сборка** (debug / EAS development ≠ Play upload key).
+
+Scheme приложения: `hiveapp` (`app.config.ts`).
+
+#### Почему не Expo Go
+
+| Причина | Следствие |
+| ------- | --------- |
+| Bundle / package Expo Go — `host.exp.Exponent`, не `com.hive.app` | iOS/Android OAuth clients Hive не совпадут |
+| Web client не принимает `exp://` и custom scheme | Нестабильный/невозможный redirect в Go |
+| Целевой UX — native build | Тестировать в **dev client** (`eas.json` profile `development`) или preview/production |
+
+Если Client ID не заданы — UI-ошибка `auth.googleNotConfigured`, без вызова Google и без запроса к API.
+
+Если OAuth-библиотека/native-конфиг требуют dev client, а пользователь в Expo Go — `auth.googleRequiresDevBuild` (не сырой exception).
+
+### 8.5. Экраны и UI-требования
+
+| Экран | Требование |
+| ----- | ---------- |
+| `login` | Ряд «или войти через»: **Google — рабочая кнопка**; Apple и Facebook — disabled/placeholder без `onPress` (не имитировать успех) |
+| `register` | Тот же Google-вход (тот же API find-or-create). Не заставлять заполнять username/password перед Google |
+| Оба | Общий компонент кнопки (например `AuthSocialButton` / обёртка над текущим кругом 52×52), `accessibilityLabel` из `auth.loginWithGoogle` |
+
+Правила UI:
+
+- Переиспользовать `AuthScreenLayout` / `AuthFormCard`. Loading Google **не** блокирует всю форму как submit email, но повторный тап по Google игнорируется, пока `isPrompting` / запрос к API.
+- Ошибки — через `getApiErrorMessage` / ключи `errors.*` и `auth.google*` (§8.7). Не показывать сырой `error.message` как основной копирайт.
+- Успех: `router.replace('/(tabs)')`, как у email-login. `clearPendingOtp` уже внутри `setSession`.
+- Пока `isReady === false` или идёт `isPrompting` — кнопка `disabled`. Нет Client ID: тап показывает `auth.googleNotConfigured`, без silent no-op и без краша.
+
+i18n (уже заведены, не плодить дубликаты): `auth.loginWithGoogle`, `auth.googleLoginFailed`, `auth.googleNotConfigured`, `auth.googleRequiresDevBuild`, `errors.GOOGLE_*`. Добавить `errors.ACCOUNT_DISABLED`, если ещё нет.
+
+### 8.6. Состояние и API-слой
+
+#### `src/hooks/useGoogleSignIn.ts`
+
+Ответственность: конфиг Client ID, `Google.useAuthRequest`, `promptAsync`, разбор `idToken` из `authentication.idToken` или `params.id_token`, игнор cancel/dismiss, защита от двойной обработки одного token.
+
+Не вызывает API и не пишет store — только `onSuccess(idToken)` / `onError(i18nKey)`.
+
+SDK: Expo 54, `expo-auth-session` (Google provider). Перед правками сверять [доку Expo SDK 54 AuthSession](https://docs.expo.dev/versions/v54.0.0/sdk/auth-session/). Хелперы Google в AuthSession помечены deprecated в пользу native SDK — **остаёмся на auth-session**, пока флоу стабилен на dev build; миграция — §8.11.
+
+#### `src/api/auth.ts`
+
+```ts
+loginWithGoogle({ idToken: string })  // POST /auth/google → AuthSession
+```
+
+`skipAuthRefresh: true`. Тело строго `{ idToken }`, без email/username с клиента.
+
+#### `authStore`
+
+`loginWithGoogle({ idToken })`: как `login` — `clearSession` → API → `setSession`. Ошибки пробрасывать на UI, не глотать.
+
+#### Синхронизация контракта
+
+Добавить `POST /auth/google` в `openapi.yaml` приложения и в `TECH_DOCS.md` §3.1 (сейчас дыра относительно backend). Request/response как у `/auth/login`.
+
+```json
+// Request
+{ "idToken": "eyJ..." }
+
+// Response 200
+{ "user": User, "tokens": AuthTokens }
+```
+
+### 8.7. Маппинг ошибок → UX
+
+| Источник | UX |
+| -------- | --- |
+| cancel / dismiss | Тишина, снять loading |
+| нет Client ID | `auth.googleNotConfigured` |
+| нет idToken после success | `auth.googleLoginFailed` |
+| Expo Go / отсутствует native-конфиг | `auth.googleRequiresDevBuild` |
+| `VALIDATION_ERROR` | «Проверьте данные» / generic |
+| `GOOGLE_AUTH_FAILED` | «Не удалось проверить вход через Google» |
+| `GOOGLE_EMAIL_NOT_VERIFIED` | «Email Google не подтверждён» |
+| `GOOGLE_AUTH_NOT_CONFIGURED` | «Google Sign-In не настроен на сервере» |
+| `GOOGLE_ACCOUNT_CONFLICT` | «Этот email уже привязан к другому Google-аккаунту» |
+| `ACCOUNT_DISABLED` | «Аккаунт заблокирован» (не пускать в tabs) |
+| сеть / timeout | существующие `errors.network` / `errors.timeout` |
+
+### 8.8. Пошаговый план реализации (frontend)
+
+| Шаг | Задачи | DoD |
+| --- | ------ | --- |
+| **G0** | Сверить `POST /auth/google` с backend; дописать OpenAPI / `TECH_DOCS.md`; `GOOGLE_CLIENT_IDS` на staging включает Web+iOS+Android | Контракт совпадает; 503 `GOOGLE_AUTH_NOT_CONFIGURED` только если секреты реально пусты |
+| **G1** | Довести `useGoogleSignIn`: cancel без ошибки, нет лога idToken, `isPrompting`, идемпотентность response | В симуляторе/dev client picker открывается, cancel безопасен |
+| **G2** | Общая кнопка; подключить на `login` и `register`; loading + ошибки | Сценарии G1–G5 на обоих экранах |
+| **G3** | Store/API уже есть — регресс: сессия, hydrate, logout, `/auth/me` | После Google — тот же путь, что после пароля |
+| **G4** | Client ID в `.env` / EAS secrets; Android SHA-1 той сборки, что стоит на устройстве; iOS bundle | G1–G3 на **физическом** iOS и Android dev/preview |
+| **G5** | Чек-лист §8.10 | Закрыт вручную |
+
+### 8.9. Риски
+
+- **Audience mismatch** — idToken выписан на iOS/Android client, а backend знает только Web (или наоборот) → `GOOGLE_AUTH_FAILED`. Лечится полным списком Client ID на сервере.
+- **SHA-1** — debug keystore Mac ≠ EAS credentials ≠ Play App Signing. Для каждой подписи — свой Android OAuth client или несколько SHA-1.
+- **App Store 4.8** — если в продакшен-сборке есть Google (или другой сторонний логин), Apple требует Sign in with Apple. Пока Google только в dev/preview — ок; перед сабмитом в App Store Apple — отдельная задача (§8.11).
+- **Google-only без пароля** — «Забыли пароль?» не должен обещать вход, которого нет; не менять anti-enumeration forgot-флоу без backend-кода.
+
+### 8.10. Приёмочный чек-лист (ручной)
+
+Прогонять на **dev client или preview**, не в Expo Go.
+
+- [ ] Новый Google-аккаунт: тап → picker → tabs; OTP не показывается; `/auth/me` ок
+- [ ] Повторный вход тем же Google — тот же user id, второй аккаунт не создаётся
+- [ ] Email+пароль, затем Google с тем же email — тот же user, оба способа входа работают
+- [ ] Отмена picker — остаёмся на login/register, без красной ошибки
+- [ ] Нет Client ID в env — понятное «не настроено», без краша
+- [ ] Неверный/просроченный idToken (если воспроизвести) — `GOOGLE_AUTH_FAILED`, сессии нет
+- [ ] После Google перезапуск приложения сохраняет сессию
+- [ ] Logout отзывает refresh и возвращает на auth
+- [ ] `idToken` и Client secret не печатаются в Metro
+- [ ] Apple/Facebook по-прежнему ничего не логинят
+- [ ] iOS и Android пройдены отдельно (разные Client ID / SHA-1)
+
+### 8.11. Вне скоупа (frontend)
+
+- Sign in with Apple / Facebook (кнопки-заглушки остаются)
+- `@react-native-google-signin/google-signin` (native One Tap) — возможная замена auth-session позже
+- Привязка / отвязка Google из профиля у уже залогиненного пользователя
+- Смена username, выданного backend при Google-регистрации
+- Passwordless / вход только OTP без пароля
+- Работающий Google Sign-In внутри Expo Go
+- Отдельный онбординг «добро пожаловать, Google» — используется общий онбординг приложения

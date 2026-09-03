@@ -1,29 +1,61 @@
 import * as Google from 'expo-auth-session/providers/google';
+import Constants from 'expo-constants';
 import * as WebBrowser from 'expo-web-browser';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 
 import { env } from '@/src/config/env';
 
 WebBrowser.maybeCompleteAuthSession();
 
+export type GoogleSignInErrorKey =
+  'auth.googleLoginFailed' | 'auth.googleNotConfigured' | 'auth.googleRequiresDevBuild';
+
 interface UseGoogleSignInOptions {
   onSuccess: (idToken: string) => Promise<void>;
-  onError: (messageKey: string) => void;
+  onError: (messageKey: GoogleSignInErrorKey) => void;
+}
+
+function getPlatformGoogleClientId(): string {
+  if (Platform.OS === 'ios') {
+    return env.googleIosClientId || env.googleWebClientId || '';
+  }
+
+  if (Platform.OS === 'android') {
+    return env.googleAndroidClientId || env.googleWebClientId || '';
+  }
+
+  return env.googleWebClientId || '';
 }
 
 export function isGoogleSignInConfigured(): boolean {
-  return Boolean(env.googleWebClientId || env.googleIosClientId || env.googleAndroidClientId);
+  return Boolean(getPlatformGoogleClientId());
+}
+
+function isExpoGoRuntime(): boolean {
+  return Constants.appOwnership === 'expo';
 }
 
 export function useGoogleSignIn({ onSuccess, onError }: UseGoogleSignInOptions) {
   const [isPrompting, setIsPrompting] = useState(false);
   const handledResponseRef = useRef<string | null>(null);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    webClientId: env.googleWebClientId || undefined,
-    iosClientId: env.googleIosClientId || undefined,
-    androidClientId: env.googleAndroidClientId || env.googleWebClientId || undefined,
-  });
+  onSuccessRef.current = onSuccess;
+  onErrorRef.current = onError;
+
+  const authConfig = useMemo(() => {
+    const platformClientId = getPlatformGoogleClientId();
+
+    return {
+      webClientId: env.googleWebClientId || platformClientId,
+      iosClientId: env.googleIosClientId || env.googleWebClientId || platformClientId,
+      androidClientId: env.googleAndroidClientId || env.googleWebClientId || platformClientId,
+    };
+  }, []);
+
+  const [request, response, promptAsync] = Google.useAuthRequest(authConfig);
 
   useEffect(() => {
     if (__DEV__) {
@@ -48,18 +80,17 @@ export function useGoogleSignIn({ onSuccess, onError }: UseGoogleSignInOptions) 
 
     if (response.type !== 'success') {
       setIsPrompting(false);
-      onError('auth.googleLoginFailed');
+      onErrorRef.current('auth.googleLoginFailed');
       return;
     }
 
     const idToken =
       response.authentication?.idToken ??
-      response.params?.id_token ??
       (typeof response.params?.id_token === 'string' ? response.params.id_token : undefined);
 
     if (!idToken) {
       setIsPrompting(false);
-      onError('auth.googleLoginFailed');
+      onErrorRef.current('auth.googleLoginFailed');
       return;
     }
 
@@ -70,19 +101,24 @@ export function useGoogleSignIn({ onSuccess, onError }: UseGoogleSignInOptions) 
     handledResponseRef.current = idToken;
     setIsPrompting(true);
 
-    void onSuccess(idToken).finally(() => {
+    void onSuccessRef.current(idToken).finally(() => {
       setIsPrompting(false);
     });
-  }, [onError, onSuccess, response]);
+  }, [response]);
 
   async function signInWithGoogle(): Promise<void> {
     if (!isGoogleSignInConfigured()) {
-      onError('auth.googleNotConfigured');
+      onErrorRef.current('auth.googleNotConfigured');
+      return;
+    }
+
+    if (isExpoGoRuntime()) {
+      onErrorRef.current('auth.googleRequiresDevBuild');
       return;
     }
 
     if (!request) {
-      onError('auth.googleLoginFailed');
+      onErrorRef.current('auth.googleLoginFailed');
       return;
     }
 
@@ -91,7 +127,7 @@ export function useGoogleSignIn({ onSuccess, onError }: UseGoogleSignInOptions) 
       await promptAsync();
     } catch {
       setIsPrompting(false);
-      onError('auth.googleLoginFailed');
+      onErrorRef.current('auth.googleLoginFailed');
     }
   }
 

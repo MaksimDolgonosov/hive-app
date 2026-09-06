@@ -73,10 +73,18 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       supportsTablet: false,
       bundleIdentifier: 'com.hive.app',
       icon: './assets/Hive.icon',
+      config: {
+        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
+      },
     },
     android: {
       package: 'com.hive.app',
       permissions: ['VIBRATE'],
+      config: {
+        googleMaps: {
+          apiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
+        },
+      },
       icon: './assets/images/icon.png',
       adaptiveIcon: {
         backgroundColor: '#F5A623',

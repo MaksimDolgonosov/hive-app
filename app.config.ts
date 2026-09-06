@@ -27,8 +27,22 @@ function resolveUrls() {
   };
 }
 
+function toGoogleOAuthScheme(clientId: string): string | null {
+  if (!clientId.endsWith('.apps.googleusercontent.com')) {
+    return null;
+  }
+
+  return `com.googleusercontent.apps.${clientId.replace('.apps.googleusercontent.com', '')}`;
+}
+
 export default ({ config }: ConfigContext): ExpoConfig => {
   const { apiUrl, wsUrl } = resolveUrls();
+  // Public Android OAuth client ID — fallback needed because EAS cloud builds
+  // do not load local .env, and the scheme must be baked into the APK.
+  const googleAndroidClientId =
+    process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ||
+    '678948952262-i44jauudeqfeumnlpeh3hup1b26db6fu.apps.googleusercontent.com';
+  const googleOAuthScheme = toGoogleOAuthScheme(googleAndroidClientId);
 
   if (process.env.NODE_ENV !== 'production') {
     console.log('[app.config] API_URL =', apiUrl);
@@ -42,7 +56,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
-    scheme: 'hiveapp',
+    scheme: ['hiveapp', 'com.hive.app', ...(googleOAuthScheme ? [googleOAuthScheme] : [])],
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     platforms: ['ios', 'android'],
@@ -72,6 +86,22 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
+      ...(googleOAuthScheme
+        ? {
+            intentFilters: [
+              {
+                action: 'VIEW',
+                data: [
+                  {
+                    scheme: googleOAuthScheme,
+                    pathPrefix: '/oauth2redirect',
+                  },
+                ],
+                category: ['BROWSABLE', 'DEFAULT'],
+              },
+            ],
+          }
+        : {}),
     },
     plugins: [
       'expo-router',
@@ -137,6 +167,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     extra: {
       ...config.extra,
+      eas: {
+        projectId: '4dcecefa-fe54-4793-aa44-e3aec67c2bb3',
+      },
       apiUrl,
       wsUrl,
       googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',

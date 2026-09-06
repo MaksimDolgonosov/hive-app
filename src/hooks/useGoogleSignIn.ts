@@ -28,6 +28,15 @@ function getPlatformGoogleClientId(): string {
   return env.googleWebClientId || '';
 }
 
+function getGoogleOAuthRedirectUri(clientId: string): string | undefined {
+  if (!clientId.endsWith('.apps.googleusercontent.com')) {
+    return undefined;
+  }
+
+  const clientIdPrefix = clientId.replace('.apps.googleusercontent.com', '');
+  return `com.googleusercontent.apps.${clientIdPrefix}:/oauth2redirect/google`;
+}
+
 export function isGoogleSignInConfigured(): boolean {
   return Boolean(getPlatformGoogleClientId());
 }
@@ -47,11 +56,19 @@ export function useGoogleSignIn({ onSuccess, onError }: UseGoogleSignInOptions) 
 
   const authConfig = useMemo(() => {
     const platformClientId = getPlatformGoogleClientId();
+    const androidClientId = env.googleAndroidClientId || env.googleWebClientId || platformClientId;
+    const iosClientId = env.googleIosClientId || env.googleWebClientId || platformClientId;
+    const redirectUri = Platform.select({
+      android: getGoogleOAuthRedirectUri(androidClientId),
+      ios: getGoogleOAuthRedirectUri(iosClientId),
+      default: undefined,
+    });
 
     return {
       webClientId: env.googleWebClientId || platformClientId,
-      iosClientId: env.googleIosClientId || env.googleWebClientId || platformClientId,
-      androidClientId: env.googleAndroidClientId || env.googleWebClientId || platformClientId,
+      iosClientId,
+      androidClientId,
+      ...(redirectUri ? { redirectUri } : {}),
     };
   }, []);
 

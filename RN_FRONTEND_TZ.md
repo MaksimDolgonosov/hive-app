@@ -3,7 +3,8 @@
 Версия: 0.3
 Стек backend: Node.js + Express + MongoDB + Socket.io, контракты — `openapi.yaml` / `TECH_DOCS.md`  
 Backend-ТЗ по email OTP и сбросу пароля: **`BACKEND_EMAIL_AUTH_TZ.md`** (реализуется отдельно от этого документа).  
-Вход через Google: контракт **`POST /auth/google`** уже есть на backend (`hive-backend-nodejs`); frontend-ТЗ — **[раздел 8](#8-вход-через-google)**.
+Вход через Google: контракт **`POST /auth/google`** уже есть на backend (`hive-backend-nodejs`); frontend-ТЗ — **[раздел 8](#8-вход-через-google)**.  
+Механики привлечения пользователей и борьбы с пустой картой (cold start): **`RN_GROWTH_TZ.md`** (клиент) и **`BACKEND_GROWTH_TZ.md`** (сервер, источник истины по контрактам).
 
 ---
 

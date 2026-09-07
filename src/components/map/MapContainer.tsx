@@ -14,6 +14,7 @@ import { SaveMapPlaceModal } from '@/src/components/map/SaveMapPlaceModal';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
+import { isGoogleMapsConfigured } from '@/src/config/env';
 import { useLocation } from '@/src/hooks/useLocation';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
 import { useMapStore } from '@/src/stores/mapStore';
@@ -403,38 +404,49 @@ export function MapContainer() {
 
   return (
     <View className="flex-1">
-      <MapView
-        ref={mapRef}
-        style={styles.mapLayer}
-        initialRegion={initialRegion}
-        onRegionChange={handleRegionChange}
-        onRegionChangeComplete={handleRegionChangeComplete}
-        onMapReady={() => {
-          void readVisibleMapRegion();
-        }}
-        scrollEnabled={mapInteractionsEnabled}
-        zoomEnabled={mapInteractionsEnabled}
-        rotateEnabled={mapInteractionsEnabled}
-        pitchEnabled={mapInteractionsEnabled}
-        showsUserLocation
-        showsMyLocationButton={false}
-        userInterfaceStyle="light"
-        {...(Platform.OS === 'android' ? { googleRenderer: 'LEGACY' as const } : {})}
-      >
-        {data?.stings.map((sting) => (
-          <StingMarker key={sting.id} sting={sting} onPress={() => openSting(sting.id)} />
-        ))}
-        {data?.hives
-          .filter((hive) => isActiveHive(hive.activeStingsCount))
-          .map((hive) => (
-            <HiveCircle
-              key={hive.id}
-              hive={hive}
-              imageUri={hiveMarkerImages[hive.id]}
-              onPress={() => openHive(hive.id)}
-            />
+      {isGoogleMapsConfigured() ? (
+        <MapView
+          ref={mapRef}
+          style={styles.mapLayer}
+          initialRegion={initialRegion}
+          onRegionChange={handleRegionChange}
+          onRegionChangeComplete={handleRegionChangeComplete}
+          onMapReady={() => {
+            void readVisibleMapRegion();
+          }}
+          scrollEnabled={mapInteractionsEnabled}
+          zoomEnabled={mapInteractionsEnabled}
+          rotateEnabled={mapInteractionsEnabled}
+          pitchEnabled={mapInteractionsEnabled}
+          showsUserLocation
+          showsMyLocationButton={false}
+          userInterfaceStyle="light"
+          {...(Platform.OS === 'android' ? { googleRenderer: 'LEGACY' as const } : {})}
+        >
+          {data?.stings.map((sting) => (
+            <StingMarker key={sting.id} sting={sting} onPress={() => openSting(sting.id)} />
           ))}
-      </MapView>
+          {data?.hives
+            .filter((hive) => isActiveHive(hive.activeStingsCount))
+            .map((hive) => (
+              <HiveCircle
+                key={hive.id}
+                hive={hive}
+                imageUri={hiveMarkerImages[hive.id]}
+                onPress={() => openHive(hive.id)}
+              />
+            ))}
+        </MapView>
+      ) : (
+        <View className="flex-1 items-center justify-center bg-hive-surface px-8">
+          <Text className="text-center font-inter text-base font-semibold text-hive-foreground">
+            {t('map.mapsKeyMissingTitle')}
+          </Text>
+          <Text className="mt-2 text-center font-inter text-sm text-hive-muted">
+            {t('map.mapsKeyMissingMessage')}
+          </Text>
+        </View>
+      )}
 
       <View pointerEvents="box-none" style={styles.overlayLayer}>
         {Platform.OS === 'android' &&

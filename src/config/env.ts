@@ -7,6 +7,7 @@ type AppExtra = {
   googleWebClientId?: string;
   googleIosClientId?: string;
   googleAndroidClientId?: string;
+  googleMapsApiKey?: string;
 };
 
 export type EnvConfig = AppExtra;
@@ -44,12 +45,15 @@ function getExtra(): EnvConfig {
   const googleAndroidClientId =
     extra.googleAndroidClientId ?? process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? '';
 
+  const googleMapsApiKey = extra.googleMapsApiKey ?? process.env.GOOGLE_MAPS_API_KEY ?? '';
+
   if (__DEV__) {
     console.log('[env]', {
       apiUrl,
       wsUrl,
       platform: Platform.OS,
       googleConfigured: Boolean(googleWebClientId),
+      googleMapsConfigured: Boolean(googleMapsApiKey),
     });
   }
 
@@ -59,7 +63,22 @@ function getExtra(): EnvConfig {
     googleWebClientId,
     googleIosClientId,
     googleAndroidClientId,
+    googleMapsApiKey,
   };
 }
 
 export const env = getExtra();
+
+/**
+ * Maps SDK on Android reads the key from the APK manifest, not from Metro/.env.
+ * Enabled after GOOGLE_MAPS_API_KEY was added as an EAS project secret.
+ */
+const ANDROID_NATIVE_MAPS_KEY_EMBEDDED = true;
+
+export function isGoogleMapsConfigured(): boolean {
+  if (Platform.OS !== 'android') {
+    return true;
+  }
+
+  return ANDROID_NATIVE_MAPS_KEY_EMBEDDED;
+}

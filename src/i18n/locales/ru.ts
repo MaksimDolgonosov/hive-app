@@ -107,6 +107,9 @@ export const ru: TranslationSchema = {
     savedPlacesDeleteConfirm: 'Удалить',
     emptyTitle: 'Пока никого рядом',
     emptyMessage: 'Сделайте первое фото или загляните позже — жала живут 4 часа.',
+    mapsKeyMissingTitle: 'Карта недоступна',
+    mapsKeyMissingMessage:
+      'Этот APK собран без Google Maps API key. Ключ в .env недостаточно — нужна новая native-сборка с секретом EAS.',
   },
   network: {
     offline: 'Нет подключения к интернету',

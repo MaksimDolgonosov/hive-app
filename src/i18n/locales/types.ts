@@ -102,6 +102,8 @@ export type TranslationSchema = {
     savedPlacesDeleteConfirm: string;
     emptyTitle: string;
     emptyMessage: string;
+    mapsKeyMissingTitle: string;
+    mapsKeyMissingMessage: string;
   };
   tabs: {
     map: string;

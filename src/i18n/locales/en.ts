@@ -106,6 +106,9 @@ export const en: TranslationSchema = {
     savedPlacesDeleteConfirm: 'Delete',
     emptyTitle: 'No one nearby yet',
     emptyMessage: 'Take the first photo or check back later — stings live for 4 hours.',
+    mapsKeyMissingTitle: 'Map unavailable',
+    mapsKeyMissingMessage:
+      'This APK was built without a Google Maps API key. A key in .env is not enough — rebuild the native client with the EAS secret.',
   },
   network: {
     offline: 'No internet connection',

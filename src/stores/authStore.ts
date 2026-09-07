@@ -30,6 +30,8 @@ interface AuthState {
   status: AuthStatus;
   hasCompletedOnboarding: boolean;
   isHydrated: boolean;
+  /** True while Google OAuth prompt / token exchange is in flight. */
+  socialAuthPending: boolean;
   /** Меняется при upload/remove аватара — сбрасывает кэш expo-image. */
   avatarCacheVersion: number;
   pendingEmail: string | null;
@@ -39,6 +41,7 @@ interface AuthState {
   setSession: (user: User, tokens: AuthTokens) => Promise<void>;
   setUser: (user: User) => void;
   bumpAvatarCacheVersion: () => void;
+  setSocialAuthPending: (value: boolean) => void;
   setTokens: (tokens: AuthTokens) => Promise<void>;
   clearSession: () => Promise<void>;
   hydrate: () => Promise<void>;
@@ -94,6 +97,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   status: 'idle',
   hasCompletedOnboarding: false,
   isHydrated: false,
+  socialAuthPending: false,
   avatarCacheVersion: 0,
   pendingEmail: null,
   otpPurpose: null,
@@ -118,6 +122,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   bumpAvatarCacheVersion: () => {
     set({ avatarCacheVersion: Date.now() });
+  },
+
+  setSocialAuthPending: (value) => {
+    set({ socialAuthPending: value });
   },
 
   setTokens: async (tokens) => {
@@ -216,7 +224,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   loginWithGoogle: async (input) => {
-    await get().clearSession();
+    if (get().refreshToken || get().accessToken) {
+      await get().clearSession();
+    }
     const { user, tokens } = await authApi.loginWithGoogle(input);
     await get().setSession(user, tokens);
   },

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 
 import { env } from '@/src/config/env';
+import { useAuthStore } from '@/src/stores/authStore';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -34,7 +35,8 @@ function getGoogleOAuthRedirectUri(clientId: string): string | undefined {
   }
 
   const clientIdPrefix = clientId.replace('.apps.googleusercontent.com', '');
-  return `com.googleusercontent.apps.${clientIdPrefix}:/oauth2redirect/google`;
+  // Google's installed-app redirect. Must match a URL scheme baked into the native binary.
+  return `com.googleusercontent.apps.${clientIdPrefix}:/oauth2redirect`;
 }
 
 export function isGoogleSignInConfigured(): boolean {
@@ -92,11 +94,13 @@ export function useGoogleSignIn({ onSuccess, onError }: UseGoogleSignInOptions) 
 
     if (response.type === 'dismiss' || response.type === 'cancel') {
       setIsPrompting(false);
+      useAuthStore.getState().setSocialAuthPending(false);
       return;
     }
 
     if (response.type !== 'success') {
       setIsPrompting(false);
+      useAuthStore.getState().setSocialAuthPending(false);
       onErrorRef.current('auth.googleLoginFailed');
       return;
     }
@@ -107,6 +111,7 @@ export function useGoogleSignIn({ onSuccess, onError }: UseGoogleSignInOptions) 
 
     if (!idToken) {
       setIsPrompting(false);
+      useAuthStore.getState().setSocialAuthPending(false);
       onErrorRef.current('auth.googleLoginFailed');
       return;
     }
@@ -117,9 +122,18 @@ export function useGoogleSignIn({ onSuccess, onError }: UseGoogleSignInOptions) 
 
     handledResponseRef.current = idToken;
     setIsPrompting(true);
+    useAuthStore.getState().setSocialAuthPending(true);
+    try {
+      WebBrowser.dismissAuthSession();
+    } catch {
+      // No active browser session — already closed or never opened as AuthSession.
+    }
 
     void onSuccessRef.current(idToken).finally(() => {
       setIsPrompting(false);
+      if (useAuthStore.getState().status !== 'authenticated') {
+        useAuthStore.getState().setSocialAuthPending(false);
+      }
     });
   }, [response]);
 
@@ -140,10 +154,12 @@ export function useGoogleSignIn({ onSuccess, onError }: UseGoogleSignInOptions) 
     }
 
     setIsPrompting(true);
+    useAuthStore.getState().setSocialAuthPending(true);
     try {
-      await promptAsync();
+      await promptAsync({ createTask: false, showInRecents: false });
     } catch {
       setIsPrompting(false);
+      useAuthStore.getState().setSocialAuthPending(false);
       onErrorRef.current('auth.googleLoginFailed');
     }
   }

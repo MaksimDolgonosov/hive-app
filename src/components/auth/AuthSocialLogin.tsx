@@ -1,9 +1,8 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { Apple } from 'lucide-react-native';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 
 import { AuthSocialButton } from '@/src/components/auth/AuthSocialButton';
 import {
@@ -39,7 +38,6 @@ function ConfiguredGoogleButton({
     async (idToken: string) => {
       try {
         await loginWithGoogle({ idToken });
-        router.replace('/(tabs)');
       } catch (err) {
         logApiError('auth.google', err);
         onError(getApiErrorMessage(err, 'auth.googleLoginFailed'));
@@ -83,9 +81,11 @@ export function AuthSocialLogin({ disabled = false, onError }: AuthSocialLoginPr
     <View className="items-center gap-3">
       <Text className="font-inter text-[13px] text-hive-muted">{t('auth.orLoginVia')}</Text>
       <View className="flex-row items-center justify-center gap-3">
-        <AuthSocialButton accessibilityLabel={t('auth.loginWithApple')}>
-          <Apple color={ICON_COLOR} size={22} strokeWidth={2} />
-        </AuthSocialButton>
+        {Platform.OS !== 'android' ? (
+          <AuthSocialButton accessibilityLabel={t('auth.loginWithApple')}>
+            <Apple color={ICON_COLOR} size={22} strokeWidth={2} />
+          </AuthSocialButton>
+        ) : null}
         {googleConfigured ? (
           <ConfiguredGoogleButton disabled={disabled} onError={onError} />
         ) : (

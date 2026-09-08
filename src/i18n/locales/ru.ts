@@ -84,7 +84,7 @@ export const ru: TranslationSchema = {
     locationDeniedMessage:
       'Разрешите доступ к геолокации в настройках, чтобы видеть фото рядом на карте.',
     openSettings: 'Открыть настройки',
-    loadError: 'Не удалось загрузить жала поблизости',
+    loadError: 'Не удалось загрузить моменты поблизости',
     capturePhoto: 'Сделать фото',
     centerOnUser: 'Показать моё местоположение',
     saveFavorite: 'Сохранить вид карты в избранное',
@@ -106,7 +106,7 @@ export const ru: TranslationSchema = {
     savedPlacesDeleteMessage: '«{{name}}» будет удалено из избранного.',
     savedPlacesDeleteConfirm: 'Удалить',
     emptyTitle: 'Пока никого рядом',
-    emptyMessage: 'Сделайте первое фото или загляните позже — жала живут 4 часа.',
+    emptyMessage: 'Сделайте первое фото или загляните позже — моменты живут 4 часа.',
     mapsKeyMissingTitle: 'Карта недоступна',
     mapsKeyMissingMessage:
       'Этот APK собран без Google Maps API key. Ключ в .env недостаточно — нужна новая native-сборка с секретом EAS.',
@@ -125,7 +125,7 @@ export const ru: TranslationSchema = {
     title: 'Рядом',
     subtitle: 'Фото поблизости, отсортированные по расстоянию',
     emptyTitle: 'Пока никого рядом',
-    emptyMessage: 'Сделайте первое фото или загляните позже — жала живут 4 часа.',
+    emptyMessage: 'Сделайте первое фото или загляните позже — моменты живут 4 часа.',
     locationDeniedMessage:
       'Разрешите доступ к геолокации в настройках, чтобы видеть фото рядом в ленте.',
     retry: 'Повторить',
@@ -133,10 +133,10 @@ export const ru: TranslationSchema = {
   profile: {
     memberSince: 'В Hive с {{date}}',
     statsPhotos: 'Фото',
-    statsHives: 'Улья',
+    statsHives: 'Ульи',
     statsLikes: 'Лайки',
     menuPhotos: 'Мои фото',
-    menuHives: 'Мои улья',
+    menuHives: 'Мои ульи',
     menuSavedPlaces: 'Избранные места',
     menuFavorites: 'Лайки',
     menuSettings: 'Настройки',
@@ -208,7 +208,7 @@ export const ru: TranslationSchema = {
     step1Title: 'Только камера',
     step1Subtitle: 'Настоящие моменты здесь и сейчас',
     step1Description:
-      '«Ужаливай» только через встроенную камеру — каждый кадр сделан на месте, без галереи и постобработки.',
+      'Снимай только через встроенную камеру — каждый кадр сделан на месте, без галереи и постобработки.',
     step2Title: '4 часа на карте',
     step2Subtitle: 'Актуальное — прямо сейчас',
     step2Description:
@@ -239,9 +239,9 @@ export const ru: TranslationSchema = {
     empty: 'В улье пока нет активных фото',
   },
   sting: {
-    photoAlt: 'Фото жала',
+    photoAlt: 'Фото момента',
     close: 'Закрыть',
-    notFound: 'Жало истекло или не найдено',
+    notFound: 'Момент истёк или не найден',
     expiresIn: 'Истекает через',
     like: 'Нравится',
     unlike: 'Убрать лайк',
@@ -313,7 +313,7 @@ export const ru: TranslationSchema = {
     STING_VALIDATION_FAILED: 'Фото не прошло проверку подлинности. Снимите новое с камеры.',
     CONTENT_MODERATION_FAILED: 'Фото не прошло проверку безопасности.',
     MODERATION_UNAVAILABLE: 'Сервис проверки фото временно недоступен. Попробуйте позже.',
-    STING_NOT_FOUND: 'Жало истекло или не найдено',
+    STING_NOT_FOUND: 'Момент истёк или не найден',
     INTERNAL_ERROR: 'Внутренняя ошибка сервера. Попробуйте позже.',
     STORAGE_NOT_CONFIGURED: 'Сервер временно не может сохранить фото',
     CAPTURED_AT_MISMATCH: 'Снимок устарел — опубликуйте сразу после съёмки или переснимите.',

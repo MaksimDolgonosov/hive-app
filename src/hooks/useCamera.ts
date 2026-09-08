@@ -11,7 +11,10 @@ import {
   readPhotoMetadataFromFile,
   roundCoord,
 } from '@/src/utils/exif';
-import { normalizePhotoPixels } from '@/src/utils/photo-orientation';
+import { prepareStingPhotoForUpload } from '@/src/utils/prepare-sting-upload';
+
+/** Исходник промежуточный: итоговая компрессия — в prepareStingPhotoForUpload. */
+const CAPTURE_JPEG_QUALITY = 0.9;
 
 export type CaptureResult =
   | { ok: true }
@@ -61,7 +64,7 @@ function takePictureWithImmediatePreview(
   return new Promise((resolve, reject) => {
     void camera
       .takePictureAsync({
-        quality: 0.7,
+        quality: CAPTURE_JPEG_QUALITY,
         exif: true,
         onPictureSaved: (picture) => {
           if (!picture.uri) {
@@ -112,9 +115,12 @@ export function useCamera(cameraRef: RefObject<CameraView | null>) {
 
       const { latitude, longitude, altitude, accuracy } = captureCoords;
 
-      const normalizedUri = await normalizePhotoPixels(photo.uri);
+      const resizedUri = await prepareStingPhotoForUpload(photo.uri, {
+        width: photo.width,
+        height: photo.height,
+      });
 
-      const preparedUri = await embedCaptureMetadataInPhoto(normalizedUri, {
+      const preparedUri = await embedCaptureMetadataInPhoto(resizedUri, {
         lat: latitude,
         lng: longitude,
         altitude,

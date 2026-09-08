@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Image, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 // bee100.png — с непрозрачным чёрным фоном, перекрывает стили кнопки; bee.png — с альфой.
-const LOCATE_ICON = require('../../../assets/icons/bee.png');
+const LOCATE_ICON = require('../../../assets/icons/bee100.png');
 
 const BUTTON_SIZE = 52;
 const ICON_SIZE = 34;
@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(253, 162, 14, 0.35)',
     overflow: 'hidden',
+    marginBottom: 15,
     ...(Platform.OS === 'android'
       ? {
           elevation: 16,

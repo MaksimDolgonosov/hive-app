@@ -4,7 +4,6 @@ import { Platform } from 'react-native';
 
 import { apiClient } from '@/src/api/client';
 import type { MapBounds, Sting, StingsNearbyResponse } from '@/src/types';
-import { prepareStingPhotoForUpload } from '@/src/utils/prepare-sting-upload';
 
 export interface PublishStingInput {
   photoUri: string;
@@ -34,12 +33,6 @@ function resolveUploadUri(uri: string): string {
   }
 
   return uri;
-}
-
-function resolvePhotoUploadUri(photoUri: string): string {
-  const photoFile = new File(photoUri);
-  const rawUri = photoFile.exists ? photoFile.uri : photoUri;
-  return resolveUploadUri(rawUri);
 }
 
 function isRetryablePublishError(error: unknown): boolean {
@@ -90,25 +83,18 @@ export async function remove(id: string): Promise<void> {
 }
 
 export async function create(input: PublishStingInput): Promise<{ sting: Sting }> {
-  const sourceFile = new File(input.photoUri);
+  const photoFile = new File(input.photoUri);
 
-  if (!sourceFile.exists) {
+  if (!photoFile.exists) {
     throw new Error('Файл фото не найден. Переснимите снимок.');
-  }
-
-  const uploadPhotoUri = await prepareStingPhotoForUpload(input.photoUri);
-  const uploadFile = new File(uploadPhotoUri);
-
-  if (!uploadFile.exists) {
-    throw new Error('Не удалось подготовить фото к загрузке. Переснимите снимок.');
   }
 
   if (__DEV__) {
     try {
-      const bytes = await uploadFile.bytes();
+      const bytes = await photoFile.bytes();
       console.log('[stings.create] prepared upload', {
         sizeKb: Math.round(bytes.byteLength / 1024),
-        uri: uploadPhotoUri,
+        uri: input.photoUri,
       });
     } catch {
       // optional dev logging
@@ -117,7 +103,7 @@ export async function create(input: PublishStingInput): Promise<{ sting: Sting }
 
   const formData = new FormData();
   formData.append('photo', {
-    uri: resolvePhotoUploadUri(uploadPhotoUri),
+    uri: resolveUploadUri(photoFile.uri),
     type: 'image/jpeg',
     name: 'sting.jpg',
   } as unknown as Blob);

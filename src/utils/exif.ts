@@ -175,7 +175,7 @@ function applyCaptureMetadataToExif(exifObj: piexif.IExif, metadata: CaptureMeta
   exifObj.Exif[piexif.ExifIFD.DateTimeDigitized] = dateTime;
 }
 
-/** После normalizePhotoPixels пиксели уже выровнены — фиксируем Orientation=1. */
+/** После prepareStingPhotoForUpload пиксели уже выровнены — фиксируем Orientation=1. */
 function normalizePhotoOrientation(exifObj: piexif.IExif): void {
   exifObj['0th'][piexif.ImageIFD.Orientation] = 1;
 }

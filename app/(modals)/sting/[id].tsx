@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getProfileInitials } from '@/src/components/profile/ProfileAvatar';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { Timer } from '@/src/components/ui/Timer';
+import { ZoomableImage } from '@/src/components/ui/ZoomableImage';
 import { useDeleteSting } from '@/src/hooks/useDeleteSting';
 import { useStingDetail } from '@/src/hooks/useStingDetail';
 import { useStingReaction } from '@/src/hooks/useStingReaction';
@@ -79,6 +80,7 @@ export default function StingDetailScreen() {
   const panGesture = useMemo(
     () =>
       Gesture.Pan()
+        .maxPointers(1)
         .activeOffsetY(12)
         .failOffsetX([-24, 24])
         .onUpdate((event) => {
@@ -247,12 +249,7 @@ function StingDetailBody({
 }: StingDetailBodyProps) {
   return (
     <>
-      <Image
-        accessibilityLabel={t('sting.photoAlt')}
-        contentFit="contain"
-        source={{ uri: sting.imageUrl }}
-        style={{ flex: 1 }}
-      />
+      <ZoomableImage accessibilityLabel={t('sting.photoAlt')} uri={sting.imageUrl} />
 
       <View className="absolute left-4" style={{ top: insets.top + 8 }}>
         <Pressable

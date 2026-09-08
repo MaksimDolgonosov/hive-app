@@ -84,6 +84,7 @@ export function HiveCameraView({
       selectedLens={selectedLens}
       mirror={facing === 'front'}
       mode="picture"
+      responsiveOrientationWhenOrientationLocked
       onAvailableLensesChanged={onAvailableLensesChanged}
       onCameraReady={onCameraReady}
     />

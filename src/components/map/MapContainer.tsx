@@ -1,7 +1,7 @@
 import { router, type Href } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import MapView, { type Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -17,15 +17,15 @@ import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { isGoogleMapsConfigured } from '@/src/config/env';
 import { useLocation } from '@/src/hooks/useLocation';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
-import { useMapStore } from '@/src/stores/mapStore';
 import { useLocationStore } from '@/src/stores/locationStore';
+import { useMapStore } from '@/src/stores/mapStore';
 import { useSavedMapPlacesStore } from '@/src/stores/savedMapPlacesStore';
+import { showErrorToast, showInfoToast } from '@/src/stores/toastStore';
 import type { MapBounds, MapRegion } from '@/src/types';
 import { SAVED_MAP_PLACES_MAX } from '@/src/types';
 import { isActiveHive } from '@/src/utils/hive';
 import { coordsToUserMapRegion, isDefaultMapRegion, regionToBounds } from '@/src/utils/map';
 import { resolveMapViewRegion } from '@/src/utils/resolve-map-view-region';
-import { showInfoToast, showErrorToast } from '@/src/stores/toastStore';
 import { showMessageToast } from '@/src/utils/show-toast';
 
 import { StingMarker } from './StingMarker';
@@ -51,6 +51,21 @@ function resolveStartupRegion(): MapRegion | null {
   }
 
   return null;
+}
+
+/**
+ * Наводиться на пользователя можно только при холодном старте карты.
+ * После перемонтирования (возврат из модалки, смена вкладки) камера уже
+ * задана сохранённым местом или прошлым кадром, и перехватывать её нельзя.
+ */
+function shouldCenterOnUserAtStartup(): boolean {
+  const { pendingSavedRegion, region } = useMapStore.getState();
+
+  if (pendingSavedRegion) {
+    return false;
+  }
+
+  return !region || isDefaultMapRegion(region);
 }
 
 function toMapRegion(region: Region): MapRegion {
@@ -92,6 +107,7 @@ export function MapContainer() {
   const [hiveMarkerImages, setHiveMarkerImages] = useState<Record<string, string>>({});
   const [mapInteractionsEnabled, setMapInteractionsEnabled] = useState(true);
   const [initialRegion, setInitialRegion] = useState<MapRegion | null>(resolveStartupRegion);
+  const [centerOnUserAtStartup] = useState(shouldCenterOnUserAtStartup);
 
   const applyMapRegion = useCallback(
     (nextRegion: MapRegion, options?: { syncStore?: boolean; programmatic?: boolean }) => {
@@ -150,22 +166,17 @@ export function MapContainer() {
       return;
     }
 
-    if (useMapStore.getState().pendingSavedRegion) {
-      hasCenteredOnUser.current = true;
-      return;
-    }
+    const currentRegion = liveRegionRef.current;
+    const showsDefaultRegion = currentRegion !== null && isDefaultMapRegion(currentRegion);
 
-    if (hasCenteredOnUser.current) {
-      const currentRegion = liveRegionRef.current;
-      if (!currentRegion || !isDefaultMapRegion(currentRegion)) {
-        return;
-      }
+    if (!showsDefaultRegion && (hasCenteredOnUser.current || !centerOnUserAtStartup)) {
+      return;
     }
 
     hasCenteredOnUser.current = true;
     const userRegion = coordsToUserMapRegion(coords.latitude, coords.longitude);
     applyMapRegion(userRegion, { programmatic: true });
-  }, [applyMapRegion, coords]);
+  }, [applyMapRegion, centerOnUserAtStartup, coords]);
 
   useEffect(() => {
     if (!region) {
@@ -203,7 +214,13 @@ export function MapContainer() {
     }
 
     clearPendingMapFocus();
-  }, [applyMapRegion, clearPendingMapFocus, pendingMapFocus, setSelectedHiveId, setSelectedStingId]);
+  }, [
+    applyMapRegion,
+    clearPendingMapFocus,
+    pendingMapFocus,
+    setSelectedHiveId,
+    setSelectedStingId,
+  ]);
 
   useEffect(() => {
     if (!pendingSavedRegion) {
@@ -215,19 +232,7 @@ export function MapContainer() {
     setDebouncedBounds(regionToBounds(pendingSavedRegion));
     setSelectedStingId(null);
     setSelectedHiveId(null);
-
-    const targetRegion = pendingSavedRegion;
-    const animate = () => {
-      mapRef.current?.animateToRegion(targetRegion, 500);
-    };
-
-    animate();
-    const retryTimer = setTimeout(animate, 200);
     clearPendingSavedRegion();
-
-    return () => {
-      clearTimeout(retryTimer);
-    };
   }, [
     applyMapRegion,
     clearPendingSavedRegion,
@@ -260,7 +265,10 @@ export function MapContainer() {
       }
 
       hasRecoveredFromDefaultRegion.current = true;
-      mapRef.current?.animateToRegion(coordsToUserMapRegion(target.latitude, target.longitude), 350);
+      mapRef.current?.animateToRegion(
+        coordsToUserMapRegion(target.latitude, target.longitude),
+        350,
+      );
       return;
     }
 
@@ -341,16 +349,15 @@ export function MapContainer() {
       return;
     }
 
+    if (!draftRegion) {
+      showMessageToast('map.savePlaceFailed');
+      return;
+    }
+
     setIsSavingPlace(true);
 
     try {
-      const regionToSave = (await readVisibleMapRegion()) ?? draftRegion;
-      if (!regionToSave) {
-        showMessageToast('map.savePlaceFailed');
-        return;
-      }
-
-      const saved = await addSavedPlace({ name, region: regionToSave });
+      const saved = await addSavedPlace({ name, region: draftRegion });
       if (!saved) {
         showMessageToast('map.savePlaceFailed');
         return;

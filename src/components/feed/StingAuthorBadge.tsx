@@ -56,7 +56,7 @@ export function StingAuthorBadge({
       )}
 
       <Text
-        className="max-w-[72px] text-center font-inter text-[11px] font-medium text-hive-foreground"
+        className="max-w-[72px] font-inter text-[11px] font-medium text-hive-foreground"
         numberOfLines={1}
       >
         {username}

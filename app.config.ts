@@ -37,12 +37,23 @@ function toGoogleOAuthScheme(clientId: string): string | null {
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   const { apiUrl, wsUrl } = resolveUrls();
-  // Public Android OAuth client ID — fallback needed because EAS cloud builds
-  // do not load local .env, and the scheme must be baked into the APK.
+  // Public OAuth client IDs — fallback needed because EAS cloud builds do not
+  // load local .env, and reversed-client URL schemes must be baked into the binary.
   const googleAndroidClientId =
     process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ||
     '678948952262-i44jauudeqfeumnlpeh3hup1b26db6fu.apps.googleusercontent.com';
-  const googleOAuthScheme = toGoogleOAuthScheme(googleAndroidClientId);
+  const googleIosClientId =
+    process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ||
+    '678948952262-s2aj0tjmj1t3n9lm2v38gtibj6ij785c.apps.googleusercontent.com';
+  const googleWebClientId =
+    process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+    '678948952262-q5dk63h8cun084olnajjidf535uejkgc.apps.googleusercontent.com';
+  const googleAndroidOAuthScheme = toGoogleOAuthScheme(googleAndroidClientId);
+  const googleIosOAuthScheme = toGoogleOAuthScheme(googleIosClientId);
+  const googleOAuthSchemes = [googleAndroidOAuthScheme, googleIosOAuthScheme].filter(
+    (scheme, index, schemes): scheme is string =>
+      Boolean(scheme) && schemes.indexOf(scheme) === index,
+  );
 
   if (process.env.NODE_ENV !== 'production') {
     console.log('[app.config] API_URL =', apiUrl);
@@ -56,7 +67,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
-    scheme: ['hiveapp', 'com.hive.app', ...(googleOAuthScheme ? [googleOAuthScheme] : [])],
+    scheme: ['hiveapp', 'com.hive.app', ...googleOAuthSchemes],
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     platforms: ['ios', 'android'],
@@ -73,6 +84,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       supportsTablet: false,
       bundleIdentifier: 'com.hive.app',
       icon: './assets/Hive.icon',
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+      },
       config: {
         googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
       },
@@ -94,14 +108,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
-      ...(googleOAuthScheme
+      ...(googleAndroidOAuthScheme
         ? {
             intentFilters: [
               {
                 action: 'VIEW',
                 data: [
                   {
-                    scheme: googleOAuthScheme,
+                    scheme: googleAndroidOAuthScheme,
                     pathPrefix: '/oauth2redirect',
                   },
                 ],
@@ -180,9 +194,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       apiUrl,
       wsUrl,
-      googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',
-      googleIosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? '',
-      googleAndroidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? '',
+      googleWebClientId,
+      googleIosClientId,
+      googleAndroidClientId,
       googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
     },
   };

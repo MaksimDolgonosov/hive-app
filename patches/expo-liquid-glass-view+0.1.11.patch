@@ -1,0 +1,95 @@
+diff --git a/node_modules/expo-liquid-glass-view/ios/ExpoLiquidGlass.podspec b/node_modules/expo-liquid-glass-view/ios/ExpoLiquidGlass.podspec
+index 7590d9c..159972c 100644
+--- a/node_modules/expo-liquid-glass-view/ios/ExpoLiquidGlass.podspec
++++ b/node_modules/expo-liquid-glass-view/ios/ExpoLiquidGlass.podspec
+@@ -24,35 +24,9 @@ Pod::Spec.new do |s|
+     'DEFINES_MODULE' => 'YES',
+   }
+ 
+-  s.source_files = "**/*.{h,m,mm,swift,hpp,cpp,metal}"
++  s.source_files = "**/*.{h,m,mm,swift,hpp,cpp}"
+ 
+   s.resource_bundles = {
+     'ExpoLiquidGlassShaders' => ['Shaders/bundle-marker.txt']
+   }
+-
+-  s.script_phases = [
+-    {
+-      :name => 'Bundle compiled Metal shaders',
+-      :execution_position => :after_compile,
+-      :shell_path => '/bin/sh',
+-      :script => <<-SCRIPT.gsub(/^ {8}/, '')
+-        set -e
+-
+-        METALLIB="${TARGET_BUILD_DIR}/default.metallib"
+-        BUNDLE="${TARGET_BUILD_DIR}/ExpoLiquidGlassShaders.bundle"
+-
+-        if [ ! -f "$METALLIB" ]; then
+-          echo "error: default.metallib not found at $METALLIB - were the .metal files compiled?"
+-          exit 1
+-        fi
+-
+-        if [ ! -d "$BUNDLE" ]; then
+-          echo "error: ExpoLiquidGlassShaders.bundle not found at $BUNDLE"
+-          exit 1
+-        fi
+-
+-        cp "$METALLIB" "$BUNDLE/default.metallib"
+-      SCRIPT
+-    }
+-  ]
+ end
+diff --git a/node_modules/expo-liquid-glass-view/ios/Views/LiquidGlassView.swift b/node_modules/expo-liquid-glass-view/ios/Views/LiquidGlassView.swift
+index b0ca590..96f3e4b 100644
+--- a/node_modules/expo-liquid-glass-view/ios/Views/LiquidGlassView.swift
++++ b/node_modules/expo-liquid-glass-view/ios/Views/LiquidGlassView.swift
+@@ -69,11 +69,12 @@ class LiquidGlassView: ExpoView {
+     var metal = GlassMetalOptions() {
+         didSet {
+             setNeedsAppearanceUpdate()
+-            if borderWidth != cachedBorderWidth { invalidateShape() }
++            if metalBorderWidth != cachedBorderWidth { invalidateShape() }
+         }
+     }
+ 
+-    private var borderWidth: CGFloat {
++    // Do not name this `borderWidth`: UIView gained that property in the iOS 26 SDK.
++    private var metalBorderWidth: CGFloat {
+         CGFloat(metal.border?.width ?? 1)
+     }
+ 
+@@ -368,13 +369,13 @@ class LiquidGlassView: ExpoView {
+         guard !shapeIsValid
+             || cachedShapeSize != bounds.size
+             || cachedRadii != radii
+-            || cachedBorderWidth != borderWidth
++            || cachedBorderWidth != metalBorderWidth
+         else { return }
+ 
+         shapeIsValid = true
+         cachedShapeSize = bounds.size
+         cachedRadii = radii
+-        cachedBorderWidth = borderWidth
++        cachedBorderWidth = metalBorderWidth
+ 
+         let clamped = radii.clamped(to: bounds.size)
+         surface.cornerRadii = radii.simd(for: bounds.size)
+@@ -427,15 +428,15 @@ class LiquidGlassView: ExpoView {
+ 
+     private func applyBorder(_ radii: CornerRadiiValues) {
+ 
+-        let visible = !isUsingNativeGlass && borderWidth > 0
++        let visible = !isUsingNativeGlass && metalBorderWidth > 0
+         borderLayer.isHidden = !visible
+         guard visible else { return }
+ 
+         borderLayer.frame = bounds
+         borderMask.frame = bounds
+-        borderMask.lineWidth = borderWidth
++        borderMask.lineWidth = metalBorderWidth
+ 
+-        borderMask.path = path(for: radii, inset: borderWidth / 2).cgPath
++        borderMask.path = path(for: radii, inset: metalBorderWidth / 2).cgPath
+     }
+ 
+     private func path(for radii: CornerRadiiValues, inset: CGFloat = 0) -> UIBezierPath {

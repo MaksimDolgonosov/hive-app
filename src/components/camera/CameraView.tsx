@@ -53,7 +53,7 @@ export function HiveCameraView({
         </Text>
         <Pressable
           accessibilityRole="button"
-          className="mt-6 rounded-hive-md bg-hive-primary px-6 py-3"
+          className="mt-6 rounded-full bg-hive-primary px-6 py-3"
           onPress={() => {
             if (permission.canAskAgain) {
               void requestPermission();
@@ -62,7 +62,7 @@ export function HiveCameraView({
             void Linking.openSettings();
           }}
         >
-          <Text className="font-inter text-base font-bold text-white">
+          <Text className="font-inter text-base font-bold text-hive-on-accent">
             {permission.canAskAgain ? t('camera.requestPermission') : t('map.openSettings')}
           </Text>
         </Pressable>

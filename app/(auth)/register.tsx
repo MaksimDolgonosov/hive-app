@@ -95,7 +95,7 @@ export default function RegisterScreen() {
 
   return (
     <AuthScreenLayout>
-      <AuthLogo subtitle={t('auth.registerSubtitle')} />
+      <AuthLogo />
 
       <AuthFormCard title={t('auth.registerTitle')} subtitle={t('auth.registerCardSubtitle')}>
         <AuthInput

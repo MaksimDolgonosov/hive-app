@@ -42,7 +42,7 @@ export function SkeletonBlock({
           width,
           height,
           borderRadius,
-          backgroundColor: '#E8E0D4',
+          backgroundColor: '#201C16',
         },
         animatedStyle,
         style,

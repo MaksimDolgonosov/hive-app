@@ -2,6 +2,7 @@ import { Vibrate } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Switch, Text, View } from 'react-native';
 
+import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { usePreferencesStore } from '@/src/stores/preferencesStore';
 
 type PublishBuzzSettingProps = {
@@ -10,6 +11,7 @@ type PublishBuzzSettingProps = {
 
 export function PublishBuzzSetting({ className }: PublishBuzzSettingProps) {
   const { t } = useTranslation();
+  const theme = useHiveTheme();
   const publishBuzzEnabled = usePreferencesStore((state) => state.publishBuzzEnabled);
   const setPublishBuzzEnabled = usePreferencesStore((state) => state.setPublishBuzzEnabled);
 
@@ -19,9 +21,9 @@ export function PublishBuzzSetting({ className }: PublishBuzzSettingProps) {
         {t('profile.publishBuzzLabel')}
       </Text>
 
-      <View className="min-h-14 flex-row items-center gap-3 rounded-hive-md border border-[#F5A62333] bg-hive-input-bg px-3.5 py-3">
+      <View className="min-h-14 flex-row items-center gap-3 rounded-hive-md border border-hive-stroke bg-hive-input-bg px-3.5 py-3">
         <View className="h-8 w-8 items-center justify-center rounded-lg bg-hive-primary/15">
-          <Vibrate color="#F5A623" size={16} strokeWidth={2} />
+          <Vibrate color={theme.accent} size={16} strokeWidth={2} />
         </View>
 
         <View className="flex-1">
@@ -32,9 +34,9 @@ export function PublishBuzzSetting({ className }: PublishBuzzSettingProps) {
 
         <Switch
           accessibilityLabel={t('profile.publishBuzzLabel')}
-          trackColor={{ false: '#E8DCC8', true: '#F5A623' }}
+          trackColor={{ false: theme.surface2, true: theme.accent }}
           thumbColor={'#FFFFFF'}
-          ios_backgroundColor="#E8DCC8"
+          ios_backgroundColor={theme.surface2}
           value={publishBuzzEnabled}
           onValueChange={(value) => {
             void setPublishBuzzEnabled(value);

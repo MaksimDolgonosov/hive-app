@@ -1,7 +1,8 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { ArrowRight } from 'lucide-react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
+import { HiveTheme } from '@/src/theme/tokens';
 
 type AuthButtonProps = {
   title: string;
@@ -9,6 +10,7 @@ type AuthButtonProps = {
   onPressIn?: () => void;
   loading?: boolean;
   disabled?: boolean;
+  showArrow?: boolean;
 };
 
 export function AuthButton({
@@ -17,6 +19,7 @@ export function AuthButton({
   onPressIn,
   loading = false,
   disabled = false,
+  showArrow = true,
 }: AuthButtonProps) {
   const isDisabled = disabled || loading;
 
@@ -28,16 +31,18 @@ export function AuthButton({
       onPressIn={onPressIn}
       style={[styles.pressable, isDisabled && styles.pressableDisabled]}
     >
-      <LinearGradient
-        colors={['#F5A623', '#FF8C00']}
-        end={{ x: 1, y: 0.5 }}
-        start={{ x: 0, y: 0.5 }}
-        style={styles.gradient}
-      >
-        {loading ? <HiveLoader color="#FFFFFF" size="small" /> : (
-          <Text style={styles.label}>{title}</Text>
+      <View style={styles.inner}>
+        {loading ? (
+          <HiveLoader color={HiveTheme.textOnAccent} size="small" />
+        ) : (
+          <>
+            <Text style={styles.label}>{title}</Text>
+            {showArrow ? (
+              <ArrowRight color={HiveTheme.textOnAccent} size={18} strokeWidth={2.5} />
+            ) : null}
+          </>
         )}
-      </LinearGradient>
+      </View>
     </Pressable>
   );
 }
@@ -45,28 +50,31 @@ export function AuthButton({
 const styles = StyleSheet.create({
   pressable: {
     width: '100%',
-    borderRadius: 14,
-    shadowColor: '#F5A623',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.27,
-    shadowRadius: 12,
-    elevation: 4,
+    borderRadius: HiveTheme.radiusPill,
+    shadowColor: HiveTheme.accent,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.28,
+    shadowRadius: 18,
+    elevation: 6,
   },
   pressableDisabled: {
     opacity: 0.7,
   },
-  gradient: {
+  inner: {
     width: '100%',
-    height: 52,
-    borderRadius: 14,
+    height: 56,
+    borderRadius: HiveTheme.radiusPill,
+    backgroundColor: HiveTheme.accent,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 10,
   },
   label: {
-    fontFamily: 'Inter-Bold',
+    fontFamily: HiveTheme.fontBodyBold,
     fontSize: 16,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: HiveTheme.textOnAccent,
     textAlign: 'center',
   },
 });

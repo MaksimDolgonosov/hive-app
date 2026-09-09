@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.12)',
   },
   chipActive: {
-    backgroundColor: '#F5A623',
+    backgroundColor: '#FFB800',
   },
   chipDisabled: {
     opacity: 0.35,
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   labelActive: {
-    color: '#FFFFFF',
+    color: '#0B0A08',
   },
   labelDisabled: {
     color: 'rgba(255, 255, 255, 0.6)',

@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
-import { Linking, Pressable, Text, View } from 'react-native';
+import { Linking, Pressable, Text } from 'react-native';
 
 import { LoadingScreen } from '@/src/components/ui/LoadingScreen';
+import { ScreenBackground } from '@/src/components/ui/ScreenBackground';
 import type { LocationStatus } from '@/src/hooks/useLocation';
 
 type LocationAccessGateProps = {
@@ -26,8 +27,8 @@ export function LocationAccessGate({
 
   if (status === 'undetermined') {
     return (
-      <View
-        className="flex-1 items-center justify-center bg-hive-bg px-8"
+      <ScreenBackground
+        className="items-center justify-center px-8"
         style={{ paddingBottom: bottomInset }}
       >
         <Text className="text-center font-inter text-lg font-semibold text-hive-foreground">
@@ -38,21 +39,21 @@ export function LocationAccessGate({
         </Text>
         <Pressable
           accessibilityRole="button"
-          className="mt-6 rounded-hive-md bg-hive-primary px-6 py-3"
+          className="mt-6 rounded-full bg-hive-primary px-6 py-3"
           onPress={onRequestPermission}
         >
-          <Text className="font-inter text-base font-bold text-white">
+          <Text className="font-inter text-base font-bold text-hive-on-accent">
             {t('onboarding.allowLocation')}
           </Text>
         </Pressable>
-      </View>
+      </ScreenBackground>
     );
   }
 
   if (status === 'denied') {
     return (
-      <View
-        className="flex-1 items-center justify-center bg-hive-bg px-8"
+      <ScreenBackground
+        className="items-center justify-center px-8"
         style={{ paddingBottom: bottomInset }}
       >
         <Text className="text-center font-inter text-lg font-semibold text-hive-foreground">
@@ -63,12 +64,12 @@ export function LocationAccessGate({
         </Text>
         <Pressable
           accessibilityRole="button"
-          className="mt-6 rounded-hive-md bg-hive-primary px-6 py-3"
+          className="mt-6 rounded-full bg-hive-primary px-6 py-3"
           onPress={() => void Linking.openSettings()}
         >
-          <Text className="font-inter text-base font-bold text-white">{t('map.openSettings')}</Text>
+          <Text className="font-inter text-base font-bold text-hive-on-accent">{t('map.openSettings')}</Text>
         </Pressable>
-      </View>
+      </ScreenBackground>
     );
   }
 

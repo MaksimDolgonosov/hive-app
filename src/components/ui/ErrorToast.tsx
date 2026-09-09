@@ -32,11 +32,11 @@ export function ErrorToast() {
       <View
         className={`flex-row items-start gap-3 rounded-hive-md border px-4 py-3 shadow-md ${
           isError
-            ? 'border-red-200 bg-[#FFF5F5]'
-            : 'border-[#F5A62333] bg-hive-surface'
+            ? 'border-hive-danger/40 bg-[#2A1614]'
+            : 'border-hive-stroke bg-hive-surface'
         }`}
       >
-        <AlertCircle color={isError ? '#DC2626' : '#F5A623'} size={20} strokeWidth={2.5} />
+        <AlertCircle color={isError ? '#DC2626' : '#FFB800'} size={20} strokeWidth={2.5} />
 
         <View className="min-w-0 flex-1">
           {title ? (
@@ -57,7 +57,7 @@ export function ErrorToast() {
           hitSlop={8}
           onPress={hide}
         >
-          <X color="#8B7355" size={16} strokeWidth={2.5} />
+          <X color="#9C9287" size={16} strokeWidth={2.5} />
         </Pressable>
       </View>
     </View>

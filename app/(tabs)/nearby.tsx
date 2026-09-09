@@ -1,12 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  FlatList,
-  Pressable,
-  RefreshControl,
-  Text,
-  View,
-} from 'react-native';
+import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -14,6 +8,7 @@ import { HiveNearbyCard } from '@/src/components/feed/HiveNearbyCard';
 import { NearbyCard } from '@/src/components/feed/NearbyCard';
 import { LocationAccessGate } from '@/src/components/map/LocationAccessGate';
 import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
+import { ScreenBackground } from '@/src/components/ui/ScreenBackground';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { useLocation } from '@/src/hooks/useLocation';
@@ -123,10 +118,20 @@ export default function NearbyScreen() {
   }
 
   return (
-    <View className="flex-1 bg-hive-bg">
-      <View className="px-6 pb-4" style={{ paddingTop: insets.top + 16 }}>
-        <Text className="font-inter text-2xl font-bold text-hive-foreground">{t('nearby.title')}</Text>
-        <Text className="mt-1 font-inter text-sm text-hive-muted">{t('nearby.subtitle')}</Text>
+    <ScreenBackground>
+      <View
+        className="flex-row items-end justify-between px-5 pb-4"
+        style={{ paddingTop: insets.top + 8 }}
+      >
+        <Text className="font-display text-[28px] font-bold text-hive-foreground">
+          {t('nearby.title')}
+        </Text>
+        <View className="flex-row items-center gap-1.5 rounded-full bg-hive-signal/20 px-3 py-[7px]">
+          <View className="h-1.5 w-1.5 rounded-full bg-hive-signal" />
+          <Text className="font-inter text-xs font-semibold text-hive-signal">
+            {t('nearby.activeCount', { count: feedItems.length })}
+          </Text>
+        </View>
       </View>
 
       <FlatList
@@ -134,15 +139,15 @@ export default function NearbyScreen() {
           paddingHorizontal: 16,
           paddingBottom: listBottomInset,
           flexGrow: feedItems.length === 0 ? 1 : undefined,
-          gap: 10,
+          gap: 14,
         }}
         data={feedItems}
         keyExtractor={(item) => item.key}
         refreshControl={
           <RefreshControl
-            colors={['#F5A623']}
+            colors={['#FFB800']}
             refreshing={isRefetching && !isFetching}
-            tintColor="#F5A623"
+            tintColor="#FFB800"
             onRefresh={() => void refetch()}
           />
         }
@@ -177,10 +182,10 @@ export default function NearbyScreen() {
               </Text>
               <Pressable
                 accessibilityRole="button"
-                className="mt-4 rounded-hive-md bg-hive-primary px-5 py-2.5"
+                className="mt-4 rounded-full bg-hive-primary px-5 py-2.5"
                 onPress={() => void refetch()}
               >
-                <Text className="font-inter text-sm font-semibold text-white">
+                <Text className="font-inter text-sm font-semibold text-hive-on-accent">
                   {t('nearby.retry')}
                 </Text>
               </Pressable>
@@ -204,9 +209,7 @@ export default function NearbyScreen() {
         </View>
       )}
 
-      {selectedHiveId && (
-        <HiveBottomSheet hiveId={selectedHiveId} onClose={closeHiveSheet} />
-      )}
-    </View>
+      {selectedHiveId && <HiveBottomSheet hiveId={selectedHiveId} onClose={closeHiveSheet} />}
+    </ScreenBackground>
   );
 }

@@ -12,7 +12,7 @@ import Animated, {
 
 import { notifyLikeTap } from '@/src/utils/haptics';
 
-const LIKE_COLOR_LIGHT = '#F5A623';
+const LIKE_COLOR_LIGHT = '#FFB800';
 const LIKE_COLOR_DARK = '#bf7600';
 const HEART_LIFT_Y = -28;
 const HEART_SCALE_PEAK = 1.5;
@@ -148,15 +148,19 @@ export function StingLikeButton({
 
         <Animated.View pointerEvents="none" style={[styles.heartLayer, heartIdleLayerStyle]}>
           <Heart
-            color="#FFFFFF"
-            fill={showLikedButton ? '#FFFFFF' : 'transparent'}
+            color={showLikedButton ? '#0B0A08' : '#FFFFFF'}
+            fill={showLikedButton ? '#0B0A08' : 'transparent'}
             size={HEART_SIZE}
             strokeWidth={2}
           />
         </Animated.View>
       </Animated.View>
 
-      <Text className="font-inter text-base font-semibold text-white">{reactionsCount}</Text>
+      <Text
+        className={`font-inter text-base font-semibold ${showLikedButton ? 'text-hive-on-accent' : 'text-white'}`}
+      >
+        {reactionsCount}
+      </Text>
     </Pressable>
   );
 }

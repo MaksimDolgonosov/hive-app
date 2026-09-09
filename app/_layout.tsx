@@ -2,16 +2,20 @@ import '../global.css';
 
 import {
   Inter_400Regular,
+  Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
   useFonts,
 } from '@expo-google-fonts/inter';
+import { SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import * as SystemUI from 'expo-system-ui';
 import { useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
@@ -22,7 +26,8 @@ import { LoadingScreen } from '@/src/components/ui/LoadingScreen';
 import i18n from '@/src/i18n';
 import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import { useLocaleStore } from '@/src/stores/localeStore';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { HIVE_NATIVEWIND_VARS } from '@/src/theme/nativewind-vars';
+import { HiveThemes } from '@/src/theme/tokens';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,14 +36,17 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const localeReady = useLocaleStore((state) => state.isReady);
   const hydrateLocale = useLocaleStore((state) => state.hydrate);
   const hydratePreferences = usePreferencesStore((state) => state.hydrate);
+  const preferencesReady = usePreferencesStore((state) => state.isHydrated);
+  const colorScheme = usePreferencesStore((state) => state.colorScheme);
   const [fontsLoaded, fontError] = useFonts({
     Inter: Inter_400Regular,
+    'Inter-Medium': Inter_500Medium,
     'Inter-SemiBold': Inter_600SemiBold,
     'Inter-Bold': Inter_700Bold,
+    'SpaceGrotesk-Bold': SpaceGrotesk_700Bold,
   });
 
   useEffect(() => {
@@ -47,19 +55,44 @@ export default function RootLayout() {
   }, [hydrateLocale, hydratePreferences]);
 
   useEffect(() => {
-    if ((fontsLoaded || fontError) && localeReady) {
+    void SystemUI.setBackgroundColorAsync(HiveThemes[colorScheme].bg);
+  }, [colorScheme]);
+
+  const isReady = (fontsLoaded || Boolean(fontError)) && localeReady && preferencesReady;
+
+  useEffect(() => {
+    if (isReady) {
       SplashScreen.hideAsync();
     }
-  }, [fontError, fontsLoaded, localeReady]);
+  }, [isReady]);
 
-  if ((!fontsLoaded && !fontError) || !localeReady) {
-    return <LoadingScreen />;
+  if (!isReady) {
+    return (
+      <View style={[{ flex: 1 }, HIVE_NATIVEWIND_VARS[colorScheme]]}>
+        <LoadingScreen />
+      </View>
+    );
   }
+
+  const palette = HiveThemes[colorScheme];
+  const navigationTheme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
 
   return (
     <I18nextProvider i18n={i18n}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <ThemeProvider
+          value={{
+            ...navigationTheme,
+            colors: {
+              ...navigationTheme.colors,
+              background: palette.bg,
+              card: palette.surface,
+              text: palette.text,
+              border: palette.stroke,
+              primary: palette.accent,
+            },
+          }}
+        >
           <QueryProvider>
             <AuthProvider>
               <AppShell>
@@ -75,7 +108,7 @@ export default function RootLayout() {
               </AppShell>
             </AuthProvider>
           </QueryProvider>
-          <StatusBar style="dark" />
+          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         </ThemeProvider>
       </GestureHandlerRootView>
     </I18nextProvider>

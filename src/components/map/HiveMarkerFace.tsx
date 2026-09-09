@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { HiveGradients, HiveTheme } from '@/src/theme/tokens';
 import { getHiveMarkerVisualMetrics } from '@/src/utils/hive-marker-visual';
 
 type HiveMarkerFaceProps = {
@@ -49,11 +50,12 @@ export function HiveMarkerFace({ count, animate = true }: HiveMarkerFaceProps) {
         {
           width: metrics.markerSize,
           height: metrics.markerSize,
+          borderRadius: metrics.markerSize / 2,
         },
       ]}
     >
       <LinearGradient
-        colors={['#F5A623', '#FF8C00']}
+        colors={[...HiveGradients.marker]}
         end={{ x: 1, y: 1 }}
         start={{ x: 0, y: 0 }}
         style={[
@@ -65,7 +67,12 @@ export function HiveMarkerFace({ count, animate = true }: HiveMarkerFaceProps) {
           },
         ]}
       >
-        <Hexagon color="#FFFFFF" fill="#FFFFFF" size={metrics.iconSize} strokeWidth={0} />
+        <Hexagon
+          color={HiveTheme.textOnAccent}
+          fill={HiveTheme.textOnAccent}
+          size={metrics.iconSize}
+          strokeWidth={0}
+        />
         <Text
           style={[
             styles.count,
@@ -96,7 +103,12 @@ export function HiveMarkerFaceStatic({ count }: { count: number }) {
         },
       ]}
     >
-      <Hexagon color="#FFFFFF" fill="#FFFFFF" size={metrics.iconSize} strokeWidth={0} />
+      <Hexagon
+        color={HiveTheme.textOnAccent}
+        fill={HiveTheme.textOnAccent}
+        size={metrics.iconSize}
+        strokeWidth={0}
+      />
       <Text
         style={[
           styles.count,
@@ -114,29 +126,27 @@ export function HiveMarkerFaceStatic({ count }: { count: number }) {
 
 const styles = StyleSheet.create({
   shadow: {
-    shadowColor: '#F5A623',
+    shadowColor: HiveTheme.accent,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.67,
+    shadowOpacity: 0.72,
     shadowRadius: 16,
   },
   marker: {
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
     paddingTop: 2,
   },
   markerStatic: {
-    backgroundColor: '#F5A623',
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
+    backgroundColor: HiveTheme.accent,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
     paddingTop: 2,
   },
   count: {
-    color: '#FFFFFF',
-    fontFamily: 'Inter-Bold',
+    color: HiveTheme.textOnAccent,
+    fontFamily: HiveTheme.fontDisplay,
     fontWeight: '700',
     includeFontPadding: false,
   },

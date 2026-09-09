@@ -51,10 +51,10 @@ export default function MyPhotosScreen() {
           </Text>
           <Pressable
             accessibilityRole="button"
-            className="mt-4 rounded-hive-md bg-hive-primary px-5 py-2.5"
+            className="mt-4 rounded-full bg-hive-primary px-5 py-2.5"
             onPress={() => void refetch()}
           >
-            <Text className="font-inter text-sm font-semibold text-white">
+            <Text className="font-inter text-sm font-semibold text-hive-on-accent">
               {t('profile.collections.retry')}
             </Text>
           </Pressable>
@@ -73,9 +73,9 @@ export default function MyPhotosScreen() {
           contentContainerStyle={profilePhotoGridPadding(listBottomInset)}
           refreshControl={
             <RefreshControl
-              colors={['#F5A623']}
+              colors={['#FFB800']}
               refreshing={isRefetching && !isLoading}
-              tintColor="#F5A623"
+              tintColor="#FFB800"
               onRefresh={() => void refetch()}
             />
           }

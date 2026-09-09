@@ -1,12 +1,16 @@
 import { Stack } from 'expo-router';
 
+import { useHiveTheme } from '@/src/hooks/useHiveTheme';
+
 export default function AuthLayout() {
+  const theme = useHiveTheme();
+
   return (
     <Stack
       screenOptions={{
         headerShown: false,
         animation: 'fade',
-        contentStyle: { backgroundColor: '#FFF8ED' },
+        contentStyle: { backgroundColor: theme.bg },
       }}
     >
       <Stack.Screen name="login" />

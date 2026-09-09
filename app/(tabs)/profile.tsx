@@ -1,7 +1,14 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router, type Href } from 'expo-router';
-import { Bookmark, Heart, Hexagon, Image as ImageIcon, LogOut, Settings } from 'lucide-react-native';
+import {
+  Bookmark,
+  Heart,
+  Hexagon,
+  Image as ImageIcon,
+  LogOut,
+  Settings,
+  SlidersHorizontal,
+} from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -10,7 +17,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProfileAboutCard } from '@/src/components/profile/ProfileAboutCard';
 import { PublishBuzzSetting } from '@/src/components/profile/PublishBuzzSetting';
 import { ProfileEditModal } from '@/src/components/profile/ProfileEditModal';
-import { ProfileGlassCard } from '@/src/components/profile/ProfileGlassCard';
 import { ProfileHeaderCard } from '@/src/components/profile/ProfileHeaderCard';
 import { ProfileMenuRow } from '@/src/components/profile/ProfileMenuRow';
 import { ProfileRecentPhotos } from '@/src/components/profile/ProfileRecentPhotos';
@@ -18,6 +24,9 @@ import { ProfileSettingsModal } from '@/src/components/profile/ProfileSettingsMo
 import { ProfileSkeleton } from '@/src/components/profile/ProfileSkeleton';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { LanguageSelect } from '@/src/components/ui/LanguageSelect';
+import { ScreenBackground } from '@/src/components/ui/ScreenBackground';
+import { ThemeSelect } from '@/src/components/ui/ThemeSelect';
+import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { useProfileOverview } from '@/src/hooks/useProfileOverview';
 import { useAuthStore } from '@/src/stores/authStore';
 import { useSavedMapPlacesStore } from '@/src/stores/savedMapPlacesStore';
@@ -39,6 +48,7 @@ function formatMemberDate(isoDate: string, locale: string): string {
 
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
+  const theme = useHiveTheme();
   const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -47,8 +57,11 @@ export default function ProfileScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
 
-  const { data: profileOverview, isLoading: isOverviewLoading, refetch: refetchProfileOverview } =
-    useProfileOverview(user !== null);
+  const {
+    data: profileOverview,
+    isLoading: isOverviewLoading,
+    refetch: refetchProfileOverview,
+  } = useProfileOverview(user !== null);
 
   const showSkeleton = !user || (isOverviewLoading && !profileOverview);
 
@@ -88,46 +101,60 @@ export default function ProfileScreen() {
 
   if (showSkeleton) {
     return (
-      <LinearGradient
-        colors={['#FFF8ED', '#FFE8B8', '#FFD54F44']}
-        locations={[0, 0.5, 1]}
-        style={{ flex: 1 }}
-      >
+      <ScreenBackground>
         <ScrollView
           contentContainerStyle={{
-            paddingTop: insets.top + 16,
+            paddingTop: insets.top + 8,
             paddingBottom: getGlassTabBarInset(insets.bottom) + 16,
             paddingHorizontal: 20,
-            gap: 10,
+            gap: 24,
           }}
           showsVerticalScrollIndicator={false}
         >
+          <Text className="font-display text-[28px] font-bold text-hive-foreground">
+            {t('tabs.profile')}
+          </Text>
           <ProfileSkeleton />
         </ScrollView>
-      </LinearGradient>
+      </ScreenBackground>
     );
   }
 
   return (
-    <LinearGradient
-      colors={['#FFF8ED', '#FFE8B8', '#FFD54F44']}
-      locations={[0, 0.5, 1]}
-      style={{ flex: 1 }}
-    >
+    <ScreenBackground>
       <ScrollView
         contentContainerStyle={{
-          paddingTop: insets.top + 16,
+          paddingTop: insets.top + 8,
           paddingBottom: getGlassTabBarInset(insets.bottom) + 16,
           paddingHorizontal: 20,
-          gap: 10,
+          gap: 24,
         }}
         showsVerticalScrollIndicator={false}
       >
+        <View className="flex-row items-center justify-between">
+          <Text className="font-display text-[28px] font-bold text-hive-foreground">
+            {t('tabs.profile')}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('profile.menuSettings')}
+            className="h-10 w-10 items-center justify-center rounded-full border border-hive-stroke bg-hive-surface"
+            onPress={() => setSettingsOpen(true)}
+          >
+            <SlidersHorizontal color={theme.textMuted} size={18} strokeWidth={2} />
+          </Pressable>
+        </View>
+
         <ProfileHeaderCard editableAvatar stats={stats} subtitle={subtitle} user={user} />
 
         <ProfileAboutCard user={user} onEdit={() => setEditProfileOpen(true)} />
 
-        <ProfileGlassCard>
+        <ProfileRecentPhotos
+          photoUrls={recentPhotos}
+          onViewAll={() => router.push('/(modals)/profile/photos' as Href)}
+        />
+
+        <View>
           <ProfileMenuRow
             badge={stats.photos > 0 ? stats.photos : undefined}
             icon={ImageIcon}
@@ -160,14 +187,10 @@ export default function ProfileScreen() {
             icon={LogOut}
             label={t('profile.menuLogout')}
             showDivider={false}
+            tone="danger"
             onPress={() => void handleLogout()}
           />
-        </ProfileGlassCard>
-
-        <ProfileRecentPhotos
-          photoUrls={recentPhotos}
-          onViewAll={() => router.push('/(modals)/profile/photos' as Href)}
-        />
+        </View>
       </ScrollView>
 
       <ProfileSettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)}>
@@ -178,13 +201,14 @@ export default function ProfileScreen() {
               {t('profile.menuSettings')}
             </Text>
             <LanguageSelect />
+            <ThemeSelect className="mt-4" />
             <PublishBuzzSetting className="mt-4" />
             <Pressable
               accessibilityRole="button"
-              className="mt-6 items-center rounded-hive-md bg-hive-primary py-3"
+              className="mt-6 items-center rounded-full bg-hive-primary py-3"
               onPress={requestClose}
             >
-              <Text className="font-inter text-base font-semibold text-white">
+              <Text className="font-inter text-base font-semibold text-hive-on-accent">
                 {t('profile.closeSettings')}
               </Text>
             </Pressable>
@@ -197,6 +221,6 @@ export default function ProfileScreen() {
         visible={editProfileOpen}
         onClose={() => setEditProfileOpen(false)}
       />
-    </LinearGradient>
+    </ScreenBackground>
   );
 }

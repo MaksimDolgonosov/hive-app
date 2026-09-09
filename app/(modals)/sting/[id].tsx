@@ -181,10 +181,10 @@ export default function StingDetailScreen() {
         <Text className="text-center font-inter text-base text-white">{t('sting.notFound')}</Text>
         <Pressable
           accessibilityRole="button"
-          className="mt-6 rounded-hive-md bg-hive-primary px-6 py-3"
+          className="mt-6 rounded-full bg-hive-primary px-6 py-3"
           onPress={handleClose}
         >
-          <Text className="font-inter text-base font-bold text-white">{t('sting.close')}</Text>
+          <Text className="font-inter text-base font-bold text-hive-on-accent">{t('sting.close')}</Text>
         </Pressable>
       </View>
     );
@@ -323,7 +323,7 @@ function StingDetailBody({
                   />
                 ) : (
                   <LinearGradient
-                    colors={['#F5A623', '#FF8C00']}
+                    colors={['#FFB800', '#FFB800']}
                     end={{ x: 1, y: 1 }}
                     start={{ x: 0, y: 0 }}
                     style={{

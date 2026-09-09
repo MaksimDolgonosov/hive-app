@@ -5,7 +5,7 @@ import {
   ONBOARDING_CONTENT_STEPS,
   OnboardingScreen,
 } from '@/src/components/onboarding/OnboardingScreen';
-import { CameraIllustration } from '@/src/components/onboarding/OnboardingIllustrations';
+import { ONBOARDING_IMAGES } from '@/src/constants/onboarding-images';
 import { useOnboardingSkip } from '@/src/hooks/useOnboardingSkip';
 
 export default function OnboardingStep1Screen() {
@@ -15,11 +15,10 @@ export default function OnboardingStep1Screen() {
   return (
     <OnboardingScreen
       actionLabel={t('onboarding.next')}
+      backgroundSource={ONBOARDING_IMAGES.camera}
       description={t('onboarding.step1Description')}
-      illustration={<CameraIllustration />}
       skipLabel={t('onboarding.skip')}
       step={2}
-      subtitle={t('onboarding.step1Subtitle')}
       title={t('onboarding.step1Title')}
       totalSteps={ONBOARDING_CONTENT_STEPS}
       onAction={() => router.push('/(onboarding)/step2' as Href)}

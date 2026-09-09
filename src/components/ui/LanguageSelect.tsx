@@ -5,6 +5,7 @@ import { FlatList, Modal, Pressable, Text, View, useWindowDimensions } from 'rea
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppLanguage, SUPPORTED_LANGUAGES } from '@/src/i18n/languages';
+import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { useLocaleStore } from '@/src/stores/localeStore';
 
 type LanguageSelectProps = {
@@ -15,6 +16,7 @@ const LIST_MAX_HEIGHT = 320;
 
 export function LanguageSelect({ className }: LanguageSelectProps) {
   const { t } = useTranslation();
+  const theme = useHiveTheme();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const language = useLocaleStore((state) => state.language);
@@ -38,14 +40,14 @@ export function LanguageSelect({ className }: LanguageSelectProps) {
         <Pressable
           accessibilityRole="button"
           accessibilityState={{ expanded: open }}
-          className="h-14 flex-row items-center gap-2.5 rounded-hive-md border border-[#F5A62333] bg-hive-input-bg px-3.5"
+          className="h-14 flex-row items-center gap-2.5 rounded-hive-md border border-hive-stroke bg-hive-input-bg px-3.5"
           onPress={() => setOpen(true)}
         >
-          <Globe color="#8B7355" size={18} strokeWidth={2} />
+          <Globe color={theme.textMuted} size={18} strokeWidth={2} />
           <Text className="flex-1 font-inter text-[15px] text-hive-foreground">
             {t(`language.${language}`)}
           </Text>
-          <ChevronDown color="#8B7355" size={18} strokeWidth={2} />
+          <ChevronDown color={theme.textMuted} size={18} strokeWidth={2} />
         </Pressable>
       </View>
 
@@ -88,7 +90,7 @@ export function LanguageSelect({ className }: LanguageSelectProps) {
                     >
                       {t(`language.${item}`)}
                     </Text>
-                    {isActive && <Check color="#F5A623" size={18} strokeWidth={2.5} />}
+                    {isActive && <Check color={theme.accent} size={18} strokeWidth={2.5} />}
                   </Pressable>
                 );
               }}

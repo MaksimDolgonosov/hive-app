@@ -4,6 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import type { Hive } from '@/src/types';
 import { formatDistance } from '@/src/utils/geo';
+import { HiveTheme } from '@/src/theme/tokens';
 
 type HiveNearbyCardProps = {
   hive: Hive;
@@ -17,15 +18,15 @@ export function HiveNearbyCard({ hive, distanceM, onPress }: HiveNearbyCardProps
   return (
     <Pressable
       accessibilityRole="button"
-      className="flex-row items-center overflow-hidden rounded-hive-md bg-hive-surface px-4 py-3"
+      className="flex-row items-center overflow-hidden rounded-[22px] border border-hive-stroke bg-hive-surface px-4 py-3.5"
       onPress={onPress}
     >
       <View className="h-14 w-14 items-center justify-center rounded-full bg-hive-primary/15">
-        <Hexagon color="#F5A623" fill="rgba(245, 166, 35, 0.25)" size={28} />
+        <Hexagon color={HiveTheme.accent} fill="rgba(255, 184, 0, 0.28)" size={28} />
       </View>
 
       <View className="ml-3 flex-1">
-        <Text className="font-inter text-base font-semibold text-hive-foreground">
+        <Text className="font-display text-base font-bold text-hive-foreground">
           {t('hive.title')}
         </Text>
         <Text className="mt-0.5 font-inter text-sm text-hive-muted">

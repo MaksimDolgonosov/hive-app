@@ -2,13 +2,14 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
 import type { GlassActiveRenderer } from 'expo-liquid-glass-view';
 import { router, type Href } from 'expo-router';
-import { Camera, List, Map, User, type LucideIcon } from 'lucide-react-native';
+import { Camera, Map, Send, User, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutChangeEvent, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { HiveTheme } from '@/src/theme/tokens';
 import { shouldUseLiquidGlass } from '@/src/utils/liquid-glass';
 
 type TabKey = 'map' | 'nearby' | 'camera' | 'profile';
@@ -22,13 +23,15 @@ type TabConfig = {
 
 const TABS: TabConfig[] = [
   { key: 'map', labelKey: 'tabs.map', icon: Map, routeName: 'index' },
-  { key: 'nearby', labelKey: 'tabs.nearby', icon: List, routeName: 'nearby' },
+  { key: 'nearby', labelKey: 'tabs.nearby', icon: Send, routeName: 'nearby' },
   { key: 'camera', labelKey: 'tabs.camera', icon: Camera },
   { key: 'profile', labelKey: 'tabs.profile', icon: User, routeName: 'profile' },
 ];
 
 const GLASS_CORNER_RADIUS = 28;
 const GLASS_TINT = 'rgba(255, 255, 255, 0.58)';
+const INACTIVE_TAB_COLOR = '#8B7355';
+const ACTIVE_TAB_COLOR = '#FFFFFF';
 
 const TAB_SPRING = {
   damping: 22,
@@ -103,6 +106,7 @@ function TabBarContent({
       {TABS.map((tab) => {
         const isActive = tab.key === activeTab;
         const Icon = tab.icon;
+        const color = isActive ? ACTIVE_TAB_COLOR : INACTIVE_TAB_COLOR;
 
         return (
           <Pressable
@@ -113,7 +117,7 @@ function TabBarContent({
             onPress={() => onPress(tab)}
             style={styles.tab}
           >
-            <Icon color={isActive ? '#FFFFFF' : '#8B7355'} size={22} />
+            <Icon color={color} size={20} strokeWidth={2.1} />
             <Text style={[styles.label, isActive && styles.labelActive]}>{t(tab.labelKey)}</Text>
           </Pressable>
         );
@@ -123,7 +127,6 @@ function TabBarContent({
 }
 
 function AndroidGlassSurface({ children }: { children: ReactNode }) {
-  // BlurView поверх MapView на Android ломает рендер карты.
   return <View style={[styles.glass, styles.glassAndroid]}>{children}</View>;
 }
 
@@ -242,12 +245,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.5)',
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    marginBottom: GLASS_TAB_BAR_BOTTOM_GAP,
   },
   glassLiquid: {
     height: GLASS_TAB_BAR_HEIGHT,
     width: '100%',
-    marginBottom: GLASS_TAB_BAR_BOTTOM_GAP,
   },
   glassContainer: {
     flex: 1,
@@ -260,17 +261,17 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 6,
+    padding: 4,
     gap: 4,
     position: 'relative',
   },
   activePill: {
     position: 'absolute',
-    top: 6,
-    bottom: 6,
+    top: 4,
+    bottom: 4,
     left: 0,
-    borderRadius: 22,
-    backgroundColor: '#F5A623',
+    borderRadius: 24,
+    backgroundColor: HiveTheme.accent,
   },
   tab: {
     flex: 1,
@@ -278,17 +279,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 2,
-    borderRadius: 22,
+    borderRadius: 24,
     zIndex: 1,
   },
   label: {
-    fontFamily: 'Inter',
+    fontFamily: HiveTheme.fontBodySemiBold,
     fontSize: 10,
-    color: '#8B7355',
+    fontWeight: '600',
+    color: INACTIVE_TAB_COLOR,
   },
   labelActive: {
-    color: '#FFFFFF',
-    fontFamily: 'Inter-SemiBold',
-    fontWeight: '600',
+    color: ACTIVE_TAB_COLOR,
   },
 });

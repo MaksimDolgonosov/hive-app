@@ -43,9 +43,9 @@ export function HiveCircle({ hive, imageUri, onPress }: HiveCircleProps) {
     <>
       <Circle
         center={coordinate}
-        fillColor={`rgba(168, 200, 152, ${circleFillOpacity})`}
+        fillColor={`rgba(255, 184, 0, ${circleFillOpacity * 0.45})`}
         radius={hive.radiusM}
-        strokeColor="rgba(255, 255, 255, 0.4)"
+        strokeColor="rgba(255, 184, 0, 0.35)"
         strokeWidth={1}
       />
       {Platform.OS === 'android' ? (
@@ -72,6 +72,7 @@ export function HiveCircle({ hive, imageUri, onPress }: HiveCircleProps) {
               {
                 width: metrics.markerSize,
                 height: metrics.markerSize,
+                borderRadius: metrics.markerSize / 2,
               },
             ]}
           >

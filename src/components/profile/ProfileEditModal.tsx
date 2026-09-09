@@ -128,11 +128,11 @@ export function ProfileEditModal({ visible, user, onClose }: ProfileEditModalPro
                   {t('profile.bioLabel')}
                 </Text>
                 <TextInput
-                  className="min-h-[96px] rounded-hive-md border border-[#F5A62333] bg-hive-input-bg px-3.5 py-2.5 font-inter text-[15px] text-hive-foreground"
+                  className="min-h-[96px] rounded-hive-md border border-hive-stroke bg-hive-input-bg px-3.5 py-2.5 font-inter text-[15px] text-hive-foreground"
                   maxLength={PROFILE_BIO_MAX_LENGTH}
                   multiline
                   placeholder={t('profile.bioPlaceholder')}
-                  placeholderTextColor="#8B7355"
+                  placeholderTextColor="#9C9287"
                   textAlignVertical="top"
                   value={bio}
                   onChangeText={setBio}
@@ -165,10 +165,10 @@ export function ProfileEditModal({ visible, user, onClose }: ProfileEditModalPro
                       <TextInput
                         autoCapitalize="none"
                         autoCorrect={false}
-                        className="h-12 rounded-hive-md border border-[#F5A62333] bg-hive-input-bg px-3.5 font-inter text-[15px] text-hive-foreground"
+                        className="h-12 rounded-hive-md border border-hive-stroke bg-hive-input-bg px-3.5 font-inter text-[15px] text-hive-foreground"
                         maxLength={PROFILE_SOCIAL_LINK_MAX_LENGTH}
                         placeholder={t(`profile.socialPlaceholder.${key}`)}
-                        placeholderTextColor="#8B7355"
+                        placeholderTextColor="#9C9287"
                         value={socialDrafts[key]}
                         onChangeText={(value) => updateSocialDraft(key, value)}
                       />
@@ -190,7 +190,7 @@ export function ProfileEditModal({ visible, user, onClose }: ProfileEditModalPro
                 onPress={onClose}
               >
                 {updateProfile.isPending ? (
-                  <HiveLoader color="#8B7355" size="small" />
+                  <HiveLoader color="#9C9287" size="small" />
                 ) : (
                   <Text className="font-inter text-sm font-semibold text-hive-muted">
                     {t('profile.avatarCancel')}

@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-const DEFAULT_COLOR = '#F5A623';
+const DEFAULT_COLOR = '#FFB800';
 const DEFAULT_DURATION_MS = 1400;
 
 const SIZE_MAP = {

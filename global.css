@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --hive-bg: 11 10 8;
+  --hive-primary: 255 184 0;
+  --hive-accent: 255 184 0;
+  --hive-foreground: 246 242 234;
+  --hive-muted: 156 146 135;
+  --hive-dim: 106 97 88;
+  --hive-surface: 21 19 15;
+  --hive-surface2: 32 28 22;
+  --hive-input-bg: 21 19 15;
+  --hive-signal: 198 242 78;
+  --hive-danger: 255 107 90;
+  --hive-on-accent: 11 10 8;
+  --hive-stroke: rgba(255, 255, 255, 0.08);
+}

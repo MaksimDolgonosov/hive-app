@@ -13,6 +13,11 @@ export type TranslationSchema = {
     ru: string;
     en: string;
   };
+  theme: {
+    label: string;
+    dark: string;
+    light: string;
+  };
   auth: {
     registerSubtitle: string;
     loginSubtitle: string;
@@ -36,7 +41,6 @@ export type TranslationSchema = {
     registerFailed: string;
     loginWithGoogle: string;
     loginWithApple: string;
-    loginWithFacebook: string;
     googleLoginFailed: string;
     googleNotConfigured: string;
     googleRequiresDevBuild: string;
@@ -122,6 +126,7 @@ export type TranslationSchema = {
     emptyMessage: string;
     locationDeniedMessage: string;
     retry: string;
+    activeCount: string;
   };
   profile: {
     memberSince: string;
@@ -192,22 +197,16 @@ export type TranslationSchema = {
   };
   onboarding: {
     next: string;
+    start: string;
     skip: string;
     welcomeTitle: string;
-    welcomeSubtitle: string;
     welcomeDescription: string;
     step1Title: string;
-    step1Subtitle: string;
     step1Description: string;
     step2Title: string;
-    step2Subtitle: string;
     step2Description: string;
     step3Title: string;
-    step3Subtitle: string;
     step3Description: string;
-    galleryUnavailable: string;
-    expiresInFourHours: string;
-    publishedAtLocation: string;
     locationTitle: string;
     locationSubtitle: string;
     locationDescription: string;
@@ -223,6 +222,14 @@ export type TranslationSchema = {
     close: string;
     loadError: string;
     empty: string;
+    dissolvesIn: string;
+    addPhoto: string;
+    justNow: string;
+    minutesAgo: string;
+    hoursAgo: string;
+    daysAgo: string;
+    contributorsTwo: string;
+    contributorsMany: string;
   };
   sting: {
     photoAlt: string;

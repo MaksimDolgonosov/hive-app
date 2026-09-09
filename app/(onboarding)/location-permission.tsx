@@ -35,7 +35,7 @@ export default function OnboardingLocationPermissionScreen() {
       description={t('onboarding.locationDescription')}
       illustration={
         <PermissionIllustration>
-          <MapPin color="#F5A623" size={56} strokeWidth={2} />
+          <MapPin color="#FFB800" size={56} strokeWidth={2} />
         </PermissionIllustration>
       }
       loading={loading}

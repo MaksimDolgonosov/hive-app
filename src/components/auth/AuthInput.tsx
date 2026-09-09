@@ -2,6 +2,8 @@ import type { LucideIcon } from 'lucide-react-native';
 import { useRef } from 'react';
 import { Platform, Pressable, Text, TextInput, type TextInputProps, View } from 'react-native';
 
+import { useHiveTheme } from '@/src/hooks/useHiveTheme';
+
 type AuthInputProps = TextInputProps & {
   label: string;
   icon: LucideIcon;
@@ -64,6 +66,7 @@ export function AuthInput({
   ...inputProps
 }: AuthInputProps) {
   const inputRef = useRef<TextInput>(null);
+  const theme = useHiveTheme();
 
   function focusInput() {
     inputRef.current?.focus();
@@ -84,17 +87,19 @@ export function AuthInput({
   return (
     <View className="gap-1.5">
       <Pressable accessibilityRole="button" hitSlop={8} onPress={focusInput}>
-        <Text className="font-inter text-[13px] font-semibold text-hive-foreground">{label}</Text>
+        <Text className="font-inter text-[11px] font-semibold uppercase tracking-[1.2px] text-hive-dim">
+          {label}
+        </Text>
       </Pressable>
 
       <View
-        className={`h-12 flex-row items-center gap-2.5 rounded-hive-md border bg-hive-input-bg px-3.5 ${
-          error ? 'border-red-400' : 'border-[#F5A62333]'
+        className={`h-14 flex-row items-center gap-3 rounded-hive-md border bg-hive-input-bg px-[18px] ${
+          error ? 'border-red-400' : 'border-hive-stroke'
         }`}
       >
         <Pressable accessibilityRole="button" hitSlop={8} onPress={focusInput}>
           <View pointerEvents="none">
-            <Icon color="#8B7355" size={18} strokeWidth={2} />
+            <Icon color={theme.textDim} size={18} strokeWidth={2} />
           </View>
         </Pressable>
 
@@ -106,11 +111,11 @@ export function AuthInput({
           autoCorrect={false}
           importantForAutofill={autofill.importantForAutofill}
           keyboardType={keyboardType}
-          placeholderTextColor="#8B7355"
+          placeholderTextColor={theme.textDim}
           secureTextEntry={secureTextEntry}
           showSoftInputOnFocus
           spellCheck={false}
-          style={{ flex: 1, minWidth: 0, height: 48, paddingVertical: 0 }}
+          style={{ flex: 1, minWidth: 0, height: 56, paddingVertical: 0 }}
           textContentType={autofill.textContentType}
           className="font-inter text-[15px] text-hive-foreground"
         />

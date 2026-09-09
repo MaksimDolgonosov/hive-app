@@ -71,7 +71,7 @@ export default function SavedPlacesScreen() {
         ListEmptyComponent={
           <View className="flex-1 items-center justify-center px-8 py-16">
             <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-hive-primary/15">
-              <Bookmark color="#F5A623" size={28} strokeWidth={2} />
+              <Bookmark color="#FFB800" size={28} strokeWidth={2} />
             </View>
             <Text className="text-center font-inter text-base font-semibold text-hive-foreground">
               {t('profile.collections.savedPlacesEmptyTitle')}
@@ -82,14 +82,14 @@ export default function SavedPlacesScreen() {
           </View>
         }
         renderItem={({ item }) => (
-          <View className="overflow-hidden rounded-hive-md border border-[#F5A62322] bg-hive-surface/95">
+          <View className="overflow-hidden rounded-hive-md border border-hive-stroke bg-hive-surface/95">
             <Pressable
               accessibilityRole="button"
               className="flex-row items-center gap-3 px-4 py-3.5"
               onPress={() => openSavedPlace(item)}
             >
               <View className="h-10 w-10 items-center justify-center rounded-full bg-hive-primary/15">
-                <MapPin color="#F5A623" size={18} strokeWidth={2.25} />
+                <MapPin color="#FFB800" size={18} strokeWidth={2.25} />
               </View>
 
               <View className="min-w-0 flex-1">
@@ -107,10 +107,10 @@ export default function SavedPlacesScreen() {
 
             <Pressable
               accessibilityRole="button"
-              className="absolute right-3 top-3 h-8 w-8 items-center justify-center rounded-full bg-[#FFF4E0]"
+              className="absolute right-3 top-3 h-8 w-8 items-center justify-center rounded-full bg-[#15130F]"
               onPress={() => confirmDelete(item)}
             >
-              <Trash2 color="#8B7355" size={16} strokeWidth={2} />
+              <Trash2 color="#9C9287" size={16} strokeWidth={2} />
             </Pressable>
           </View>
         )}

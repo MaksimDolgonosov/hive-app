@@ -5,9 +5,9 @@ import { SkeletonBlock } from '@/src/components/ui/SkeletonBlock';
 
 function StatSkeleton() {
   return (
-    <View className="items-center gap-1.5">
-      <SkeletonBlock borderRadius={6} height={20} width={28} />
-      <SkeletonBlock borderRadius={4} height={12} width={48} />
+    <View className="flex-1 items-center gap-1.5">
+      <SkeletonBlock borderRadius={6} height={24} width={36} />
+      <SkeletonBlock borderRadius={4} height={10} width={56} />
     </View>
   );
 }
@@ -15,10 +15,10 @@ function StatSkeleton() {
 function MenuRowSkeleton({ showDivider = true }: { showDivider?: boolean }) {
   return (
     <View
-      className={`h-[52px] flex-row items-center justify-between px-4 ${showDivider ? 'border-b border-[#F5A62322]' : ''}`}
+      className={`h-[52px] flex-row items-center justify-between ${showDivider ? 'border-b border-hive-stroke' : ''}`}
     >
-      <View className="flex-row items-center gap-3">
-        <SkeletonBlock borderRadius={8} height={32} width={32} />
+      <View className="flex-row items-center gap-3.5">
+        <SkeletonBlock borderRadius={8} height={18} width={18} />
         <SkeletonBlock borderRadius={4} height={15} width={120} />
       </View>
       <SkeletonBlock borderRadius={4} height={16} width={16} />
@@ -29,22 +29,23 @@ function MenuRowSkeleton({ showDivider = true }: { showDivider?: boolean }) {
 export function ProfileSkeleton() {
   return (
     <>
-      <ProfileGlassCard>
-        <View className="items-center gap-4 px-6 py-6">
-          <SkeletonBlock borderRadius={44} height={88} width={88} />
-
-          <View className="items-center gap-2">
-            <SkeletonBlock borderRadius={6} height={22} width={140} />
-            <SkeletonBlock borderRadius={4} height={14} width={180} />
-          </View>
-
-          <View className="w-full flex-row justify-around border-t border-[#F5A62322] pt-3">
-            <StatSkeleton />
-            <StatSkeleton />
-            <StatSkeleton />
+      <View className="gap-6">
+        <View className="flex-row items-center gap-4">
+          <SkeletonBlock borderRadius={36} height={72} width={72} />
+          <View className="flex-1 gap-2">
+            <SkeletonBlock borderRadius={6} height={20} width={160} />
+            <SkeletonBlock borderRadius={4} height={14} width={140} />
           </View>
         </View>
-      </ProfileGlassCard>
+
+        <View className="flex-row items-center">
+          <StatSkeleton />
+          <View className="h-10 w-px bg-hive-stroke" />
+          <StatSkeleton />
+          <View className="h-10 w-px bg-hive-stroke" />
+          <StatSkeleton />
+        </View>
+      </View>
 
       <ProfileGlassCard>
         <View className="gap-4 px-5 py-5">
@@ -58,26 +59,24 @@ export function ProfileSkeleton() {
         </View>
       </ProfileGlassCard>
 
-      <ProfileGlassCard>
+      <View className="gap-3">
+        <View className="flex-row items-center justify-between">
+          <SkeletonBlock borderRadius={6} height={16} width={140} />
+          <SkeletonBlock borderRadius={6} height={14} width={72} />
+        </View>
+        <View className="flex-row gap-2">
+          <SkeletonBlock borderRadius={16} height={96} width={96} />
+          <SkeletonBlock borderRadius={16} height={96} width={96} />
+          <SkeletonBlock borderRadius={16} height={96} width={96} />
+        </View>
+      </View>
+
+      <View>
         <MenuRowSkeleton />
         <MenuRowSkeleton />
         <MenuRowSkeleton />
         <MenuRowSkeleton />
         <MenuRowSkeleton showDivider={false} />
-      </ProfileGlassCard>
-
-      <View className="gap-3">
-        <View className="flex-row items-center justify-between">
-          <SkeletonBlock borderRadius={6} height={20} width={140} />
-          <SkeletonBlock borderRadius={6} height={14} width={72} />
-        </View>
-
-        <View className="flex-row gap-2">
-          <SkeletonBlock borderRadius={12} height={90} width={90} />
-          <SkeletonBlock borderRadius={12} height={90} width={90} />
-          <SkeletonBlock borderRadius={12} height={90} width={90} />
-          <SkeletonBlock borderRadius={12} height={90} width={90} />
-        </View>
       </View>
     </>
   );

@@ -8,8 +8,8 @@ const LOCAL_WS_URL = 'ws://localhost:3000/ws';
 
 const SPLASH_IMAGE = './assets/images/splash.png';
 const SPLASH_ICON = './assets/images/splash-icon.png';
-const SPLASH_BACKGROUND = '#FFF8ED';
-const SPLASH_DARK_BACKGROUND = '#2C1810';
+const SPLASH_BACKGROUND = '#0B0A08';
+const SPLASH_DARK_BACKGROUND = '#0B0A08';
 
 function resolveUrls() {
   const isProduction = process.env.APP_ENV === 'production';
@@ -101,7 +101,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       icon: './assets/images/icon.png',
       adaptiveIcon: {
-        backgroundColor: '#F5A623',
+        backgroundColor: '#FFB800',
         foregroundImage: './assets/images/android-icon-foreground.png',
         backgroundImage: './assets/images/android-icon-background.png',
         monochromeImage: './assets/images/android-icon-monochrome.png',

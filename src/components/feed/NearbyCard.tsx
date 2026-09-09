@@ -1,11 +1,13 @@
 import { Image } from 'expo-image';
-import { Heart } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Clock, Heart, MapPin } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
 import { StingAuthorBadge } from '@/src/components/feed/StingAuthorBadge';
 import { Timer } from '@/src/components/ui/Timer';
 import { useAuthStore } from '@/src/stores/authStore';
+import { HiveGradients, HiveTheme } from '@/src/theme/tokens';
 import type { Sting } from '@/src/types';
 import { formatDistance } from '@/src/utils/geo';
 import { openUserProfile } from '@/src/utils/open-user-profile';
@@ -27,61 +29,70 @@ export function NearbyCard({ sting, distanceM, onPress, onAuthorPress }: NearbyC
   return (
     <Pressable
       accessibilityRole="button"
-      className="flex-row overflow-hidden rounded-hive-md bg-hive-surface"
+      className="overflow-hidden rounded-[22px] bg-hive-surface"
       onPress={onPress}
     >
-      <Image
-        accessibilityLabel={t('sting.photoAlt')}
-        contentFit="cover"
-        source={{ uri: sting.thumbnailUrl }}
-        style={{ width: 96, height: 96, backgroundColor: '#E8E0D4' }}
-      />
+      <View className="h-[196px]">
+        <Image
+          accessibilityLabel={t('sting.photoAlt')}
+          contentFit="cover"
+          source={{ uri: sting.thumbnailUrl }}
+          style={{ width: '100%', height: '100%', backgroundColor: HiveTheme.surface2 }}
+        />
+        <LinearGradient
+          colors={[...HiveGradients.photoOverlay]}
+          style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 120 }}
+        />
 
-      <View className="flex-1 justify-center px-3 py-2">
-        {sting.comment ? (
-          <Text
-            className="font-inter text-sm text-hive-foreground"
-            numberOfLines={2}
-          >
-            {sting.comment}
+        <View className="absolute left-3 top-3 flex-row items-center gap-1.5 rounded-[13px] bg-black/65 px-2.5 py-1.5">
+          <MapPin color="#F6F2EA" size={12} strokeWidth={2.25} />
+          <Text className="font-inter text-xs font-medium text-[#F6F2EA]">
+            {formatDistance(distanceM)}
           </Text>
-        ) : null}
+        </View>
 
-        <Text
-          className={`font-inter text-sm font-semibold text-hive-foreground${sting.comment ? ' mt-1' : ''}`}
-        >
-          {formatDistance(distanceM)}
-        </Text>
-
-        <View className="mt-1 flex-row items-center gap-1">
-          <Text className="font-inter text-xs text-hive-muted">{t('sting.expiresIn')}</Text>
+        <View className="absolute right-3 top-3 flex-row items-center gap-1.5 rounded-[13px] bg-black/65 px-2.5 py-1.5">
+          <Clock color={HiveTheme.accent} size={12} strokeWidth={2.25} />
           <Timer
             expiresAt={sting.expiresAt}
-            className="font-inter text-xs font-medium text-hive-primary"
+            className="font-inter text-xs font-semibold text-hive-primary"
           />
         </View>
 
-        {sting.reactionsCount > 0 && (
-          <View className="mt-1.5 flex-row items-center gap-1">
-            <Heart color="#F5A623" fill="#F5A623" size={12} />
-            <Text className="font-inter text-xs text-hive-muted">{sting.reactionsCount}</Text>
+        <View className="absolute bottom-3 left-3 right-3 gap-1.5">
+          {sting.comment ? (
+            <Text
+              className="font-display text-[18px] font-bold text-[#F6F2EA]"
+              numberOfLines={1}
+            >
+              {sting.comment}
+            </Text>
+          ) : null}
+
+          <View className="flex-row items-center justify-between">
+            <StingAuthorBadge
+              avatarCacheVersion={avatarCacheVersion}
+              avatarUrl={author.avatarUrl}
+              username={author.username}
+              onPress={() => {
+                if (onAuthorPress) {
+                  onAuthorPress(sting.authorId);
+                  return;
+                }
+
+                openUserProfile(sting.authorId, currentUser?.id);
+              }}
+            />
+
+            {sting.reactionsCount > 0 ? (
+              <View className="flex-row items-center gap-1">
+                <Heart color={HiveTheme.accent} fill={HiveTheme.accent} size={13} />
+                <Text className="font-inter text-xs text-[#9C9287]">{sting.reactionsCount}</Text>
+              </View>
+            ) : null}
           </View>
-        )}
+        </View>
       </View>
-
-      <StingAuthorBadge
-        avatarCacheVersion={avatarCacheVersion}
-        avatarUrl={author.avatarUrl}
-        username={author.username}
-        onPress={() => {
-          if (onAuthorPress) {
-            onAuthorPress(sting.authorId);
-            return;
-          }
-
-          openUserProfile(sting.authorId, currentUser?.id);
-        }}
-      />
     </Pressable>
   );
 }

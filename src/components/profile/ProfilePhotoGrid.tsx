@@ -32,7 +32,7 @@ export function ProfilePhotoGrid({ stings, onPressSting }: ProfilePhotoGridProps
             <Image
               contentFit="cover"
               source={{ uri: sting.thumbnailUrl }}
-              style={{ width: PHOTO_SIZE, height: PHOTO_SIZE, backgroundColor: '#E8E0D4' }}
+              style={{ width: PHOTO_SIZE, height: PHOTO_SIZE, backgroundColor: '#201C16' }}
             />
             <View className="absolute bottom-0 left-0 right-0 bg-black/45 px-1.5 py-1">
               <Timer

@@ -15,7 +15,9 @@ import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { isGoogleMapsConfigured } from '@/src/config/env';
+import { HIVE_DARK_MAP_STYLE } from '@/src/constants/map-style';
 import { useLocation } from '@/src/hooks/useLocation';
+import { useAppColorScheme } from '@/src/hooks/useHiveTheme';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
 import { useLocationStore } from '@/src/stores/locationStore';
 import { useMapStore } from '@/src/stores/mapStore';
@@ -80,6 +82,7 @@ function toMapRegion(region: Region): MapRegion {
 export function MapContainer() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const colorScheme = useAppColorScheme();
   const mapRef = useRef<MapView>(null);
   const liveRegionRef = useRef<MapRegion | null>(null);
   const hasCenteredOnUser = useRef(false);
@@ -427,7 +430,8 @@ export function MapContainer() {
           pitchEnabled={mapInteractionsEnabled}
           showsUserLocation
           showsMyLocationButton={false}
-          userInterfaceStyle="light"
+          userInterfaceStyle={colorScheme}
+          customMapStyle={colorScheme === 'dark' ? HIVE_DARK_MAP_STYLE : undefined}
           {...(Platform.OS === 'android' ? { googleRenderer: 'LEGACY' as const } : {})}
         >
           {data?.stings.map((sting) => (

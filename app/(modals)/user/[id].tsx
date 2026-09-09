@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useMemo } from 'react';
@@ -10,6 +9,8 @@ import { ProfileAboutCard } from '@/src/components/profile/ProfileAboutCard';
 import { ProfileHeaderCard } from '@/src/components/profile/ProfileHeaderCard';
 import { PublicProfileSkeleton } from '@/src/components/profile/PublicProfileSkeleton';
 import { ProfileRecentPhotos } from '@/src/components/profile/ProfileRecentPhotos';
+import { ScreenBackground } from '@/src/components/ui/ScreenBackground';
+import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { usePublicProfile } from '@/src/hooks/usePublicProfile';
 import type { ProfileStats } from '@/src/types';
 
@@ -29,6 +30,7 @@ function formatMemberDate(isoDate: string, locale: string): string {
 
 export default function PublicUserProfileScreen() {
   const { t, i18n } = useTranslation();
+  const theme = useHiveTheme();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
@@ -61,23 +63,23 @@ export default function PublicUserProfileScreen() {
 
   if (!userId) {
     return (
-      <View className="flex-1 items-center justify-center bg-hive-bg px-8">
+      <ScreenBackground className="items-center justify-center px-8">
         <Text className="text-center font-inter text-base text-hive-foreground">
           {t('userProfile.notFound')}
         </Text>
         <Pressable
           accessibilityRole="button"
-          className="mt-6 rounded-hive-md bg-hive-primary px-6 py-3"
+          className="mt-6 rounded-full bg-hive-primary px-6 py-3"
           onPress={handleBack}
         >
-          <Text className="font-inter text-base font-bold text-white">{t('userProfile.back')}</Text>
+          <Text className="font-inter text-base font-bold text-hive-on-accent">{t('userProfile.back')}</Text>
         </Pressable>
-      </View>
+      </ScreenBackground>
     );
   }
 
   return (
-    <LinearGradient colors={['#FFF8ED', '#FFE8B8', '#FFD54F44']} locations={[0, 0.5, 1]} style={{ flex: 1 }}>
+    <ScreenBackground>
       <View className="absolute left-0 right-0 z-10 px-4" style={{ top: insets.top + 8 }}>
         <Pressable
           accessibilityLabel={t('userProfile.back')}
@@ -85,7 +87,7 @@ export default function PublicUserProfileScreen() {
           className="h-10 w-10 items-center justify-center rounded-full bg-hive-surface/95"
           onPress={handleBack}
         >
-          <ChevronLeft color="#2C1810" size={24} />
+          <ChevronLeft color={theme.text} size={24} />
         </Pressable>
       </View>
 
@@ -96,10 +98,10 @@ export default function PublicUserProfileScreen() {
           </Text>
           <Pressable
             accessibilityRole="button"
-            className="mt-6 rounded-hive-md bg-hive-primary px-6 py-3"
+            className="mt-6 rounded-full bg-hive-primary px-6 py-3"
             onPress={handleBack}
           >
-            <Text className="font-inter text-base font-bold text-white">{t('userProfile.back')}</Text>
+            <Text className="font-inter text-base font-bold text-hive-on-accent">{t('userProfile.back')}</Text>
           </Pressable>
         </View>
       ) : (
@@ -129,6 +131,6 @@ export default function PublicUserProfileScreen() {
           )}
         </ScrollView>
       )}
-    </LinearGradient>
+    </ScreenBackground>
   );
 }

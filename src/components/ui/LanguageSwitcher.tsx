@@ -18,7 +18,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
       <Text className="mb-2 text-center font-inter text-xs text-hive-muted">
         {t('language.label')}
       </Text>
-      <View className="flex-row self-center overflow-hidden rounded-full border border-[#F5A62333] bg-hive-input-bg p-1">
+      <View className="flex-row self-center overflow-hidden rounded-full border border-hive-stroke bg-hive-input-bg p-1">
         {SUPPORTED_LANGUAGES.map((lang) => {
           const isActive = language === lang;
 
@@ -32,7 +32,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
             >
               <Text
                 className={`font-inter text-xs font-semibold uppercase ${
-                  isActive ? 'text-white' : 'text-hive-muted'
+                  isActive ? 'text-hive-on-accent' : 'text-hive-muted'
                 }`}
               >
                 {lang}

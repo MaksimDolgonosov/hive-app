@@ -1,42 +1,34 @@
 import { Hexagon } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Text, View } from 'react-native';
 
+import { HiveTheme } from '@/src/theme/tokens';
+
 type AuthLogoProps = {
-  subtitle: string;
+  subtitle?: string;
 };
 
 export function AuthLogo({ subtitle }: AuthLogoProps) {
   return (
-    <View className="mb-6 items-center gap-3">
-      <View
-        className="h-24 w-24 items-center justify-center overflow-hidden rounded-[28px]"
-        style={{
-          shadowColor: '#F5A623',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.33,
-          shadowRadius: 24,
-          elevation: 8,
-        }}
-      >
-        <LinearGradient
-          colors={['#F5A623', '#FF8C00']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{
-            width: 96,
-            height: 96,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+    <View className="mb-2 gap-3">
+      <View className="flex-row items-center gap-2.5">
+        <View
+          className="h-8 w-8 items-center justify-center rounded-[8px]"
+          style={{ backgroundColor: HiveTheme.accent }}
         >
-          <Hexagon color="#FFFFFF" size={48} strokeWidth={2} />
-        </LinearGradient>
+          <Hexagon
+            color={HiveTheme.textOnAccent}
+            fill={HiveTheme.textOnAccent}
+            size={18}
+            strokeWidth={0}
+          />
+        </View>
+        <Text className="font-display text-[19px] font-bold uppercase tracking-[1.6px] text-hive-foreground">
+          HIVE
+        </Text>
       </View>
-      <Text className="font-inter text-[32px] font-bold text-hive-foreground">Hive</Text>
-      <Text className="max-w-[280px] text-center font-inter text-[15px] text-hive-muted">
-        {subtitle}
-      </Text>
+      {subtitle ? (
+        <Text className="font-inter text-[15px] leading-[22px] text-hive-muted">{subtitle}</Text>
+      ) : null}
     </View>
   );
 }

@@ -40,12 +40,13 @@ export function CaptureButton({
       onPress={() => void handlePress()}
       className="items-center justify-center"
     >
-      <View className="h-20 w-20 items-center justify-center rounded-full border-4 border-white/90">
+      <View className="h-[76px] w-[76px] items-center justify-center rounded-full bg-hive-primary shadow-lg">
         {loading ? (
-          <HiveLoader color="#FFFFFF" size="small" />
+          <HiveLoader color="#0B0A08" size="small" />
         ) : (
           <View
-            className={`h-16 w-16 rounded-full bg-white ${isDisabled ? 'opacity-50' : 'opacity-100'}`}
+            className={`h-16 w-16 rounded-full ${isDisabled ? 'opacity-50' : 'opacity-100'}`}
+            style={{ backgroundColor: '#FFFFFF' }}
           />
         )}
       </View>

@@ -42,7 +42,7 @@ export function ProfileAboutCard({
               hitSlop={8}
               onPress={onEdit}
             >
-              <Pencil color="#F5A623" size={16} />
+              <Pencil color="#FFB800" size={16} />
             </Pressable>
           ) : null}
         </View>
@@ -64,7 +64,7 @@ export function ProfileAboutCard({
                   key={key}
                   accessibilityLabel={t(meta.labelKey)}
                   accessibilityRole="link"
-                  className="flex-row items-center gap-2 rounded-full border border-[#F5A62333] bg-hive-input-bg px-3 py-2"
+                  className="flex-row items-center gap-2 rounded-full border border-hive-stroke bg-hive-input-bg px-3 py-2"
                   onPress={() => void Linking.openURL(url)}
                 >
                   <Icon color={meta.color} size={16} />

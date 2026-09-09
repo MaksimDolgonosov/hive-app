@@ -10,9 +10,9 @@ import type { Sting } from '@/src/types';
 import { buildAvatarDisplayUri } from '@/src/utils/avatar-url';
 import { resolveStingAuthor } from '@/src/utils/resolve-sting-author';
 
-const MARKER_SIZE = 38;
-const PRIMARY = '#e1961d';
-const SURFACE_STRONG = '#FFFFFFE6';
+const MARKER_SIZE = 44;
+const PRIMARY = '#FFB800';
+const SURFACE_STRONG = '#201C16';
 
 interface StingMarkerProps {
   sting: Sting;
@@ -72,7 +72,7 @@ export function StingMarker({ sting, onPress }: StingMarkerProps) {
             />
           ) : (
             <LinearGradient
-              colors={['#F5A623', '#FF8C00']}
+              colors={['#FFB800', '#E5A400']}
               end={{ x: 1, y: 1 }}
               start={{ x: 0, y: 0 }}
               style={{
@@ -83,7 +83,7 @@ export function StingMarker({ sting, onPress }: StingMarkerProps) {
                 justifyContent: 'center',
               }}
             >
-              <Text className="font-inter text-xs font-bold text-white">{initials}</Text>
+              <Text className="font-display text-xs font-bold text-hive-on-accent">{initials}</Text>
             </LinearGradient>
           )}
         </View>
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   marker: {
     width: MARKER_SIZE,
     height: MARKER_SIZE,
-    borderRadius: MARKER_SIZE / 2,
+    borderRadius: 22,
     backgroundColor: SURFACE_STRONG,
     borderWidth: 1,
     borderColor: PRIMARY,

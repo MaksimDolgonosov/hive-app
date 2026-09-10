@@ -11964,7 +11964,7 @@
                   },
                   "clip": true,
                   "width": "fill_container",
-                  "height": 168,
+                  "height": 148,
                   "fill": {
                     "type": "image",
                     "enabled": true,
@@ -12004,7 +12004,7 @@
                         ]
                       },
                       "width": 350,
-                      "height": 168
+                      "height": 148
                     },
                     {
                       "type": "frame",
@@ -12085,7 +12085,7 @@
                       "type": "frame",
                       "id": "aGI9L",
                       "x": 14,
-                      "y": 110,
+                      "y": 90,
                       "name": "Footer",
                       "width": 322,
                       "layout": "vertical",
@@ -12180,6 +12180,265 @@
                 },
                 {
                   "type": "frame",
+                  "id": "T4ra4u",
+                  "name": "Card Улей",
+                  "clip": true,
+                  "width": "fill_container",
+                  "fill": "$v2-surface",
+                  "cornerRadius": 22,
+                  "stroke": "$v2-stroke",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 10,
+                  "padding": 10,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "vnrBu",
+                      "name": "PhotoStrip",
+                      "clip": true,
+                      "width": "fill_container",
+                      "height": 128,
+                      "cornerRadius": 14,
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "p1tDJW",
+                          "name": "HivePhoto 1",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1705328361283-1790279044bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIzMzN8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "cornerRadius": 10
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Uq3v4",
+                          "name": "HivePhoto 2",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1558618005-3c8a366b4ac1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIzMzR8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "cornerRadius": 10
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Ob4Om",
+                          "name": "HivePhoto 3",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1617170709251-dd8f915df721?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIzMzR8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "cornerRadius": 10
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "S4yyDE",
+                      "name": "Footer",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "padding": [
+                        2,
+                        4,
+                        4,
+                        4
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "uwtMA",
+                          "name": "HiveBadge",
+                          "width": 48,
+                          "height": 48,
+                          "fill": "$v2-accent",
+                          "cornerRadius": 24,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "#FFB80040",
+                            "offset": {
+                              "x": 0,
+                              "y": 6
+                            },
+                            "blur": 16
+                          },
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Ru5Tx",
+                              "name": "Count",
+                              "fill": "#0B0A08",
+                              "content": "12",
+                              "lineHeight": 1,
+                              "fontFamily": "$v2-font-display",
+                              "fontSize": 16,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "K7nUS",
+                              "name": "Label",
+                              "fill": "#0B0A08B3",
+                              "content": "улей",
+                              "fontFamily": "$v2-font-body",
+                              "fontSize": 9,
+                              "fontWeight": "600",
+                              "letterSpacing": 0.6
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "uimBV",
+                          "name": "Info",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "gczmf",
+                              "name": "Title",
+                              "fill": "$v2-text",
+                              "content": "Улей",
+                              "fontFamily": "$v2-font-display",
+                              "fontSize": 17,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "E9epB",
+                              "name": "Meta",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "I4cEe",
+                                  "name": "Photos",
+                                  "fill": "$v2-text-muted",
+                                  "content": "12 фото",
+                                  "fontFamily": "$v2-font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "ellipse",
+                                  "id": "t1fTm",
+                                  "name": "Dot",
+                                  "fill": "$v2-text-muted",
+                                  "width": 3,
+                                  "height": 3
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "rgOvm",
+                                  "name": "Timer",
+                                  "gap": 4,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "EGXdO",
+                                      "name": "Icon",
+                                      "width": 13,
+                                      "height": 13,
+                                      "icon": "timer",
+                                      "library": "Material Symbols Rounded",
+                                      "fill": "$v2-accent"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "oP0OV",
+                                      "name": "Label",
+                                      "fill": "$v2-accent",
+                                      "content": "12:40",
+                                      "fontFamily": "$v2-font-body",
+                                      "fontSize": 13,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "kdSsa",
+                          "name": "Trailing",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "h9TgiO",
+                              "name": "Distance",
+                              "gap": 5,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "w9mYkY",
+                                  "name": "Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "near_me",
+                                  "library": "Material Symbols Rounded",
+                                  "fill": "$v2-signal"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "GgzQq",
+                                  "name": "Label",
+                                  "fill": "$v2-text",
+                                  "content": "180 м",
+                                  "fontFamily": "$v2-font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "icon",
+                              "id": "PQUgm",
+                              "name": "Chevron",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "chevron_right",
+                              "library": "Material Symbols Rounded",
+                              "fill": "$v2-text-muted"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
                   "id": "eCdw0",
                   "name": "Card Иван П.",
                   "metadata": {
@@ -12190,7 +12449,7 @@
                   },
                   "clip": true,
                   "width": "fill_container",
-                  "height": 168,
+                  "height": 148,
                   "fill": {
                     "type": "image",
                     "enabled": true,
@@ -12230,7 +12489,7 @@
                         ]
                       },
                       "width": 350,
-                      "height": 168
+                      "height": 148
                     },
                     {
                       "type": "frame",
@@ -12311,7 +12570,7 @@
                       "type": "frame",
                       "id": "xwfO3",
                       "x": 14,
-                      "y": 110,
+                      "y": 90,
                       "name": "Footer",
                       "width": 322,
                       "layout": "vertical",
@@ -12416,7 +12675,7 @@
                   },
                   "clip": true,
                   "width": "fill_container",
-                  "height": 168,
+                  "height": 148,
                   "fill": {
                     "type": "image",
                     "enabled": true,
@@ -12456,7 +12715,7 @@
                         ]
                       },
                       "width": 350,
-                      "height": 168
+                      "height": 148
                     },
                     {
                       "type": "frame",
@@ -12537,7 +12796,7 @@
                       "type": "frame",
                       "id": "yeiDt",
                       "x": 14,
-                      "y": 110,
+                      "y": 90,
                       "name": "Footer",
                       "width": 322,
                       "layout": "vertical",

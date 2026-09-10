@@ -74,7 +74,7 @@ export function OnboardingScreen({
       ) : (
         <LinearGradient
           colors={[...theme.gradients.screen]}
-          locations={[0, 0.45, 1]}
+          locations={theme.gradients.screenLocations}
           style={StyleSheet.absoluteFill}
         />
       )}

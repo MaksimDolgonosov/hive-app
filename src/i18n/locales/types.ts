@@ -219,7 +219,8 @@ export type TranslationSchema = {
   hive: {
     title: string;
     photoCount: string;
-    close: string;
+    back: string;
+    notFound: string;
     loadError: string;
     empty: string;
     dissolvesIn: string;
@@ -228,8 +229,6 @@ export type TranslationSchema = {
     minutesAgo: string;
     hoursAgo: string;
     daysAgo: string;
-    contributorsTwo: string;
-    contributorsMany: string;
   };
   sting: {
     photoAlt: string;

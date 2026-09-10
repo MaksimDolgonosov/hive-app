@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HiveNearbyCard } from '@/src/components/feed/HiveNearbyCard';
 import { NearbyCard } from '@/src/components/feed/NearbyCard';
 import { LocationAccessGate } from '@/src/components/map/LocationAccessGate';
-import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { ScreenBackground } from '@/src/components/ui/ScreenBackground';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
@@ -19,6 +18,7 @@ import type { Hive, Sting } from '@/src/types';
 import { haversineDistance } from '@/src/utils/geo';
 import { isActiveHive } from '@/src/utils/hive';
 import { coordsToFeedBounds, regionToBounds } from '@/src/utils/map';
+import { openHive } from '@/src/utils/open-hive';
 
 type FeedItem =
   | { key: string; type: 'sting'; sting: Sting; distanceM: number }
@@ -57,7 +57,6 @@ export default function NearbyScreen() {
   const { coords, status: locationStatus, requestPermission } = useLocation();
   const lastKnownCoords = useLocationStore((state) => state.lastKnownCoords);
   const mapRegion = useMapStore((state) => state.region);
-  const [selectedHiveId, setSelectedHiveId] = useState<string | null>(null);
 
   const bounds = useMemo(() => {
     if (mapRegion) {
@@ -94,14 +93,6 @@ export default function NearbyScreen() {
 
   function openSting(stingId: string) {
     router.push(`/(modals)/sting/${stingId}` as Href);
-  }
-
-  function openHive(hiveId: string) {
-    setSelectedHiveId(hiveId);
-  }
-
-  function closeHiveSheet() {
-    setSelectedHiveId(null);
   }
 
   const listBottomInset = getGlassTabBarInset(insets.bottom) + 16;
@@ -208,8 +199,6 @@ export default function NearbyScreen() {
           <HiveLoader size="small" />
         </View>
       )}
-
-      {selectedHiveId && <HiveBottomSheet hiveId={selectedHiveId} onClose={closeHiveSheet} />}
     </ScreenBackground>
   );
 }

@@ -233,7 +233,8 @@ export const ru: TranslationSchema = {
   hive: {
     title: 'Улей',
     photoCount: '{{count}} фото',
-    close: 'Закрыть',
+    back: 'Назад',
+    notFound: 'Улей не найден',
     loadError: 'Не удалось загрузить улей',
     empty: 'В улье пока нет активных фото',
     dissolvesIn: 'Улей растворится через',
@@ -242,8 +243,6 @@ export const ru: TranslationSchema = {
     minutesAgo: '{{count}} мин назад',
     hoursAgo: '{{count}} ч назад',
     daysAgo: '{{count}} дн назад',
-    contributorsTwo: '{{name1}} и {{name2}}',
-    contributorsMany: '{{name1}}, {{name2}} и ещё {{count}} человек',
   },
   sting: {
     photoAlt: 'Фото момента',

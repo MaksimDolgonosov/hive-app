@@ -3,13 +3,15 @@ import { router, type Href } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  Dimensions,
   Keyboard,
-  KeyboardAvoidingView,
+  LayoutAnimation,
   Platform,
   Pressable,
   Text,
   TextInput,
   View,
+  type KeyboardEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -25,12 +27,15 @@ import { showApiErrorToast } from '@/src/utils/show-toast';
 
 const LOW_ACCURACY_THRESHOLD_M = 50;
 const STALE_CAPTURE_THRESHOLD_MS = 90_000;
+const KEYBOARD_FIELD_GAP = 18;
+const COMPOSER_BOTTOM_GAP = 24;
 
 export default function PreviewScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const publishSting = usePublishSting();
   const [comment, setComment] = useState('');
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const capturedUri = useCameraStore((state) => state.capturedUri);
   const captureCoords = useCameraStore((state) => state.captureCoords);
@@ -48,6 +53,46 @@ export default function PreviewScreen() {
       router.replace('/(modals)/camera' as Href);
     }
   }, [captureCoords, capturedAt, capturedUri, idempotencyKey, isCameraCapture]);
+
+  useEffect(() => {
+    function keyboardOverlap(event: KeyboardEvent) {
+      const screenHeight = Dimensions.get('screen').height;
+      return Math.max(0, screenHeight - event.endCoordinates.screenY);
+    }
+
+    function syncKeyboard(event: KeyboardEvent, visible: boolean) {
+      if (Platform.OS === 'ios') {
+        LayoutAnimation.configureNext({
+          duration: event.duration > 0 ? event.duration : 250,
+          update: { type: LayoutAnimation.Types.keyboard },
+        });
+      }
+
+      setKeyboardHeight(visible ? keyboardOverlap(event) : 0);
+    }
+
+    const show = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (event) => syncKeyboard(event, true),
+    );
+    const hide = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      (event) => syncKeyboard(event, false),
+    );
+    const changeFrame = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillChangeFrame' : 'keyboardDidChangeFrame',
+      (event) => {
+        const overlap = keyboardOverlap(event);
+        syncKeyboard(event, overlap > 0);
+      },
+    );
+
+    return () => {
+      show.remove();
+      hide.remove();
+      changeFrame.remove();
+    };
+  }, []);
 
   if (!capturedUri || !captureCoords || !capturedAt || !idempotencyKey || !isCameraCapture) {
     return (
@@ -111,12 +156,13 @@ export default function PreviewScreen() {
     }
   }
 
+  const isKeyboardVisible = keyboardHeight > 0;
+  const composerPaddingBottom = isKeyboardVisible
+    ? keyboardHeight + KEYBOARD_FIELD_GAP
+    : insets.bottom + COMPOSER_BOTTOM_GAP;
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-black"
-      keyboardVerticalOffset={0}
-    >
+    <View className="flex-1 bg-black">
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('camera.previewAlt')}
@@ -143,7 +189,10 @@ export default function PreviewScreen() {
         )}
       </Pressable>
 
-      <View className="gap-3 bg-black/70 px-6 pt-4" style={{ paddingBottom: insets.bottom + 10 }}>
+      <View
+        className="gap-3 bg-black/70 px-6 pt-4"
+        style={{ paddingBottom: composerPaddingBottom }}
+      >
         <View className="gap-1.5">
           <TextInput
             accessibilityLabel={t('camera.commentLabel')}
@@ -166,36 +215,40 @@ export default function PreviewScreen() {
           </Text>
         </View>
 
-        <AuthButton
-          loading={publishSting.isPending}
-          title={t('camera.publish')}
-          onPress={() => void handlePublish()}
-        />
+        {isKeyboardVisible ? null : (
+          <>
+            <AuthButton
+              loading={publishSting.isPending}
+              title={t('camera.publish')}
+              onPress={() => void handlePublish()}
+            />
 
-        <View className="flex-row gap-3">
-          <Pressable
-            accessibilityRole="button"
-            className="flex-1 items-center rounded-hive-md border border-white/30 py-3"
-            disabled={publishSting.isPending}
-            onPress={handleRetake}
-          >
-            <Text className="font-inter text-base font-semibold text-white">
-              {t('camera.retake')}
-            </Text>
-          </Pressable>
+            <View className="flex-row gap-3">
+              <Pressable
+                accessibilityRole="button"
+                className="flex-1 items-center rounded-hive-md border border-white/30 py-3"
+                disabled={publishSting.isPending}
+                onPress={handleRetake}
+              >
+                <Text className="font-inter text-base font-semibold text-white">
+                  {t('camera.retake')}
+                </Text>
+              </Pressable>
 
-          <Pressable
-            accessibilityRole="button"
-            className="flex-1 items-center rounded-hive-md border border-white/30 py-3"
-            disabled={publishSting.isPending}
-            onPress={handleCancel}
-          >
-            <Text className="font-inter text-base font-semibold text-white">
-              {t('camera.cancel')}
-            </Text>
-          </Pressable>
-        </View>
+              <Pressable
+                accessibilityRole="button"
+                className="flex-1 items-center rounded-hive-md border border-white/30 py-3"
+                disabled={publishSting.isPending}
+                onPress={handleCancel}
+              >
+                <Text className="font-inter text-base font-semibold text-white">
+                  {t('camera.cancel')}
+                </Text>
+              </Pressable>
+            </View>
+          </>
+        )}
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }

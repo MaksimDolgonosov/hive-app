@@ -231,7 +231,8 @@ export const en: TranslationSchema = {
   hive: {
     title: 'Hive',
     photoCount: '{{count}} photos',
-    close: 'Close',
+    back: 'Back',
+    notFound: 'Hive not found',
     loadError: 'Could not load hive',
     empty: 'No active photos in this hive',
     dissolvesIn: 'Hive dissolves in',
@@ -240,8 +241,6 @@ export const en: TranslationSchema = {
     minutesAgo: '{{count}} min ago',
     hoursAgo: '{{count}}h ago',
     daysAgo: '{{count}}d ago',
-    contributorsTwo: '{{name1}} and {{name2}}',
-    contributorsMany: '{{name1}}, {{name2}} and {{count}} more',
   },
   sting: {
     photoAlt: 'Moment photo',

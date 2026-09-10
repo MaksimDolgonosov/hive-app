@@ -6,6 +6,10 @@ export default function ModalsLayout() {
       <Stack.Screen name="camera" />
       <Stack.Screen name="preview" options={{ presentation: 'card' }} />
       <Stack.Screen name="sting/[id]" options={{ presentation: 'card' }} />
+      <Stack.Screen
+        name="hive/[id]"
+        options={{ presentation: 'card', animation: 'slide_from_right' }}
+      />
       <Stack.Screen name="user/[id]" options={{ presentation: 'card' }} />
     </Stack>
   );

@@ -28,6 +28,7 @@ export type HivePalette = {
   fontBodyBold: string;
   gradients: {
     screen: readonly [string, string, string];
+    screenLocations: readonly [number, number, number];
     authGlow: readonly [string, string, string];
     photoOverlay: readonly [string, string];
     marker: readonly [string, string];
@@ -71,7 +72,8 @@ export const HiveThemes: Record<AppColorScheme, HivePalette> = {
     inputBg: '#15130F',
     gradients: {
       ...SHARED.gradients,
-      screen: ['#0B0A08', '#15130F', '#1A140C'],
+      screen: ['#2D2207', '#14100A', '#0B0A08'] as const,
+      screenLocations: [0, 0.32, 1] as const,
       authGlow: ['#0B0A08', '#1A140C', '#0B0A08'],
     },
   },
@@ -90,7 +92,8 @@ export const HiveThemes: Record<AppColorScheme, HivePalette> = {
     inputBg: '#FFFFFF',
     gradients: {
       ...SHARED.gradients,
-      screen: ['#FFF8ED', '#FFE8B8', '#FFE8B8'],
+      screen: ['#FFF8ED', '#FFE8B8', '#FFE8B8'] as const,
+      screenLocations: [0, 1, 1] as const,
       authGlow: ['#FFF8ED', '#FFE8B8', 'rgba(255, 213, 79, 0.27)'],
     },
   },

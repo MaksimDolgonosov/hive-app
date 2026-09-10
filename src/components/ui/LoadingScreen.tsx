@@ -23,7 +23,11 @@ export function LoadingScreen({ bottomOffset = 0 }: LoadingScreenProps) {
   const footerPadding = bottomOffset > 0 ? bottomOffset : Math.max(insets.bottom, 48);
 
   return (
-    <LinearGradient colors={[...theme.gradients.screen]} locations={[0, 0.55, 1]} style={styles.root}>
+    <LinearGradient
+      colors={[...theme.gradients.screen]}
+      locations={theme.gradients.screenLocations}
+      style={styles.root}
+    >
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       <View style={styles.content}>
         <View style={styles.logoShadow}>

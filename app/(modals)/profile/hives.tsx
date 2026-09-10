@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
@@ -6,21 +6,28 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
 import { ProfileHiveCard } from '@/src/components/profile/ProfileHiveCard';
-import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { useLocation } from '@/src/hooks/useLocation';
 import { useMyHives } from '@/src/hooks/useProfileCollections';
 import type { UserHiveSummary } from '@/src/types';
 import { haversineDistance } from '@/src/utils/geo';
+import { openHive } from '@/src/utils/open-hive';
 
 export default function MyHivesScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { coords } = useLocation();
-  const [selectedHiveId, setSelectedHiveId] = useState<string | null>(null);
 
-  const { data, isLoading, isError, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useMyHives();
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useMyHives();
 
   const hives = useMemo(() => data?.pages.flatMap((page) => page.hives) ?? [], [data?.pages]);
 
@@ -38,10 +45,7 @@ export default function MyHivesScreen() {
       return null;
     }
 
-    return haversineDistance(
-      { lat: coords.latitude, lng: coords.longitude },
-      hive.center,
-    );
+    return haversineDistance({ lat: coords.latitude, lng: coords.longitude }, hive.center);
   }
 
   const listBottomInset = insets.bottom + 24;
@@ -90,7 +94,7 @@ export default function MyHivesScreen() {
             <ProfileHiveCard
               hive={item}
               distanceM={resolveDistanceM(item)}
-              onPress={() => setSelectedHiveId(item.id)}
+              onPress={() => openHive(item.id)}
             />
           )}
           ListEmptyComponent={
@@ -118,10 +122,6 @@ export default function MyHivesScreen() {
           onEndReachedThreshold={0.4}
         />
       )}
-
-      {selectedHiveId ? (
-        <HiveBottomSheet hiveId={selectedHiveId} onClose={() => setSelectedHiveId(null)} />
-      ) : null}
     </ProfileCollectionLayout>
   );
 }

@@ -14,7 +14,7 @@ import { SaveMapPlaceModal } from '@/src/components/map/SaveMapPlaceModal';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { isGoogleMapsConfigured } from '@/src/config/env';
-import { HIVE_DARK_MAP_STYLE } from '@/src/constants/map-style';
+import { HIVE_DARK_MAP_STYLE, HIVE_LIGHT_MAP_STYLE } from '@/src/constants/map-style';
 import { useLocation } from '@/src/hooks/useLocation';
 import { useAppColorScheme } from '@/src/hooks/useHiveTheme';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
@@ -30,7 +30,7 @@ import { openHive } from '@/src/utils/open-hive';
 import { resolveMapViewRegion } from '@/src/utils/resolve-map-view-region';
 import { showMessageToast } from '@/src/utils/show-toast';
 
-import { StingMarker } from './StingMarker';
+import { StingMarker, StingMarkerCapture } from './StingMarker';
 
 const REGION_DEBOUNCE_MS = 300;
 const PUBLISH_FOCUS_DELTA = 0.008;
@@ -106,6 +106,7 @@ export function MapContainer() {
   const [isSavingPlace, setIsSavingPlace] = useState(false);
   const [debouncedBounds, setDebouncedBounds] = useState<MapBounds | null>(null);
   const [hiveMarkerImages, setHiveMarkerImages] = useState<Record<string, string>>({});
+  const [stingMarkerImages, setStingMarkerImages] = useState<Record<string, string>>({});
   const [initialRegion, setInitialRegion] = useState<MapRegion | null>(resolveStartupRegion);
   const [centerOnUserAtStartup] = useState(shouldCenterOnUserAtStartup);
 
@@ -134,6 +135,16 @@ export function MapContainer() {
       }
 
       return { ...previous, [hiveId]: uri };
+    });
+  }, []);
+
+  const handleStingMarkerCaptured = useCallback((stingId: string, uri: string) => {
+    setStingMarkerImages((previous) => {
+      if (previous[stingId] === uri) {
+        return previous;
+      }
+
+      return { ...previous, [stingId]: uri };
     });
   }, []);
 
@@ -384,9 +395,11 @@ export function MapContainer() {
     <View className="flex-1">
       {isGoogleMapsConfigured() ? (
         <MapView
+          // Android Google Maps applies style only at native mount; iOS updates live.
+          key={Platform.OS === 'android' ? colorScheme : 'map'}
           ref={mapRef}
           style={styles.mapLayer}
-          initialRegion={initialRegion}
+          initialRegion={liveRegionRef.current ?? initialRegion}
           onRegionChange={handleRegionChange}
           onRegionChangeComplete={handleRegionChangeComplete}
           onMapReady={() => {
@@ -395,11 +408,16 @@ export function MapContainer() {
           showsUserLocation
           showsMyLocationButton={false}
           userInterfaceStyle={colorScheme}
-          customMapStyle={colorScheme === 'dark' ? HIVE_DARK_MAP_STYLE : undefined}
+          customMapStyle={colorScheme === 'dark' ? HIVE_DARK_MAP_STYLE : HIVE_LIGHT_MAP_STYLE}
           {...(Platform.OS === 'android' ? { googleRenderer: 'LEGACY' as const } : {})}
         >
           {data?.stings.map((sting) => (
-            <StingMarker key={sting.id} sting={sting} onPress={() => openSting(sting.id)} />
+            <StingMarker
+              key={sting.id}
+              sting={sting}
+              imageUri={stingMarkerImages[sting.id]}
+              onPress={() => openSting(sting.id)}
+            />
           ))}
           {data?.hives
             .filter((hive) => isActiveHive(hive.activeStingsCount))
@@ -431,6 +449,14 @@ export function MapContainer() {
               count={hive.activeStingsCount}
               hiveId={hive.id}
               onCaptured={handleHiveMarkerCaptured}
+            />
+          ))}
+        {Platform.OS === 'android' &&
+          (data?.stings ?? []).map((sting) => (
+            <StingMarkerCapture
+              key={sting.id}
+              sting={sting}
+              onCaptured={handleStingMarkerCaptured}
             />
           ))}
 

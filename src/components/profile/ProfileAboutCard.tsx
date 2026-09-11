@@ -4,7 +4,11 @@ import { Linking, Pressable, Text, View } from 'react-native';
 
 import { SOCIAL_LINK_META } from '@/src/constants/social-links';
 import type { User } from '@/src/types';
-import { getActiveSocialLinks, hasAnySocialLink, normalizeUserSocialLinks } from '@/src/utils/social-links';
+import {
+  getActiveSocialLinks,
+  hasAnySocialLink,
+  normalizeUserSocialLinks,
+} from '@/src/utils/social-links';
 
 import { ProfileGlassCard } from './ProfileGlassCard';
 
@@ -29,16 +33,16 @@ export function ProfileAboutCard({
 
   return (
     <ProfileGlassCard>
-      <View className="gap-4 px-5 py-5">
-        <View className="flex-row items-center justify-between">
-          <Text className="font-inter text-base font-semibold text-hive-foreground">
+      <View className="gap-2 px-2 py-1">
+        <View className="flex-row items-start justify-start">
+          {/* <Text className="font-inter text-base font-semibold text-hive-foreground">
             {t('profile.aboutTitle')}
-          </Text>
+          </Text> */}
           {onEdit ? (
             <Pressable
               accessibilityLabel={t('profile.editAbout')}
               accessibilityRole="button"
-              className="h-8 w-8 items-center justify-center rounded-full bg-hive-primary/15"
+              className="ml-auto h-8 w-8 items-center justify-center rounded-full bg-hive-primary/15"
               hitSlop={8}
               onPress={onEdit}
             >
@@ -64,7 +68,7 @@ export function ProfileAboutCard({
                   key={key}
                   accessibilityLabel={t(meta.labelKey)}
                   accessibilityRole="link"
-                  className="flex-row items-center gap-2 rounded-full border border-hive-stroke bg-hive-input-bg px-3 py-2"
+                  className="flex-row items-center gap-2 rounded-full border border-[#FFFFFF14] bg-hive-input-bg px-3 py-2"
                   onPress={() => void Linking.openURL(url)}
                 >
                   <Icon color={meta.color} size={16} />

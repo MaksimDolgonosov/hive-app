@@ -1,6 +1,6 @@
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import { Hexagon } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -9,6 +9,10 @@ import { useAppColorScheme, useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { en } from '@/src/i18n/locales/en';
 import { ru } from '@/src/i18n/locales/ru';
 import { useLocaleStore } from '@/src/stores/localeStore';
+
+const APP_ICON = require('../../../assets/Hive.icon/Assets/icon.png');
+const ICON_SIZE = 128;
+const ICON_RADIUS = Math.round(ICON_SIZE * 0.223);
 
 type LoadingScreenProps = {
   bottomOffset?: number;
@@ -31,14 +35,11 @@ export function LoadingScreen({ bottomOffset = 0 }: LoadingScreenProps) {
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       <View style={styles.content}>
         <View style={styles.logoShadow}>
-          <View style={[styles.logoMark, { backgroundColor: theme.accent }]}>
-            <Hexagon
-              color={theme.textOnAccent}
-              fill={theme.textOnAccent}
-              size={44}
-              strokeWidth={0}
-            />
-          </View>
+          <Image
+            contentFit="cover"
+            source={APP_ICON}
+            style={styles.logoMark}
+          />
         </View>
         <View style={styles.wordmark}>
           <Text style={[styles.appName, { color: theme.text, fontFamily: theme.fontDisplay }]}>
@@ -74,11 +75,9 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   logoMark: {
-    width: 88,
-    height: 88,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: ICON_SIZE,
+    height: ICON_SIZE,
+    borderRadius: ICON_RADIUS,
     overflow: 'hidden',
   },
   wordmark: {

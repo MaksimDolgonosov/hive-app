@@ -55,8 +55,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
   },
 
   setColorScheme: async (scheme) => {
-    set({ colorScheme: scheme });
     applyNativeColorScheme(scheme);
+    set({ colorScheme: scheme });
     await saveColorScheme(scheme);
   },
 }));

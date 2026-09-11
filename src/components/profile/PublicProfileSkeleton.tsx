@@ -12,10 +12,18 @@ function StatSkeleton() {
   );
 }
 
+function PhotoSkeleton() {
+  return (
+    <View className="flex-1 overflow-hidden rounded-2xl" style={{ aspectRatio: 3 / 4 }}>
+      <SkeletonBlock borderRadius={16} height={1} style={{ flex: 1, width: '100%', height: '100%' }} />
+    </View>
+  );
+}
+
 export function PublicProfileSkeleton() {
   return (
     <>
-      <View className="gap-6">
+      <View className="gap-6 px-5">
         <View className="flex-row items-center gap-4">
           <SkeletonBlock borderRadius={36} height={72} width={72} />
           <View className="flex-1 gap-2">
@@ -33,28 +41,29 @@ export function PublicProfileSkeleton() {
         </View>
       </View>
 
-      <ProfileGlassCard>
-        <View className="gap-4 px-5 py-5">
-          <SkeletonBlock borderRadius={6} height={18} width={120} />
-          <SkeletonBlock borderRadius={6} height={14} width="100%" />
-          <SkeletonBlock borderRadius={6} height={14} width="88%" />
-          <SkeletonBlock borderRadius={6} height={14} width="72%" />
-          <View className="flex-row gap-2">
-            <SkeletonBlock borderRadius={999} height={32} width={96} />
-            <SkeletonBlock borderRadius={999} height={32} width={88} />
+      <View className="px-5">
+        <ProfileGlassCard>
+          <View className="gap-4 px-5 py-5">
+            <SkeletonBlock borderRadius={6} height={18} width={120} />
+            <SkeletonBlock borderRadius={6} height={14} width="100%" />
+            <SkeletonBlock borderRadius={6} height={14} width="88%" />
+            <SkeletonBlock borderRadius={6} height={14} width="72%" />
+            <View className="flex-row gap-2">
+              <SkeletonBlock borderRadius={999} height={32} width={96} />
+              <SkeletonBlock borderRadius={999} height={32} width={88} />
+            </View>
           </View>
-        </View>
-      </ProfileGlassCard>
+        </ProfileGlassCard>
+      </View>
 
       <View className="gap-3">
-        <View className="flex-row items-center justify-between">
+        <View className="px-5">
           <SkeletonBlock borderRadius={6} height={16} width={140} />
-          <SkeletonBlock borderRadius={6} height={14} width={72} />
         </View>
-        <View className="flex-row gap-2">
-          <SkeletonBlock borderRadius={16} height={96} width={96} />
-          <SkeletonBlock borderRadius={16} height={96} width={96} />
-          <SkeletonBlock borderRadius={16} height={96} width={96} />
+        <View className="flex-row px-2" style={{ gap: 8 }}>
+          <PhotoSkeleton />
+          <PhotoSkeleton />
+          <PhotoSkeleton />
         </View>
       </View>
     </>

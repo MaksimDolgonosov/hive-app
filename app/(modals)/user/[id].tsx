@@ -109,7 +109,6 @@ export default function PublicUserProfileScreen() {
           contentContainerStyle={{
             paddingTop: insets.top + 56,
             paddingBottom: insets.bottom + 24,
-            paddingHorizontal: 20,
             gap: 16,
           }}
           showsVerticalScrollIndicator={false}
@@ -118,15 +117,19 @@ export default function PublicUserProfileScreen() {
             <PublicProfileSkeleton />
           ) : (
             <>
-              <ProfileHeaderCard stats={data.stats ?? EMPTY_STATS} subtitle={subtitle} user={data.user} />
+              <View className="px-5">
+                <ProfileHeaderCard stats={data.stats ?? EMPTY_STATS} subtitle={subtitle} user={data.user} />
+              </View>
 
-              <ProfileAboutCard
-                emptyBioKey="userProfile.aboutEmpty"
-                emptySocialKey="userProfile.socialEmpty"
-                user={data.user}
-              />
+              <View className="px-5">
+                <ProfileAboutCard
+                  emptyBioKey="userProfile.aboutEmpty"
+                  emptySocialKey="userProfile.socialEmpty"
+                  user={data.user}
+                />
+              </View>
 
-              <ProfileRecentPhotos photoUrls={data.recentPhotos} />
+              <ProfileRecentPhotos layout="grid" photoUrls={data.recentPhotos} />
             </>
           )}
         </ScrollView>

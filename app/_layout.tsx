@@ -13,9 +13,10 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
+import { requireOptionalNativeModule } from 'expo-modules-core';
 import { useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
@@ -56,6 +57,20 @@ export default function RootLayout() {
 
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(HiveThemes[colorScheme].bg);
+
+    if (Platform.OS !== 'android') {
+      return;
+    }
+
+    const navigationBar = requireOptionalNativeModule<{
+      setButtonStyleAsync: (style: 'light' | 'dark') => Promise<void>;
+    }>('ExpoNavigationBar');
+
+    if (!navigationBar) {
+      return;
+    }
+
+    void navigationBar.setButtonStyleAsync(colorScheme === 'dark' ? 'light' : 'dark');
   }, [colorScheme]);
 
   const isReady = (fontsLoaded || Boolean(fontError)) && localeReady && preferencesReady;
@@ -68,7 +83,7 @@ export default function RootLayout() {
 
   if (!isReady) {
     return (
-      <View style={[{ flex: 1 }, HIVE_NATIVEWIND_VARS[colorScheme]]}>
+      <View style={[{ flex: 1, backgroundColor: HiveThemes[colorScheme].bg }, HIVE_NATIVEWIND_VARS[colorScheme]]}>
         <LoadingScreen />
       </View>
     );
@@ -79,7 +94,7 @@ export default function RootLayout() {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: palette.bg }}>
         <ThemeProvider
           value={{
             ...navigationTheme,

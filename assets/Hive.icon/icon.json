@@ -1,29 +1,35 @@
 {
   "fill" : {
-    "automatic-gradient" : "display-p3:0.96783,0.65537,0.27262,1.00000"
+    "automatic-gradient" : "extended-srgb:0.00000,0.53333,1.00000,1.00000"
   },
   "groups" : [
     {
       "layers" : [
         {
-          "blend-mode" : "overlay",
-          "fill" : "automatic",
-          "glass-specializations" : [
+          "fill-specializations" : [
             {
-              "appearance" : "light",
-              "value" : true
+              "appearance" : "dark",
+              "value" : "none"
             }
           ],
-          "hidden" : false,
-          "image-name" : "ios-icon-1024.svg",
-          "name" : "ios-icon-1024",
-          "position" : {
-            "scale" : 1,
-            "translation-in-points" : [
-              0,
-              0
-            ]
-          }
+          "glass-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : true
+            },
+            {
+              "idiom" : "square",
+              "value" : false
+            }
+          ],
+          "hidden-specializations" : [
+            {
+              "idiom" : "square",
+              "value" : false
+            }
+          ],
+          "image-name" : "icon.png",
+          "name" : "icon"
         }
       ],
       "shadow" : {
@@ -37,8 +43,9 @@
     }
   ],
   "supported-platforms" : {
-    "squares" : [
-      "iOS"
-    ]
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
   }
 }

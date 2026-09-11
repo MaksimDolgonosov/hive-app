@@ -1,7 +1,5 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import { Hexagon } from 'lucide-react-native';
-import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo } from 'react';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -9,14 +7,58 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
 
-import { HiveGradients, HiveTheme } from '@/src/theme/tokens';
+import { HiveTheme } from '@/src/theme/tokens';
+import { getRoundedHexagonPath } from '@/src/utils/hive-hexagon';
 import { getHiveMarkerVisualMetrics } from '@/src/utils/hive-marker-visual';
 
 type HiveMarkerFaceProps = {
   count: number;
   animate?: boolean;
 };
+
+function HiveHexagonMark({ count }: { count: number }) {
+  const metrics = getHiveMarkerVisualMetrics(count);
+  const path = useMemo(
+    () =>
+      getRoundedHexagonPath(metrics.markerSize, metrics.cornerRadius, metrics.strokeWidth / 2),
+    [metrics.cornerRadius, metrics.markerSize, metrics.strokeWidth],
+  );
+
+  return (
+    <View
+      style={[
+        styles.mark,
+        {
+          width: metrics.markerSize,
+          height: metrics.markerSize,
+        },
+      ]}
+    >
+      <Svg height={metrics.markerSize} width={metrics.markerSize} style={StyleSheet.absoluteFill}>
+        <Path
+          d={path}
+          fill={HiveTheme.accent}
+          stroke="rgba(255, 255, 255, 0.25)"
+          strokeLinejoin="round"
+          strokeWidth={metrics.strokeWidth}
+        />
+      </Svg>
+      <Text
+        allowFontScaling={false}
+        numberOfLines={1}
+        style={[
+          styles.count,
+          { fontSize: metrics.countFontSize },
+          Platform.OS === 'ios' ? { lineHeight: metrics.markerSize } : null,
+        ]}
+      >
+        {count}
+      </Text>
+    </View>
+  );
+}
 
 export function HiveMarkerFace({ count, animate = true }: HiveMarkerFaceProps) {
   const metrics = getHiveMarkerVisualMetrics(count);
@@ -50,104 +92,35 @@ export function HiveMarkerFace({ count, animate = true }: HiveMarkerFaceProps) {
         {
           width: metrics.markerSize,
           height: metrics.markerSize,
-          borderRadius: metrics.markerSize / 2,
         },
       ]}
     >
-      <LinearGradient
-        colors={[...HiveGradients.marker]}
-        end={{ x: 1, y: 1 }}
-        start={{ x: 0, y: 0 }}
-        style={[
-          styles.marker,
-          {
-            width: metrics.markerSize,
-            height: metrics.markerSize,
-            borderRadius: metrics.markerSize / 2,
-          },
-        ]}
-      >
-        <Hexagon
-          color={HiveTheme.textOnAccent}
-          fill={HiveTheme.textOnAccent}
-          size={metrics.iconSize}
-          strokeWidth={0}
-        />
-        <Text
-          style={[
-            styles.count,
-            {
-              fontSize: metrics.countFontSize,
-              lineHeight: Math.round(metrics.countFontSize * 1.2),
-            },
-          ]}
-        >
-          {count}
-        </Text>
-      </LinearGradient>
+      <HiveHexagonMark count={count} />
     </Animated.View>
   );
 }
 
 export function HiveMarkerFaceStatic({ count }: { count: number }) {
-  const metrics = getHiveMarkerVisualMetrics(count);
-
-  return (
-    <View
-      style={[
-        styles.markerStatic,
-        {
-          width: metrics.markerSize,
-          height: metrics.markerSize,
-          borderRadius: metrics.markerSize / 2,
-        },
-      ]}
-    >
-      <Hexagon
-        color={HiveTheme.textOnAccent}
-        fill={HiveTheme.textOnAccent}
-        size={metrics.iconSize}
-        strokeWidth={0}
-      />
-      <Text
-        style={[
-          styles.count,
-          {
-            fontSize: metrics.countFontSize,
-            lineHeight: Math.round(metrics.countFontSize * 1.2),
-          },
-        ]}
-      >
-        {count}
-      </Text>
-    </View>
-  );
+  return <HiveHexagonMark count={count} />;
 }
 
 const styles = StyleSheet.create({
   shadow: {
     shadowColor: HiveTheme.accent,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.72,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 24,
   },
-  marker: {
+  mark: {
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
-    paddingTop: 2,
-  },
-  markerStatic: {
-    backgroundColor: HiveTheme.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    paddingTop: 2,
   },
   count: {
+    ...StyleSheet.absoluteFillObject,
     color: HiveTheme.textOnAccent,
     fontFamily: HiveTheme.fontDisplay,
-    fontWeight: '700',
     includeFontPadding: false,
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
 });

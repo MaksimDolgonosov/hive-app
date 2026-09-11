@@ -72,7 +72,6 @@ export function HiveCircle({ hive, imageUri, onPress }: HiveCircleProps) {
               {
                 width: metrics.markerSize,
                 height: metrics.markerSize,
-                borderRadius: metrics.markerSize / 2,
               },
             ]}
           >

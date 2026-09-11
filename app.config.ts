@@ -71,6 +71,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     platforms: ['ios', 'android'],
+    androidNavigationBar: {
+      backgroundColor: SPLASH_BACKGROUND,
+      barStyle: 'light-content',
+      enforceContrast: false,
+    },
     splash: {
       image: SPLASH_IMAGE,
       resizeMode: 'cover',

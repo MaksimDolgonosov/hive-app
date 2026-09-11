@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HiveContributorAvatars } from '@/src/components/hive/HiveContributorAvatars';
 import { HivePhotoList } from '@/src/components/hive/HivePhotoList';
-import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { useCountdown } from '@/src/hooks/useCountdown';
 import { useHiveDetail } from '@/src/hooks/useHiveDetail';
 import { useHiveTheme } from '@/src/hooks/useHiveTheme';
@@ -114,11 +113,7 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
           </View>
         ) : null}
 
-        {isLoading ? (
-          <View className="items-center py-10">
-            <HiveLoader size="large" />
-          </View>
-        ) : null}
+        {isLoading && !data ? <HivePhotoList isLoading stings={[]} onPressSting={openSting} /> : null}
 
         {isError ? (
           <Text className="py-8 text-center font-inter text-sm text-hive-muted">

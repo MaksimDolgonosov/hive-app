@@ -15973,6 +15973,112 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "orOqS",
+      "x": 5622,
+      "y": 3200,
+      "name": "Export/V2-iOS-1024",
+      "clip": true,
+      "width": 256,
+      "height": 256,
+      "fill": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "enabled": true,
+        "rotation": 145,
+        "size": {
+          "height": 1
+        },
+        "colors": [
+          {
+            "color": "#241E14",
+            "position": 0
+          },
+          {
+            "color": "#13110C",
+            "position": 0.5
+          },
+          {
+            "color": "#0A0907",
+            "position": 1
+          }
+        ]
+      },
+      "stroke": "#FFFFFF1F",
+      "strokeWidth": 1.536,
+      "strokeAlignment": "inner",
+      "layout": "none",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "r7ndXo",
+          "x": 33.28,
+          "y": 33.28,
+          "name": "Glow",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#FFB80033",
+                "position": 0
+              },
+              {
+                "color": "#FFB80000",
+                "position": 1
+              }
+            ]
+          },
+          "width": 189.44,
+          "height": 189.44
+        },
+        {
+          "type": "frame",
+          "id": "DoRbG",
+          "x": 38.4,
+          "y": 30.72,
+          "name": "Deco1",
+          "width": 71.68,
+          "height": 71.68,
+          "fill": "#00000000",
+          "cornerRadius": 15.36,
+          "stroke": "#FFB8003D",
+          "strokeWidth": 2.1504000000000003
+        },
+        {
+          "type": "frame",
+          "id": "ewbny",
+          "x": 158.72,
+          "y": 140.8,
+          "name": "Deco2",
+          "width": 56.32,
+          "height": 56.32,
+          "fill": "#00000000",
+          "cornerRadius": 12.8,
+          "stroke": "#FFB8003D",
+          "strokeWidth": 1.6895999999999998
+        },
+        {
+          "type": "icon",
+          "id": "F8tT6",
+          "x": 22,
+          "y": 35.5,
+          "name": "Mark",
+          "width": 212,
+          "height": 185,
+          "icon": "hexagon",
+          "library": "lucide",
+          "fill": "#FFB800"
+        }
+      ]
     }
   ],
   "variables": {

@@ -5,25 +5,24 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+import { HiveThemes } from '@/src/theme/tokens';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    text: HiveThemes.light.text,
+    background: HiveThemes.light.bg,
+    tint: HiveThemes.light.accent,
+    icon: HiveThemes.light.textMuted,
+    tabIconDefault: HiveThemes.light.textMuted,
+    tabIconSelected: HiveThemes.light.accent,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    text: HiveThemes.dark.text,
+    background: HiveThemes.dark.bg,
+    tint: HiveThemes.dark.accent,
+    icon: HiveThemes.dark.textMuted,
+    tabIconDefault: HiveThemes.dark.textMuted,
+    tabIconSelected: HiveThemes.dark.accent,
   },
 };
 

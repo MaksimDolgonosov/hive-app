@@ -1,16 +1,18 @@
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import { Hexagon } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
+import { useAppColorScheme, useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { en } from '@/src/i18n/locales/en';
 import { ru } from '@/src/i18n/locales/ru';
 import { useLocaleStore } from '@/src/stores/localeStore';
 
-const BACKGROUND_COLORS = ['#FFF8ED', '#FFE8B8', '#FFE082'] as const;
-const LOGO_GRADIENT = ['#F5A623', '#FF8C00'] as const;
+const APP_ICON = require('../../../assets/Hive.icon/Assets/icon.png');
+const ICON_SIZE = 128;
+const ICON_RADIUS = Math.round(ICON_SIZE * 0.223);
 
 type LoadingScreenProps = {
   bottomOffset?: number;
@@ -19,26 +21,33 @@ type LoadingScreenProps = {
 export function LoadingScreen({ bottomOffset = 0 }: LoadingScreenProps) {
   const insets = useSafeAreaInsets();
   const language = useLocaleStore((state) => state.language);
+  const theme = useHiveTheme();
+  const colorScheme = useAppColorScheme();
   const tagline = language === 'en' ? en.common.appTagline : ru.common.appTagline;
   const footerPadding = bottomOffset > 0 ? bottomOffset : Math.max(insets.bottom, 48);
 
   return (
-    <LinearGradient colors={[...BACKGROUND_COLORS]} locations={[0, 0.55, 1]} style={styles.root}>
-      <StatusBar style="dark" />
+    <LinearGradient
+      colors={[...theme.gradients.screen]}
+      locations={theme.gradients.screenLocations}
+      style={styles.root}
+    >
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       <View style={styles.content}>
         <View style={styles.logoShadow}>
-          <LinearGradient
-            colors={[...LOGO_GRADIENT]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+          <Image
+            contentFit="cover"
+            source={APP_ICON}
             style={styles.logoMark}
-          >
-            <Hexagon color="#FFFFFF" size={60} strokeWidth={2} />
-          </LinearGradient>
+          />
         </View>
         <View style={styles.wordmark}>
-          <Text style={styles.appName}>Hive</Text>
-          <Text style={styles.tagline}>{tagline}</Text>
+          <Text style={[styles.appName, { color: theme.text, fontFamily: theme.fontDisplay }]}>
+            HIVE
+          </Text>
+          <Text style={[styles.tagline, { color: theme.textMuted, fontFamily: theme.fontBody }]}>
+            {tagline}
+          </Text>
         </View>
       </View>
       <View style={[styles.footer, { paddingBottom: footerPadding }]}>
@@ -59,18 +68,16 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   logoShadow: {
-    shadowColor: '#F5A623',
+    shadowColor: '#FFB800',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.33,
+    shadowOpacity: 0.4,
     shadowRadius: 28,
     elevation: 10,
   },
   logoMark: {
-    width: 120,
-    height: 120,
-    borderRadius: 34,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: ICON_SIZE,
+    height: ICON_SIZE,
+    borderRadius: ICON_RADIUS,
     overflow: 'hidden',
   },
   wordmark: {
@@ -78,14 +85,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   appName: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 36,
-    color: '#2C1810',
+    fontSize: 32,
+    letterSpacing: 2,
   },
   tagline: {
-    fontFamily: 'Inter',
     fontSize: 15,
-    color: '#8B7355',
   },
   footer: {
     alignItems: 'center',

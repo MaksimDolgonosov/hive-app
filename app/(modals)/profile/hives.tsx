@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
@@ -6,21 +6,28 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
 import { ProfileHiveCard } from '@/src/components/profile/ProfileHiveCard';
-import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { useLocation } from '@/src/hooks/useLocation';
 import { useMyHives } from '@/src/hooks/useProfileCollections';
 import type { UserHiveSummary } from '@/src/types';
 import { haversineDistance } from '@/src/utils/geo';
+import { openHive } from '@/src/utils/open-hive';
 
 export default function MyHivesScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { coords } = useLocation();
-  const [selectedHiveId, setSelectedHiveId] = useState<string | null>(null);
 
-  const { data, isLoading, isError, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useMyHives();
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useMyHives();
 
   const hives = useMemo(() => data?.pages.flatMap((page) => page.hives) ?? [], [data?.pages]);
 
@@ -38,10 +45,7 @@ export default function MyHivesScreen() {
       return null;
     }
 
-    return haversineDistance(
-      { lat: coords.latitude, lng: coords.longitude },
-      hive.center,
-    );
+    return haversineDistance({ lat: coords.latitude, lng: coords.longitude }, hive.center);
   }
 
   const listBottomInset = insets.bottom + 24;
@@ -59,10 +63,10 @@ export default function MyHivesScreen() {
           </Text>
           <Pressable
             accessibilityRole="button"
-            className="mt-4 rounded-hive-md bg-hive-primary px-5 py-2.5"
+            className="mt-4 rounded-full bg-hive-primary px-5 py-2.5"
             onPress={() => void refetch()}
           >
-            <Text className="font-inter text-sm font-semibold text-white">
+            <Text className="font-inter text-sm font-semibold text-hive-on-accent">
               {t('profile.collections.retry')}
             </Text>
           </Pressable>
@@ -80,9 +84,9 @@ export default function MyHivesScreen() {
           keyExtractor={(item) => item.id}
           refreshControl={
             <RefreshControl
-              colors={['#F5A623']}
+              colors={['#FFB800']}
               refreshing={isRefetching && !isLoading}
-              tintColor="#F5A623"
+              tintColor="#FFB800"
               onRefresh={() => void refetch()}
             />
           }
@@ -90,7 +94,7 @@ export default function MyHivesScreen() {
             <ProfileHiveCard
               hive={item}
               distanceM={resolveDistanceM(item)}
-              onPress={() => setSelectedHiveId(item.id)}
+              onPress={() => openHive(item.id)}
             />
           )}
           ListEmptyComponent={
@@ -118,10 +122,6 @@ export default function MyHivesScreen() {
           onEndReachedThreshold={0.4}
         />
       )}
-
-      {selectedHiveId ? (
-        <HiveBottomSheet hiveId={selectedHiveId} onClose={() => setSelectedHiveId(null)} />
-      ) : null}
     </ProfileCollectionLayout>
   );
 }

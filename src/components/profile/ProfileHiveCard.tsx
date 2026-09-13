@@ -21,7 +21,7 @@ export function ProfileHiveCard({ hive, distanceM, onPress }: ProfileHiveCardPro
       onPress={onPress}
     >
       <View className="h-14 w-14 items-center justify-center rounded-full bg-hive-primary/15">
-        <Hexagon color="#F5A623" fill="rgba(245, 166, 35, 0.25)" size={28} />
+        <Hexagon color="#FFB800" fill="rgba(245, 166, 35, 0.25)" size={28} />
       </View>
 
       <View className="ml-3 flex-1">

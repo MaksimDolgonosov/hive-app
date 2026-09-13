@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Camera } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Alert, Linking, Pressable, Text, View } from 'react-native';
@@ -46,7 +45,7 @@ function AvatarContent({
   if (displayUri) {
     return (
       <View
-        className="overflow-hidden rounded-full border-[3px] border-white"
+        className="overflow-hidden rounded-full border-[3px] border-hive-surface"
         style={{ width: size, height: size }}
       >
         <Image
@@ -62,24 +61,20 @@ function AvatarContent({
   }
 
   return (
-    <LinearGradient
-      colors={['#F5A623', '#FF8C00']}
-      end={{ x: 1, y: 1 }}
-      start={{ x: 0, y: 0 }}
+    <View
       style={{
         width: size,
         height: size,
         borderRadius: size / 2,
-        borderWidth: 3,
-        borderColor: '#FFFFFF',
+        backgroundColor: '#FFB800',
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
-      <Text className="font-inter font-bold text-white" style={{ fontSize }}>
+      <Text className="font-display font-bold text-hive-on-accent" style={{ fontSize }}>
         {initials}
       </Text>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -203,7 +198,7 @@ export function ProfileAvatar({
         ) : null}
 
         <View
-          className="absolute items-center justify-center rounded-full border-2 border-white bg-hive-primary"
+          className="absolute items-center justify-center rounded-full border-2 border-hive-bg bg-hive-primary"
           style={{
             width: badgeSize,
             height: badgeSize,
@@ -211,7 +206,7 @@ export function ProfileAvatar({
             bottom: -2,
           }}
         >
-          <Camera color="#FFFFFF" size={Math.round(badgeSize * 0.5)} />
+          <Camera color="#0B0A08" size={Math.round(badgeSize * 0.5)} />
         </View>
       </View>
     </Pressable>

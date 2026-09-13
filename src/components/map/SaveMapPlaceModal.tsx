@@ -72,10 +72,10 @@ export function SaveMapPlaceModal({
           <TextInput
             autoCapitalize="sentences"
             autoCorrect={false}
-            className="rounded-hive-md border border-[#F5A62333] bg-white px-4 py-3 font-inter text-base text-hive-foreground"
+            className="rounded-hive-md border border-hive-stroke bg-hive-input-bg px-4 py-3 font-inter text-base text-hive-foreground"
             maxLength={SAVED_MAP_PLACE_NAME_MAX_LENGTH}
             placeholder={t('map.savePlaceNamePlaceholder')}
-            placeholderTextColor="#8B7355"
+            placeholderTextColor="#9C9287"
             returnKeyType="done"
             value={name}
             onChangeText={setName}

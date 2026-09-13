@@ -5,7 +5,7 @@ import {
   ONBOARDING_CONTENT_STEPS,
   OnboardingScreen,
 } from '@/src/components/onboarding/OnboardingScreen';
-import { WelcomeMapIllustration } from '@/src/components/onboarding/OnboardingIllustrations';
+import { ONBOARDING_IMAGES } from '@/src/constants/onboarding-images';
 import { useOnboardingSkip } from '@/src/hooks/useOnboardingSkip';
 
 export default function OnboardingWelcomeScreen() {
@@ -14,13 +14,11 @@ export default function OnboardingWelcomeScreen() {
 
   return (
     <OnboardingScreen
-      showLanguagePicker
       actionLabel={t('onboarding.next')}
+      backgroundSource={ONBOARDING_IMAGES.welcome}
       description={t('onboarding.welcomeDescription')}
-      illustration={<WelcomeMapIllustration />}
       skipLabel={t('onboarding.skip')}
       step={1}
-      subtitle={t('onboarding.welcomeSubtitle')}
       title={t('onboarding.welcomeTitle')}
       totalSteps={ONBOARDING_CONTENT_STEPS}
       onAction={() => router.push('/(onboarding)/step1' as Href)}

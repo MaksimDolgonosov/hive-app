@@ -4,7 +4,6 @@ import { Text, View } from 'react-native';
 import type { ProfileStats, User } from '@/src/types';
 
 import { ProfileAvatar } from './ProfileAvatar';
-import { ProfileGlassCard } from './ProfileGlassCard';
 
 type ProfileHeaderCardProps = {
   user: User;
@@ -15,9 +14,11 @@ type ProfileHeaderCardProps = {
 
 function StatItem({ value, label }: { value: number; label: string }) {
   return (
-    <View className="items-center gap-0.5">
-      <Text className="font-inter text-xl font-bold text-hive-primary">{value}</Text>
-      <Text className="font-inter text-xs text-hive-muted">{label}</Text>
+    <View className="flex-1 items-center gap-0.5">
+      <Text className="font-display text-2xl font-bold text-hive-foreground">{value}</Text>
+      <Text className="font-inter text-[10px] font-semibold uppercase tracking-[0.8px] text-hive-dim">
+        {label}
+      </Text>
     </View>
   );
 }
@@ -31,23 +32,30 @@ export function ProfileHeaderCard({
   const { t } = useTranslation();
 
   return (
-    <ProfileGlassCard>
-      <View className="items-center gap-4 px-6 py-6">
-        <ProfileAvatar avatarUrl={user.avatarUrl} editable={editableAvatar} username={user.username} />
+    <View className="gap-6">
+      <View className="flex-row items-center gap-4">
+        <ProfileAvatar
+          avatarUrl={user.avatarUrl}
+          editable={editableAvatar}
+          size={72}
+          username={user.username}
+        />
 
-        <View className="items-center gap-1">
-          <Text className="font-inter text-[22px] font-bold text-hive-foreground">
+        <View className="flex-1 gap-1">
+          <Text className="font-display text-[20px] font-bold text-hive-foreground">
             {user.username}
           </Text>
-          <Text className="font-inter text-sm text-hive-muted">{subtitle}</Text>
-        </View>
-
-        <View className="w-full flex-row justify-around border-t border-[#F5A62322] pt-3">
-          <StatItem label={t('profile.statsPhotos')} value={stats.photos} />
-          <StatItem label={t('profile.statsHives')} value={stats.hives} />
-          <StatItem label={t('profile.statsLikes')} value={stats.likes} />
+          <Text className="font-inter text-[13px] text-hive-muted">{subtitle}</Text>
         </View>
       </View>
-    </ProfileGlassCard>
+
+      <View className="flex-row items-center">
+        <StatItem label={t('profile.statsPhotos')} value={stats.photos} />
+        <View className="h-10 w-px bg-hive-stroke" />
+        <StatItem label={t('profile.statsHives')} value={stats.hives} />
+        <View className="h-10 w-px bg-hive-stroke" />
+        <StatItem label={t('profile.statsLikes')} value={stats.likes} />
+      </View>
+    </View>
   );
 }

@@ -16,5 +16,5 @@ export const SOCIAL_LINK_META: Record<SocialLinkKey, { icon: LucideIcon; color: 
     telegram: { icon: MessageCircle, color: '#229ED9', labelKey: 'profile.socialTelegram' },
     tiktok: { icon: Link2, color: '#010101', labelKey: 'profile.socialTiktok' },
     youtube: { icon: Play, color: '#FF0000', labelKey: 'profile.socialYoutube' },
-    website: { icon: Globe, color: '#F5A623', labelKey: 'profile.socialWebsite' },
+    website: { icon: Globe, color: '#FFB800', labelKey: 'profile.socialWebsite' },
   };

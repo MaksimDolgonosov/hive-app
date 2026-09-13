@@ -12,10 +12,11 @@ import { MapBookmarkButton } from '@/src/components/map/MapBookmarkButton';
 import { MapLocationButton } from '@/src/components/map/MapLocationButton';
 import { SaveMapPlaceModal } from '@/src/components/map/SaveMapPlaceModal';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
-import { HiveBottomSheet } from '@/src/components/ui/HiveBottomSheet';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { isGoogleMapsConfigured } from '@/src/config/env';
+import { HIVE_DARK_MAP_STYLE, HIVE_LIGHT_MAP_STYLE } from '@/src/constants/map-style';
 import { useLocation } from '@/src/hooks/useLocation';
+import { useAppColorScheme } from '@/src/hooks/useHiveTheme';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
 import { useLocationStore } from '@/src/stores/locationStore';
 import { useMapStore } from '@/src/stores/mapStore';
@@ -25,10 +26,11 @@ import type { MapBounds, MapRegion } from '@/src/types';
 import { SAVED_MAP_PLACES_MAX } from '@/src/types';
 import { isActiveHive } from '@/src/utils/hive';
 import { coordsToUserMapRegion, isDefaultMapRegion, regionToBounds } from '@/src/utils/map';
+import { openHive } from '@/src/utils/open-hive';
 import { resolveMapViewRegion } from '@/src/utils/resolve-map-view-region';
 import { showMessageToast } from '@/src/utils/show-toast';
 
-import { StingMarker } from './StingMarker';
+import { StingMarker, StingMarkerCapture } from './StingMarker';
 
 const REGION_DEBOUNCE_MS = 300;
 const PUBLISH_FOCUS_DELTA = 0.008;
@@ -80,6 +82,7 @@ function toMapRegion(region: Region): MapRegion {
 export function MapContainer() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const colorScheme = useAppColorScheme();
   const mapRef = useRef<MapView>(null);
   const liveRegionRef = useRef<MapRegion | null>(null);
   const hasCenteredOnUser = useRef(false);
@@ -90,8 +93,6 @@ export function MapContainer() {
   const region = useMapStore((state) => state.region);
   const setRegion = useMapStore((state) => state.setRegion);
   const setSelectedStingId = useMapStore((state) => state.setSelectedStingId);
-  const setSelectedHiveId = useMapStore((state) => state.setSelectedHiveId);
-  const selectedHiveId = useMapStore((state) => state.selectedHiveId);
   const pendingMapFocus = useMapStore((state) => state.pendingMapFocus);
   const clearPendingMapFocus = useMapStore((state) => state.clearPendingMapFocus);
   const pendingSavedRegion = useMapStore((state) => state.pendingSavedRegion);
@@ -105,7 +106,7 @@ export function MapContainer() {
   const [isSavingPlace, setIsSavingPlace] = useState(false);
   const [debouncedBounds, setDebouncedBounds] = useState<MapBounds | null>(null);
   const [hiveMarkerImages, setHiveMarkerImages] = useState<Record<string, string>>({});
-  const [mapInteractionsEnabled, setMapInteractionsEnabled] = useState(true);
+  const [stingMarkerImages, setStingMarkerImages] = useState<Record<string, string>>({});
   const [initialRegion, setInitialRegion] = useState<MapRegion | null>(resolveStartupRegion);
   const [centerOnUserAtStartup] = useState(shouldCenterOnUserAtStartup);
 
@@ -134,6 +135,16 @@ export function MapContainer() {
       }
 
       return { ...previous, [hiveId]: uri };
+    });
+  }, []);
+
+  const handleStingMarkerCaptured = useCallback((stingId: string, uri: string) => {
+    setStingMarkerImages((previous) => {
+      if (previous[stingId] === uri) {
+        return previous;
+      }
+
+      return { ...previous, [stingId]: uri };
     });
   }, []);
 
@@ -207,20 +218,13 @@ export function MapContainer() {
 
     if (pendingMapFocus.stingId) {
       setSelectedStingId(pendingMapFocus.stingId);
-      setSelectedHiveId(null);
     } else if (pendingMapFocus.hiveId) {
-      setSelectedHiveId(pendingMapFocus.hiveId);
       setSelectedStingId(null);
+      openHive(pendingMapFocus.hiveId);
     }
 
     clearPendingMapFocus();
-  }, [
-    applyMapRegion,
-    clearPendingMapFocus,
-    pendingMapFocus,
-    setSelectedHiveId,
-    setSelectedStingId,
-  ]);
+  }, [applyMapRegion, clearPendingMapFocus, pendingMapFocus, setSelectedStingId]);
 
   useEffect(() => {
     if (!pendingSavedRegion) {
@@ -231,15 +235,8 @@ export function MapContainer() {
     applyMapRegion(pendingSavedRegion, { programmatic: true });
     setDebouncedBounds(regionToBounds(pendingSavedRegion));
     setSelectedStingId(null);
-    setSelectedHiveId(null);
     clearPendingSavedRegion();
-  }, [
-    applyMapRegion,
-    clearPendingSavedRegion,
-    pendingSavedRegion,
-    setSelectedHiveId,
-    setSelectedStingId,
-  ]);
+  }, [applyMapRegion, clearPendingSavedRegion, pendingSavedRegion, setSelectedStingId]);
 
   function handleRegionChange(nextRegion: Region) {
     const mapped = toMapRegion(nextRegion);
@@ -289,21 +286,6 @@ export function MapContainer() {
   function openSting(stingId: string) {
     setSelectedStingId(stingId);
     router.push(`/(modals)/sting/${stingId}` as Href);
-  }
-
-  function openHive(hiveId: string) {
-    setSelectedHiveId(hiveId);
-  }
-
-  function closeHiveSheet() {
-    setSelectedHiveId(null);
-
-    if (Platform.OS === 'ios') {
-      setMapInteractionsEnabled(false);
-      requestAnimationFrame(() => {
-        setMapInteractionsEnabled(true);
-      });
-    }
   }
 
   function centerOnUserLocation() {
@@ -413,25 +395,29 @@ export function MapContainer() {
     <View className="flex-1">
       {isGoogleMapsConfigured() ? (
         <MapView
+          // Android Google Maps applies style only at native mount; iOS updates live.
+          key={Platform.OS === 'android' ? colorScheme : 'map'}
           ref={mapRef}
           style={styles.mapLayer}
-          initialRegion={initialRegion}
+          initialRegion={liveRegionRef.current ?? initialRegion}
           onRegionChange={handleRegionChange}
           onRegionChangeComplete={handleRegionChangeComplete}
           onMapReady={() => {
             void readVisibleMapRegion();
           }}
-          scrollEnabled={mapInteractionsEnabled}
-          zoomEnabled={mapInteractionsEnabled}
-          rotateEnabled={mapInteractionsEnabled}
-          pitchEnabled={mapInteractionsEnabled}
           showsUserLocation
           showsMyLocationButton={false}
-          userInterfaceStyle="light"
+          userInterfaceStyle={colorScheme}
+          customMapStyle={colorScheme === 'dark' ? HIVE_DARK_MAP_STYLE : HIVE_LIGHT_MAP_STYLE}
           {...(Platform.OS === 'android' ? { googleRenderer: 'LEGACY' as const } : {})}
         >
           {data?.stings.map((sting) => (
-            <StingMarker key={sting.id} sting={sting} onPress={() => openSting(sting.id)} />
+            <StingMarker
+              key={sting.id}
+              sting={sting}
+              imageUri={stingMarkerImages[sting.id]}
+              onPress={() => openSting(sting.id)}
+            />
           ))}
           {data?.hives
             .filter((hive) => isActiveHive(hive.activeStingsCount))
@@ -463,6 +449,14 @@ export function MapContainer() {
               count={hive.activeStingsCount}
               hiveId={hive.id}
               onCaptured={handleHiveMarkerCaptured}
+            />
+          ))}
+        {Platform.OS === 'android' &&
+          (data?.stings ?? []).map((sting) => (
+            <StingMarkerCapture
+              key={sting.id}
+              sting={sting}
+              onCaptured={handleStingMarkerCaptured}
             />
           ))}
 
@@ -506,8 +500,6 @@ export function MapContainer() {
           <MapLocationButton disabled={!coords} onPress={centerOnUserLocation} />
         </View>
       </View>
-
-      {selectedHiveId && <HiveBottomSheet hiveId={selectedHiveId} onClose={closeHiveSheet} />}
 
       <SaveMapPlaceModal
         initialName={savePlaceDefaultName}

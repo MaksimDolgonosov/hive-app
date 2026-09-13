@@ -1,8 +1,10 @@
 import type { LucideIcon } from 'lucide-react-native';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
-const BUTTON_SIZE = 52;
-const ICON_SIZE = 22;
+import { HiveTheme } from '@/src/theme/tokens';
+
+const BUTTON_SIZE = 48;
+const ICON_SIZE = 20;
 
 type MapOverlayButtonProps = {
   icon: LucideIcon;
@@ -27,7 +29,7 @@ export function MapOverlayButton({
       style={({ pressed }) => [disabled && styles.disabled, pressed && !disabled && styles.pressed]}
     >
       <View style={styles.button}>
-        <Icon color="#F5A623" size={ICON_SIZE} strokeWidth={2.25} />
+        <Icon color={HiveTheme.accent} size={ICON_SIZE} strokeWidth={2.25} />
       </View>
     </Pressable>
   );
@@ -40,9 +42,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: BUTTON_SIZE / 2,
-    backgroundColor: '#FFF4E0',
+    backgroundColor: Platform.OS === 'android' ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 255, 255, 0.58)',
     borderWidth: 1,
-    borderColor: 'rgba(253, 162, 14, 0.35)',
+    borderColor: 'rgba(255, 255, 255, 0.5)',
     overflow: 'hidden',
     ...(Platform.OS === 'android'
       ? {
@@ -51,8 +53,8 @@ const styles = StyleSheet.create({
       : {
           shadowColor: '#000000',
           shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.16,
-          shadowRadius: 6,
+          shadowOpacity: 0.28,
+          shadowRadius: 8,
         }),
   },
   pressed: {

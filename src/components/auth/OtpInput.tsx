@@ -46,7 +46,7 @@ export function OtpInput({
               ? 'border-red-400'
               : isActive
                 ? 'border-hive-primary'
-                : 'border-[#F5A62333]';
+                : 'border-hive-stroke';
 
             return (
               <View

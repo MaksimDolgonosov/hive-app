@@ -32,8 +32,8 @@ export function CameraControls({
             <ZapOff color="#FFFFFF" size={20} />
           ) : (
             <Zap
-              color={flash === 'on' ? '#F5A623' : '#FFFFFF'}
-              fill={flash === 'on' ? '#F5A623' : 'none'}
+              color={flash === 'on' ? '#FFB800' : '#FFFFFF'}
+              fill={flash === 'on' ? '#FFB800' : 'none'}
               size={20}
             />
           )}

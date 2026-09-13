@@ -5,7 +5,7 @@ import {
   ONBOARDING_CONTENT_STEPS,
   OnboardingScreen,
 } from '@/src/components/onboarding/OnboardingScreen';
-import { FourHoursIllustration } from '@/src/components/onboarding/OnboardingIllustrations';
+import { ONBOARDING_IMAGES } from '@/src/constants/onboarding-images';
 import { useOnboardingSkip } from '@/src/hooks/useOnboardingSkip';
 
 export default function OnboardingStep2Screen() {
@@ -15,11 +15,10 @@ export default function OnboardingStep2Screen() {
   return (
     <OnboardingScreen
       actionLabel={t('onboarding.next')}
+      backgroundSource={ONBOARDING_IMAGES.lifetime}
       description={t('onboarding.step2Description')}
-      illustration={<FourHoursIllustration />}
       skipLabel={t('onboarding.skip')}
       step={3}
-      subtitle={t('onboarding.step2Subtitle')}
       title={t('onboarding.step2Title')}
       totalSteps={ONBOARDING_CONTENT_STEPS}
       onAction={() => router.push('/(onboarding)/step3' as Href)}

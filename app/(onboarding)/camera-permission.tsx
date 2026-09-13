@@ -38,7 +38,7 @@ export default function OnboardingCameraPermissionScreen() {
       description={t('onboarding.cameraDescription')}
       illustration={
         <PermissionIllustration>
-          <CameraIcon color="#F5A623" size={56} strokeWidth={2} />
+          <CameraIcon color="#FFB800" size={56} strokeWidth={2} />
         </PermissionIllustration>
       }
       loading={loading}

@@ -142,6 +142,11 @@ export type TranslationSchema = {
     recentPhotos: string;
     viewAll: string;
     closeSettings: string;
+    splashPreviewLabel: string;
+    splashPreviewTitle: string;
+    splashPreviewHint: string;
+    splashPreviewClose: string;
+    splashPreviewCloseHint: string;
     publishBuzzLabel: string;
     publishBuzzHint: string;
     avatarPickerTitle: string;

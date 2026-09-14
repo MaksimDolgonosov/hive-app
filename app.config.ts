@@ -6,9 +6,10 @@ const PRODUCTION_WS_URL = 'wss://hive-backend-nodejs-production.up.railway.app/w
 const LOCAL_API_URL = 'http://localhost:3000/api/v1';
 const LOCAL_WS_URL = 'ws://localhost:3000/ws';
 
-const SPLASH_IMAGE = './assets/images/splash.png';
-const SPLASH_ICON = './assets/images/splash-icon.png';
-const SPLASH_BACKGROUND = '#0B0A08';
+const SPLASH_LIGHT_IMAGE = './assets/images/splash.png';
+const SPLASH_LIGHT_ICON = './assets/images/splash-icon.png';
+const SPLASH_DARK_IMAGE = './assets/images/icon.png';
+const SPLASH_LIGHT_BACKGROUND = '#FFF8ED';
 const SPLASH_DARK_BACKGROUND = '#0B0A08';
 
 function resolveUrls() {
@@ -72,16 +73,16 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     newArchEnabled: true,
     platforms: ['ios', 'android'],
     androidNavigationBar: {
-      backgroundColor: SPLASH_BACKGROUND,
+      backgroundColor: SPLASH_DARK_BACKGROUND,
       barStyle: 'light-content',
       enforceContrast: false,
     },
     splash: {
-      image: SPLASH_IMAGE,
+      image: SPLASH_LIGHT_IMAGE,
       resizeMode: 'cover',
-      backgroundColor: SPLASH_BACKGROUND,
+      backgroundColor: SPLASH_LIGHT_BACKGROUND,
       dark: {
-        image: SPLASH_ICON,
+        image: SPLASH_DARK_IMAGE,
         backgroundColor: SPLASH_DARK_BACKGROUND,
       },
     },
@@ -158,30 +159,30 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       [
         'expo-splash-screen',
         {
-          backgroundColor: SPLASH_BACKGROUND,
-          image: SPLASH_IMAGE,
+          backgroundColor: SPLASH_LIGHT_BACKGROUND,
+          image: SPLASH_LIGHT_IMAGE,
           enableFullScreenImage_legacy: true,
           resizeMode: 'cover',
           dark: {
-            image: SPLASH_ICON,
+            image: SPLASH_DARK_IMAGE,
             backgroundColor: SPLASH_DARK_BACKGROUND,
           },
           ios: {
-            image: SPLASH_IMAGE,
-            backgroundColor: SPLASH_BACKGROUND,
+            image: SPLASH_LIGHT_IMAGE,
+            backgroundColor: SPLASH_LIGHT_BACKGROUND,
             enableFullScreenImage_legacy: true,
             dark: {
-              image: SPLASH_ICON,
+              image: SPLASH_DARK_IMAGE,
               backgroundColor: SPLASH_DARK_BACKGROUND,
             },
           },
           android: {
-            image: SPLASH_ICON,
+            image: SPLASH_LIGHT_ICON,
             imageWidth: 200,
             resizeMode: 'contain',
-            backgroundColor: SPLASH_BACKGROUND,
+            backgroundColor: SPLASH_LIGHT_BACKGROUND,
             dark: {
-              image: SPLASH_ICON,
+              image: SPLASH_DARK_IMAGE,
               backgroundColor: SPLASH_DARK_BACKGROUND,
             },
           },

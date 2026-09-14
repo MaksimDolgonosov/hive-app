@@ -22,6 +22,7 @@ import { ProfileMenuRow } from '@/src/components/profile/ProfileMenuRow';
 import { ProfileRecentPhotos } from '@/src/components/profile/ProfileRecentPhotos';
 import { ProfileSettingsModal } from '@/src/components/profile/ProfileSettingsModal';
 import { ProfileSkeleton } from '@/src/components/profile/ProfileSkeleton';
+import { SplashPreviewLink } from '@/src/components/profile/SplashPreviewLink';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { LanguageSelect } from '@/src/components/ui/LanguageSelect';
 import { ScreenBackground } from '@/src/components/ui/ScreenBackground';
@@ -202,6 +203,13 @@ export default function ProfileScreen() {
             </Text>
             <LanguageSelect />
             <ThemeSelect className="mt-4" />
+            <SplashPreviewLink
+              className="mt-4"
+              onPress={() => {
+                requestClose();
+                router.push('/(modals)/splash' as Href);
+              }}
+            />
             <PublishBuzzSetting className="mt-4" />
             <Pressable
               accessibilityRole="button"

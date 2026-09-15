@@ -25,7 +25,12 @@ import { showErrorToast, showInfoToast } from '@/src/stores/toastStore';
 import type { MapBounds, MapRegion } from '@/src/types';
 import { SAVED_MAP_PLACES_MAX } from '@/src/types';
 import { isActiveHive } from '@/src/utils/hive';
-import { coordsToUserMapRegion, isDefaultMapRegion, regionToBounds } from '@/src/utils/map';
+import {
+  coordsToUserMapRegion,
+  DEFAULT_MAP_REGION,
+  isDefaultMapRegion,
+  regionToBounds,
+} from '@/src/utils/map';
 import { openHive } from '@/src/utils/open-hive';
 import { resolveMapViewRegion } from '@/src/utils/resolve-map-view-region';
 import { showMessageToast } from '@/src/utils/show-toast';
@@ -162,15 +167,21 @@ export function MapContainer() {
     }
 
     const lastKnownCoords = useLocationStore.getState().lastKnownCoords;
-    if (!lastKnownCoords) {
+    if (lastKnownCoords) {
+      hasRestoredCachedRegion.current = true;
+      applyMapRegion(coordsToUserMapRegion(lastKnownCoords.latitude, lastKnownCoords.longitude), {
+        programmatic: true,
+      });
+      return;
+    }
+
+    if (locationStatus !== 'granted') {
       return;
     }
 
     hasRestoredCachedRegion.current = true;
-    applyMapRegion(coordsToUserMapRegion(lastKnownCoords.latitude, lastKnownCoords.longitude), {
-      programmatic: true,
-    });
-  }, [applyMapRegion, initialRegion, region]);
+    applyMapRegion(DEFAULT_MAP_REGION);
+  }, [applyMapRegion, initialRegion, locationStatus, region]);
 
   useEffect(() => {
     if (!coords) {
@@ -358,22 +369,13 @@ export function MapContainer() {
   });
 
   const tabBarInset = getGlassTabBarInset(insets.bottom);
+  const mapRegion = initialRegion ?? DEFAULT_MAP_REGION;
 
   if (locationStatus !== 'granted') {
     return (
       <LocationAccessGate
         bottomInset={tabBarInset}
         status={locationStatus}
-        onRequestPermission={() => void requestPermission()}
-      />
-    );
-  }
-
-  if (!initialRegion) {
-    return (
-      <LocationAccessGate
-        bottomInset={tabBarInset}
-        status="loading"
         onRequestPermission={() => void requestPermission()}
       />
     );
@@ -399,7 +401,7 @@ export function MapContainer() {
           key={Platform.OS === 'android' ? colorScheme : 'map'}
           ref={mapRef}
           style={styles.mapLayer}
-          initialRegion={liveRegionRef.current ?? initialRegion}
+          initialRegion={liveRegionRef.current ?? mapRegion}
           onRegionChange={handleRegionChange}
           onRegionChangeComplete={handleRegionChangeComplete}
           onMapReady={() => {

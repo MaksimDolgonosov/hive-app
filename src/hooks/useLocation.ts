@@ -9,6 +9,25 @@ export type LocationStatus = 'idle' | 'loading' | 'granted' | 'denied' | 'undete
 const LOW_ACCURACY_THRESHOLD_M = 50;
 const SAVE_LOCATION_DEBOUNCE_MS = 5_000;
 const SAVE_LOCATION_MAX_ACCURACY_M = 200;
+const LAST_KNOWN_TIMEOUT_MS = 2_000;
+const CURRENT_POSITION_TIMEOUT_MS = 5_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Location request timed out')), ms);
+
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
 
 function shouldPersistCoords(coords: Location.LocationObjectCoords): boolean {
   if (coords.accuracy == null || !Number.isFinite(coords.accuracy)) {
@@ -83,35 +102,51 @@ export function useLocation() {
     stopWatching();
     syncStatus('granted');
 
-    try {
-      const lastKnown = await Location.getLastKnownPositionAsync({
-        maxAge: 24 * 60 * 60 * 1000,
-      });
-      if (lastKnown) {
-        syncCoords(lastKnown.coords);
-      }
-    } catch {
-      // no cached OS fix
-    }
-
-    try {
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-      syncCoords(location.coords);
-    } catch {
-      // watchPositionAsync may still deliver a fix
-    }
-
-    subscriptionRef.current = await Location.watchPositionAsync(
+    // Never await watch/current on the critical path: Android emulator GPS
+    // APIs can hang forever and would keep the map on the loading screen.
+    void Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.Balanced,
-        distanceInterval: 10,
+        distanceInterval: 1,
+        timeInterval: 1000,
       },
       (location) => {
         syncCoords(location.coords);
       },
-    );
+    )
+      .then((subscription) => {
+        stopWatching();
+        subscriptionRef.current = subscription;
+      })
+      .catch(() => {
+        // lastKnown / getCurrent may still populate coords
+      });
+
+    try {
+      const lastKnown = await withTimeout(
+        Location.getLastKnownPositionAsync({
+          maxAge: 24 * 60 * 60 * 1000,
+        }),
+        LAST_KNOWN_TIMEOUT_MS,
+      );
+      if (lastKnown) {
+        syncCoords(lastKnown.coords);
+      }
+    } catch {
+      // no cached OS fix, or emulator timed out
+    }
+
+    try {
+      const location = await withTimeout(
+        Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Lowest,
+        }),
+        CURRENT_POSITION_TIMEOUT_MS,
+      );
+      syncCoords(location.coords);
+    } catch {
+      // watchPositionAsync may still deliver a fix
+    }
   }, [stopWatching, syncCoords, syncStatus]);
 
   const requestPermission = useCallback(async () => {
@@ -127,19 +162,32 @@ export function useLocation() {
     await startWatching();
   }, [startWatching, syncCoords, syncStatus]);
 
+  const startWatchingRef = useRef(startWatching);
+  startWatchingRef.current = startWatching;
+
   useEffect(() => {
     let cancelled = false;
 
     async function init() {
       syncStatus('loading');
 
-      const { status: permissionStatus } = await Location.getForegroundPermissionsAsync();
+      let permissionStatus: Location.PermissionStatus;
+      try {
+        const result = await withTimeout(
+          Location.getForegroundPermissionsAsync(),
+          LAST_KNOWN_TIMEOUT_MS,
+        );
+        permissionStatus = result.status;
+      } catch {
+        permissionStatus = Location.PermissionStatus.GRANTED;
+      }
+
       if (cancelled) {
         return;
       }
 
       if (permissionStatus === Location.PermissionStatus.GRANTED) {
-        await startWatching();
+        void startWatchingRef.current();
         return;
       }
 
@@ -165,7 +213,7 @@ export function useLocation() {
         saveTimerRef.current = null;
       }
     };
-  }, [startWatching, stopWatching, syncCoords, syncStatus]);
+  }, [stopWatching, syncCoords, syncStatus]);
 
   const accuracy = coords?.accuracy ?? null;
   const isLowAccuracy = accuracy !== null && accuracy > LOW_ACCURACY_THRESHOLD_M;

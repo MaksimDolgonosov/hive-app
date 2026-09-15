@@ -15,18 +15,13 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileAboutCard } from '@/src/components/profile/ProfileAboutCard';
-import { PublishBuzzSetting } from '@/src/components/profile/PublishBuzzSetting';
 import { ProfileEditModal } from '@/src/components/profile/ProfileEditModal';
 import { ProfileHeaderCard } from '@/src/components/profile/ProfileHeaderCard';
 import { ProfileMenuRow } from '@/src/components/profile/ProfileMenuRow';
 import { ProfileRecentPhotos } from '@/src/components/profile/ProfileRecentPhotos';
-import { ProfileSettingsModal } from '@/src/components/profile/ProfileSettingsModal';
 import { ProfileSkeleton } from '@/src/components/profile/ProfileSkeleton';
-import { SplashPreviewLink } from '@/src/components/profile/SplashPreviewLink';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
-import { LanguageSelect } from '@/src/components/ui/LanguageSelect';
 import { ScreenBackground } from '@/src/components/ui/ScreenBackground';
-import { ThemeSelect } from '@/src/components/ui/ThemeSelect';
 import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { useProfileOverview } from '@/src/hooks/useProfileOverview';
 import { useAuthStore } from '@/src/stores/authStore';
@@ -55,7 +50,6 @@ export default function ProfileScreen() {
   const logout = useAuthStore((state) => state.logout);
   const refreshUser = useAuthStore((state) => state.refreshUser);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
 
   const {
@@ -140,7 +134,7 @@ export default function ProfileScreen() {
             accessibilityRole="button"
             accessibilityLabel={t('profile.menuSettings')}
             className="h-10 w-10 items-center justify-center rounded-full border border-hive-stroke bg-hive-surface"
-            onPress={() => setSettingsOpen(true)}
+            onPress={() => router.push('/(modals)/profile/settings' as Href)}
           >
             <SlidersHorizontal color={theme.textMuted} size={18} strokeWidth={2} />
           </Pressable>
@@ -182,47 +176,16 @@ export default function ProfileScreen() {
           <ProfileMenuRow
             icon={Settings}
             label={t('profile.menuSettings')}
-            onPress={() => setSettingsOpen(true)}
+            onPress={() => router.push('/(modals)/profile/settings' as Href)}
           />
           <ProfileMenuRow
             icon={LogOut}
             label={t('profile.menuLogout')}
             showDivider={false}
-            tone="danger"
             onPress={() => void handleLogout()}
           />
         </View>
       </ScrollView>
-
-      <ProfileSettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)}>
-        {(requestClose) => (
-          <>
-            <View className="mb-4 h-1 w-10 self-center rounded-full bg-hive-primary/30" />
-            <Text className="mb-4 text-center font-inter text-lg font-semibold text-hive-foreground">
-              {t('profile.menuSettings')}
-            </Text>
-            <LanguageSelect />
-            <ThemeSelect className="mt-4" />
-            <SplashPreviewLink
-              className="mt-4"
-              onPress={() => {
-                requestClose();
-                router.push('/(modals)/splash' as Href);
-              }}
-            />
-            <PublishBuzzSetting className="mt-4" />
-            <Pressable
-              accessibilityRole="button"
-              className="mt-6 items-center rounded-full bg-hive-primary py-3"
-              onPress={requestClose}
-            >
-              <Text className="font-inter text-base font-semibold text-hive-on-accent">
-                {t('profile.closeSettings')}
-              </Text>
-            </Pressable>
-          </>
-        )}
-      </ProfileSettingsModal>
 
       <ProfileEditModal
         user={user}

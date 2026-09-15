@@ -1,10 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import { create } from 'zustand';
 
-import {
-  loadSavedMapPlaces,
-  saveSavedMapPlaces,
-} from '@/src/stores/saved-map-places-storage';
+import { loadSavedMapPlaces, saveSavedMapPlaces } from '@/src/stores/saved-map-places-storage';
 import type { MapRegion, SavedMapPlace } from '@/src/types';
 import { SAVED_MAP_PLACES_MAX } from '@/src/types';
 
@@ -14,6 +11,7 @@ interface SavedMapPlacesState {
   hydrate: () => Promise<void>;
   addPlace: (input: { name: string; region: MapRegion }) => Promise<SavedMapPlace | null>;
   removePlace: (id: string) => Promise<void>;
+  clearPlaces: () => Promise<void>;
 }
 
 export const useSavedMapPlacesStore = create<SavedMapPlacesState>((set, get) => ({
@@ -53,5 +51,10 @@ export const useSavedMapPlacesStore = create<SavedMapPlacesState>((set, get) => 
     const nextPlaces = get().places.filter((place) => place.id !== id);
     await saveSavedMapPlaces(nextPlaces);
     set({ places: nextPlaces });
+  },
+
+  clearPlaces: async () => {
+    await saveSavedMapPlaces([]);
+    set({ places: [] });
   },
 }));

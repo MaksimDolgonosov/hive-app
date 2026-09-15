@@ -2,10 +2,19 @@ import { Appearance } from 'react-native';
 import { create } from 'zustand';
 
 import type { AppColorScheme } from '@/src/theme/tokens';
+import {
+  applyAppIcon,
+  canChangeAppIcon,
+  getPlatformDefaultAppIcon,
+  readNativeAppIcon,
+  type AppIconId,
+} from '@/src/utils/app-icon';
 
 import {
+  loadAppIcon,
   loadColorScheme,
   loadPublishBuzzEnabled,
+  saveAppIcon,
   saveColorScheme,
   savePublishBuzzEnabled,
 } from './preferences-storage';
@@ -19,15 +28,18 @@ function applyNativeColorScheme(scheme: AppColorScheme) {
 interface PreferencesState {
   publishBuzzEnabled: boolean;
   colorScheme: AppColorScheme;
+  appIcon: AppIconId;
   isHydrated: boolean;
   hydrate: () => Promise<void>;
   setPublishBuzzEnabled: (enabled: boolean) => Promise<void>;
   setColorScheme: (scheme: AppColorScheme) => Promise<void>;
+  setAppIcon: (icon: AppIconId) => Promise<boolean>;
 }
 
 export const usePreferencesStore = create<PreferencesState>((set, get) => ({
   publishBuzzEnabled: true,
   colorScheme: DEFAULT_COLOR_SCHEME,
+  appIcon: getPlatformDefaultAppIcon(),
   isHydrated: false,
 
   hydrate: async () => {
@@ -35,16 +47,30 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       return;
     }
 
-    const [storedBuzz, storedScheme] = await Promise.all([
+    const [storedBuzz, storedScheme, storedIcon] = await Promise.all([
       loadPublishBuzzEnabled(),
       loadColorScheme(),
+      loadAppIcon(),
     ]);
     const colorScheme = storedScheme ?? DEFAULT_COLOR_SCHEME;
     applyNativeColorScheme(colorScheme);
 
+    const nativeIcon = readNativeAppIcon();
+    let appIcon = storedIcon ?? nativeIcon ?? getPlatformDefaultAppIcon();
+
+    if (storedIcon && canChangeAppIcon() && nativeIcon !== storedIcon) {
+      try {
+        await applyAppIcon(storedIcon);
+        appIcon = storedIcon;
+      } catch {
+        appIcon = nativeIcon ?? storedIcon;
+      }
+    }
+
     set({
       publishBuzzEnabled: storedBuzz ?? true,
       colorScheme,
+      appIcon,
       isHydrated: true,
     });
   },
@@ -58,6 +84,18 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
     applyNativeColorScheme(scheme);
     set({ colorScheme: scheme });
     await saveColorScheme(scheme);
+  },
+
+  setAppIcon: async (icon) => {
+    const appliedNatively = canChangeAppIcon();
+
+    if (appliedNatively) {
+      await applyAppIcon(icon);
+    }
+
+    set({ appIcon: icon });
+    await saveAppIcon(icon);
+    return appliedNatively;
   },
 }));
 

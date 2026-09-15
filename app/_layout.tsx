@@ -56,7 +56,9 @@ export default function RootLayout() {
   }, [hydrateLocale, hydratePreferences]);
 
   useEffect(() => {
-    void SystemUI.setBackgroundColorAsync(HiveThemes[colorScheme].bg);
+    const palette = HiveThemes[colorScheme];
+    const systemBackground = colorScheme === 'light' ? palette.gradients.screen[2] : palette.bg;
+    void SystemUI.setBackgroundColorAsync(systemBackground);
 
     if (Platform.OS !== 'android') {
       return;
@@ -94,13 +96,18 @@ export default function RootLayout() {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <GestureHandlerRootView style={{ flex: 1, backgroundColor: palette.bg }}>
+      <GestureHandlerRootView
+        style={{
+          flex: 1,
+          backgroundColor: colorScheme === 'light' ? palette.gradients.screen[2] : palette.bg,
+        }}
+      >
         <ThemeProvider
           value={{
             ...navigationTheme,
             colors: {
               ...navigationTheme.colors,
-              background: palette.bg,
+              background: colorScheme === 'light' ? 'transparent' : palette.bg,
               card: palette.surface,
               text: palette.text,
               border: palette.stroke,

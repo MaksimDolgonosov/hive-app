@@ -19,6 +19,7 @@ import {
   saveOnboardingCompleted,
   clearOnboardingCompleted,
 } from './onboarding-storage';
+import { useSavedMapPlacesStore } from './savedMapPlacesStore';
 import { clearTokens, loadTokens, saveTokens } from './secure-storage';
 
 type ResetPasswordResult = 'session' | 'login_required';
@@ -63,6 +64,7 @@ interface AuthState {
   forgotPassword: (input: ForgotPasswordInput) => Promise<void>;
   resetPassword: (input: ResetPasswordInput) => Promise<ResetPasswordResult>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -277,6 +279,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // Server-side revoke is best-effort; local session is always cleared.
       }
     }
+    await get().clearSession();
+  },
+
+  deleteAccount: async () => {
+    await authApi.deleteAccount();
+    await useSavedMapPlacesStore.getState().clearPlaces();
     await get().clearSession();
   },
 

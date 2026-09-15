@@ -20,6 +20,15 @@ export const ru: TranslationSchema = {
     dark: 'Тёмная',
     light: 'Светлая',
   },
+  appIcon: {
+    label: 'Иконка приложения',
+    dark: 'Тёмная',
+    light: 'Светлая',
+    hint: 'Меняет иконку Hive на домашнем экране',
+    unavailableMessage:
+      'Смена иконки работает в development или production сборке. В Expo Go она недоступна.',
+    changeFailed: 'Не удалось сменить иконку приложения',
+  },
   auth: {
     registerSubtitle: 'Открой местность через фото других',
     loginSubtitle: 'С возвращением!',
@@ -77,6 +86,10 @@ export const ru: TranslationSchema = {
     confirmPassword: 'Повторите пароль',
     passwordsDoNotMatch: 'Пароли не совпадают',
     passwordUpdated: 'Пароль обновлён. Войдите с новым паролем.',
+    privacyConsentPrefix: 'Я ознакомился(лась) и соглашаюсь с',
+    privacyPolicyLink: 'Политикой конфиденциальности',
+    privacyConsentRequired:
+      'Чтобы создать аккаунт, нужно согласиться с Политикой конфиденциальности',
   },
   home: {
     greeting: 'Привет, {{name}}!',
@@ -146,14 +159,26 @@ export const ru: TranslationSchema = {
     menuFavorites: 'Лайки',
     menuSettings: 'Настройки',
     menuLogout: 'Выйти',
+    menuDeleteAccount: 'Удалить аккаунт',
+    deleteAccountConfirmTitle: 'Удалить аккаунт?',
+    deleteAccountConfirmMessage:
+      'Профиль, фото, лайки и сессии будут удалены безвозвратно. Это нельзя отменить.',
+    deleteAccountConfirm: 'Удалить',
+    deleteAccountCancel: 'Отмена',
+    deleteAccountFailedTitle: 'Не удалось удалить аккаунт',
+    deleteAccountFailedMessage: 'Попробуйте ещё раз позже.',
     recentPhotos: 'Недавние моменты',
     viewAll: 'Все →',
-    closeSettings: 'Готово',
     splashPreviewLabel: 'Экран загрузки',
     splashPreviewTitle: 'Открыть splash',
     splashPreviewHint: 'Текущая тема: {{theme}}',
     splashPreviewClose: 'Закрыть экран загрузки',
     splashPreviewCloseHint: 'Нажмите, чтобы вернуться в настройки',
+    privacyPolicyLabel: 'Документы',
+    privacyPolicyTitle: 'Политика конфиденциальности',
+    privacyPolicyHint: 'Как Hive собирает и использует ваши данные',
+    deleteAccountLabel: 'Аккаунт',
+    deleteAccountHint: 'Безвозвратно удалить профиль, фото и сессии',
     publishBuzzLabel: 'Вибрация при публикации',
     publishBuzzHint: 'Вибрация, когда фото появляется на карте',
     avatarPickerTitle: 'Фото профиля',
@@ -299,6 +324,9 @@ export const ru: TranslationSchema = {
     aboutEmpty: 'Пользователь пока ничего не рассказал о себе.',
     socialEmpty: 'Ссылки на соцсети не указаны.',
   },
+  privacyPolicy: {
+    title: 'Политика конфиденциальности',
+  },
   notFound: {
     title: 'Страница не найдена',
     message: 'Такого экрана нет. Вернитесь на карту или выберите другой раздел.',
@@ -338,5 +366,6 @@ export const ru: TranslationSchema = {
     GOOGLE_AUTH_NOT_CONFIGURED: 'Google Sign-In не настроен на сервере',
     GOOGLE_ACCOUNT_CONFLICT: 'Этот email уже привязан к другому Google-аккаунту',
     ACCOUNT_DISABLED: 'Аккаунт заблокирован',
+    USER_NOT_FOUND: 'Аккаунт не найден',
   },
 };

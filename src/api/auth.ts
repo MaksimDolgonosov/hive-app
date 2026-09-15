@@ -152,3 +152,7 @@ export async function updateProfile(input: UpdateProfileInput): Promise<{ user: 
   const { data } = await apiClient.patch<{ user: User }>('/auth/me', input);
   return data;
 }
+
+export async function deleteAccount(): Promise<void> {
+  await apiClient.delete('/auth/me', { timeout: 60_000 });
+}

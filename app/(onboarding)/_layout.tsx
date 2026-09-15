@@ -1,16 +1,12 @@
 import { Stack } from 'expo-router';
 
-import { useHiveTheme } from '@/src/hooks/useHiveTheme';
-
 export default function OnboardingLayout() {
-  const theme = useHiveTheme();
-
   return (
     <Stack
       screenOptions={{
         headerShown: false,
         animation: 'fade',
-        contentStyle: { backgroundColor: theme.bg },
+        contentStyle: { backgroundColor: 'transparent' },
         gestureEnabled: false,
       }}
     >

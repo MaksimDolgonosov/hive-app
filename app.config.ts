@@ -107,9 +107,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       icon: './assets/images/icon.png',
       adaptiveIcon: {
-        backgroundColor: '#FFB800',
-        foregroundImage: './assets/images/android-icon-foreground.png',
-        backgroundImage: './assets/images/android-icon-background.png',
+        backgroundColor: SPLASH_DARK_BACKGROUND,
+        foregroundImage: './assets/images/icon.png',
         monochromeImage: './assets/images/android-icon-monochrome.png',
       },
       edgeToEdgeEnabled: true,
@@ -155,6 +154,19 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           photosPermission: 'Hive использует галерею для выбора фото профиля.',
           cameraPermission: 'Hive использует камеру для фото профиля.',
         },
+      ],
+      [
+        'expo-alternate-app-icons',
+        [
+          {
+            name: 'Light',
+            ios: './assets/images/icon-light.png',
+            android: {
+              foregroundImage: './assets/images/icon-light.png',
+              backgroundColor: '#FFB800',
+            },
+          },
+        ],
       ],
       [
         'expo-splash-screen',

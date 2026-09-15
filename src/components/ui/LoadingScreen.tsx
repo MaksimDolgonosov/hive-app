@@ -1,11 +1,11 @@
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, Ellipse, RadialGradient, Stop } from 'react-native-svg';
 
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
+import { ScreenGradient } from '@/src/components/ui/ScreenGradient';
 import { useAppColorScheme, useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { en } from '@/src/i18n/locales/en';
 import { ru } from '@/src/i18n/locales/ru';
@@ -37,11 +37,7 @@ export function LoadingScreen({ bottomOffset = 0 }: LoadingScreenProps) {
   const glowColor = isDark ? theme.accent : LIGHT_GLOW_COLOR;
 
   return (
-    <LinearGradient
-      colors={[...theme.gradients.screen]}
-      locations={theme.gradients.screenLocations}
-      style={styles.root}
-    >
+    <ScreenGradient style={styles.root}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <View pointerEvents="none" style={styles.brandGlow}>
         <Svg height={BRAND_GLOW_HEIGHT} width={BRAND_GLOW_WIDTH}>
@@ -112,7 +108,7 @@ export function LoadingScreen({ bottomOffset = 0 }: LoadingScreenProps) {
           style={{ marginBottom: 16 }}
         />
       </View>
-    </LinearGradient>
+    </ScreenGradient>
   );
 }
 

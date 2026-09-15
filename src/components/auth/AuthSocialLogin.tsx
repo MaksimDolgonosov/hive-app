@@ -16,6 +16,7 @@ const ICON_COLOR = '#F6F2EA';
 
 type AuthSocialLoginProps = {
   disabled?: boolean;
+  onBeforeAuth?: () => boolean;
   onError: (message: string | null) => void;
 };
 
@@ -53,9 +54,11 @@ function AppleIcon() {
 
 function ConfiguredGoogleButton({
   disabled,
+  onBeforeAuth,
   onError,
 }: {
   disabled: boolean;
+  onBeforeAuth?: () => boolean;
   onError: (message: string | null) => void;
 }) {
   const { t } = useTranslation();
@@ -93,6 +96,9 @@ function ConfiguredGoogleButton({
       loading={isPrompting}
       variant="row"
       onPress={() => {
+        if (onBeforeAuth && !onBeforeAuth()) {
+          return;
+        }
         onError(null);
         void signInWithGoogle();
       }}
@@ -102,7 +108,7 @@ function ConfiguredGoogleButton({
   );
 }
 
-export function AuthSocialLogin({ disabled = false, onError }: AuthSocialLoginProps) {
+export function AuthSocialLogin({ disabled = false, onBeforeAuth, onError }: AuthSocialLoginProps) {
   const { t } = useTranslation();
   const googleConfigured = isGoogleSignInConfigured();
 
@@ -115,14 +121,19 @@ export function AuthSocialLogin({ disabled = false, onError }: AuthSocialLoginPr
       </View>
 
       {googleConfigured ? (
-        <ConfiguredGoogleButton disabled={disabled} onError={onError} />
+        <ConfiguredGoogleButton disabled={disabled} onBeforeAuth={onBeforeAuth} onError={onError} />
       ) : (
         <AuthSocialButton
           accessibilityLabel={t('auth.loginWithGoogle')}
           disabled={disabled}
           label={t('auth.loginWithGoogle')}
           variant="row"
-          onPress={() => onError(t('auth.googleNotConfigured'))}
+          onPress={() => {
+            if (onBeforeAuth && !onBeforeAuth()) {
+              return;
+            }
+            onError(t('auth.googleNotConfigured'));
+          }}
         >
           <GoogleIcon />
         </AuthSocialButton>

@@ -5,6 +5,7 @@ export default function ModalsLayout() {
     <Stack screenOptions={{ headerShown: false, presentation: 'fullScreenModal' }}>
       <Stack.Screen name="camera" />
       <Stack.Screen name="splash" />
+      <Stack.Screen name="privacy-policy" options={{ presentation: 'card' }} />
       <Stack.Screen name="preview" options={{ presentation: 'card' }} />
       <Stack.Screen name="sting/[id]" options={{ presentation: 'card' }} />
       <Stack.Screen

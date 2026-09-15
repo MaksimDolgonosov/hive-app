@@ -10,9 +10,10 @@ import { AuthInput } from '@/src/components/auth/AuthInput';
 import { AuthLogo } from '@/src/components/auth/AuthLogo';
 import { AuthScreenLayout } from '@/src/components/auth/AuthScreenLayout';
 import { AuthSocialLogin } from '@/src/components/auth/AuthSocialLogin';
+import { PrivacyConsentCheckbox } from '@/src/components/auth/PrivacyConsentCheckbox';
 import { useAuthStore } from '@/src/stores/authStore';
 import { getApiErrorCode, getApiErrorMessage } from '@/src/utils/api-error';
-import { verifyOtpHref } from '@/src/utils/auth-navigation';
+import { privacyPolicyHref, verifyOtpHref } from '@/src/utils/auth-navigation';
 import { isValidEmail, normalizeEmail } from '@/src/utils/email';
 
 export default function RegisterScreen() {
@@ -28,12 +29,26 @@ export default function RegisterScreen() {
   const [passwordError, setPasswordError] = useState<string | undefined>();
   const [showLoginHint, setShowLoginHint] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(true);
+  const [privacyError, setPrivacyError] = useState<string | undefined>();
 
   function clearFieldErrors() {
     setUsernameError(undefined);
     setEmailError(undefined);
     setPasswordError(undefined);
+    setPrivacyError(undefined);
     setShowLoginHint(false);
+  }
+
+  function ensurePrivacyAccepted(): boolean {
+    if (acceptedPrivacy) {
+      setPrivacyError(undefined);
+      return true;
+    }
+
+    setPrivacyError(t('auth.privacyConsentRequired'));
+    setError(t('auth.privacyConsentRequired'));
+    return false;
   }
 
   async function handleRegister() {
@@ -42,31 +57,35 @@ export default function RegisterScreen() {
 
     const trimmedUsername = username.trim();
     const normalizedEmail = normalizeEmail(email);
-    let hasValidationError = false;
+    let hasFieldError = false;
 
     if (!trimmedUsername) {
       setUsernameError(t('auth.fillAllFields'));
-      hasValidationError = true;
+      hasFieldError = true;
     }
 
     if (!normalizedEmail) {
       setEmailError(t('auth.fillAllFields'));
-      hasValidationError = true;
+      hasFieldError = true;
     } else if (!isValidEmail(normalizedEmail)) {
       setEmailError(t('auth.invalidEmail'));
-      hasValidationError = true;
+      hasFieldError = true;
     }
 
     if (!password) {
       setPasswordError(t('auth.fillAllFields'));
-      hasValidationError = true;
+      hasFieldError = true;
     } else if (password.length < 8) {
       setPasswordError(t('auth.passwordMinLength'));
-      hasValidationError = true;
+      hasFieldError = true;
     }
 
-    if (hasValidationError) {
-      setError(t('errors.VALIDATION_ERROR'));
+    if (!acceptedPrivacy) {
+      setPrivacyError(t('auth.privacyConsentRequired'));
+    }
+
+    if (hasFieldError || !acceptedPrivacy) {
+      setError(hasFieldError ? t('errors.VALIDATION_ERROR') : t('auth.privacyConsentRequired'));
       return;
     }
 
@@ -158,6 +177,21 @@ export default function RegisterScreen() {
           </View>
         ) : null}
 
+        <PrivacyConsentCheckbox
+          checked={acceptedPrivacy}
+          error={privacyError}
+          onCheckedChange={(value) => {
+            setAcceptedPrivacy(value);
+            setPrivacyError(undefined);
+            if (value) {
+              setError((current) =>
+                current === t('auth.privacyConsentRequired') ? null : current,
+              );
+            }
+          }}
+          onOpenPolicy={() => router.push(privacyPolicyHref())}
+        />
+
         <AuthButton
           loading={loading}
           title={t('auth.createAccount')}
@@ -166,6 +200,7 @@ export default function RegisterScreen() {
 
         <AuthSocialLogin
           disabled={loading}
+          onBeforeAuth={ensurePrivacyAccepted}
           onError={(message) => {
             setShowLoginHint(false);
             setError(message);

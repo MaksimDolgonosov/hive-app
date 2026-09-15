@@ -26,3 +26,7 @@ export function forgotPasswordHref(email?: string): Href {
 
   return `/(auth)/forgot-password?email=${encodeURIComponent(email)}` as Href;
 }
+
+export function privacyPolicyHref(): Href {
+  return '/(auth)/privacy-policy' as Href;
+}

@@ -3,6 +3,7 @@ import { View } from 'react-native';
 
 import { ErrorToast } from '@/src/components/ui/ErrorToast';
 import { OfflineBanner } from '@/src/components/ui/OfflineBanner';
+import { ScreenGradient } from '@/src/components/ui/ScreenGradient';
 import { useAppColorScheme, useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { HIVE_NATIVEWIND_VARS } from '@/src/theme/nativewind-vars';
 
@@ -13,12 +14,32 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   const colorScheme = useAppColorScheme();
   const theme = useHiveTheme();
-
-  return (
-    <View style={[{ flex: 1, backgroundColor: theme.bg }, HIVE_NATIVEWIND_VARS[colorScheme]]}>
-      {children}
+  const overlays = (
+    <>
       <OfflineBanner />
       <ErrorToast />
+    </>
+  );
+
+  return (
+    <View
+      style={[
+        { flex: 1 },
+        colorScheme === 'dark' ? { backgroundColor: theme.bg } : null,
+        HIVE_NATIVEWIND_VARS[colorScheme],
+      ]}
+    >
+      {colorScheme === 'light' ? (
+        <ScreenGradient>
+          {children}
+          {overlays}
+        </ScreenGradient>
+      ) : (
+        <>
+          {children}
+          {overlays}
+        </>
+      )}
     </View>
   );
 }

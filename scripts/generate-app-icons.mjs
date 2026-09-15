@@ -1,6 +1,7 @@
 /**
- * Generates all app icon assets from assets/images/ios-icon-1024.svg
+ * Generates the light app icon assets from assets/images/ios-icon-1024.svg
  * (full-bleed square — OS applies the rounded mask).
+ * Does not overwrite the dark default `icon.png`.
  * Run: node scripts/generate-app-icons.mjs
  */
 import { mkdir } from 'node:fs/promises';
@@ -64,7 +65,7 @@ async function main() {
   await mkdir(OUT_DIR, { recursive: true });
 
   const outputs = [
-    { name: 'icon.png', size: 1024 },
+    { name: 'icon-light.png', size: 1024 },
     { name: 'splash-icon.png', size: 512 },
     { name: 'android-icon-foreground.png', size: 1024 },
     { name: 'favicon.png', size: 48 },

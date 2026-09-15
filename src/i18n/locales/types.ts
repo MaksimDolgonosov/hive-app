@@ -18,6 +18,14 @@ export type TranslationSchema = {
     dark: string;
     light: string;
   };
+  appIcon: {
+    label: string;
+    dark: string;
+    light: string;
+    hint: string;
+    unavailableMessage: string;
+    changeFailed: string;
+  };
   auth: {
     registerSubtitle: string;
     loginSubtitle: string;
@@ -74,6 +82,9 @@ export type TranslationSchema = {
     confirmPassword: string;
     passwordsDoNotMatch: string;
     passwordUpdated: string;
+    privacyConsentPrefix: string;
+    privacyPolicyLink: string;
+    privacyConsentRequired: string;
   };
   home: {
     greeting: string;
@@ -139,14 +150,25 @@ export type TranslationSchema = {
     menuFavorites: string;
     menuSettings: string;
     menuLogout: string;
+    menuDeleteAccount: string;
+    deleteAccountConfirmTitle: string;
+    deleteAccountConfirmMessage: string;
+    deleteAccountConfirm: string;
+    deleteAccountCancel: string;
+    deleteAccountFailedTitle: string;
+    deleteAccountFailedMessage: string;
     recentPhotos: string;
     viewAll: string;
-    closeSettings: string;
     splashPreviewLabel: string;
     splashPreviewTitle: string;
     splashPreviewHint: string;
     splashPreviewClose: string;
     splashPreviewCloseHint: string;
+    privacyPolicyLabel: string;
+    privacyPolicyTitle: string;
+    privacyPolicyHint: string;
+    deleteAccountLabel: string;
+    deleteAccountHint: string;
     publishBuzzLabel: string;
     publishBuzzHint: string;
     avatarPickerTitle: string;
@@ -283,6 +305,9 @@ export type TranslationSchema = {
     aboutEmpty: string;
     socialEmpty: string;
   };
+  privacyPolicy: {
+    title: string;
+  };
   notFound: {
     title: string;
     message: string;
@@ -322,5 +347,6 @@ export type TranslationSchema = {
     GOOGLE_AUTH_NOT_CONFIGURED: string;
     GOOGLE_ACCOUNT_CONFLICT: string;
     ACCOUNT_DISABLED: string;
+    USER_NOT_FOUND: string;
   };
 };

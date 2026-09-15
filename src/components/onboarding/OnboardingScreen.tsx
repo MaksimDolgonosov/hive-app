@@ -6,7 +6,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/src/components/auth/AuthButton';
-import { useHiveTheme } from '@/src/hooks/useHiveTheme';
+import { ScreenGradient } from '@/src/components/ui/ScreenGradient';
+import { useAppColorScheme, useHiveTheme } from '@/src/hooks/useHiveTheme';
 
 export const ONBOARDING_CONTENT_STEPS = 4;
 
@@ -50,6 +51,7 @@ export function OnboardingScreen({
 }: OnboardingScreenProps) {
   const insets = useSafeAreaInsets();
   const theme = useHiveTheme();
+  const colorScheme = useAppColorScheme();
   const isPhoto = Boolean(backgroundSource);
   const titleColor = isPhoto ? PHOTO_TITLE : theme.text;
   const bodyColor = isPhoto ? PHOTO_BODY : theme.textMuted;
@@ -57,7 +59,12 @@ export function OnboardingScreen({
   const inactiveDot = isPhoto ? PHOTO_DOT_INACTIVE : `${theme.text}33`;
 
   return (
-    <View style={styles.root}>
+    <View
+      style={[
+        styles.root,
+        !isPhoto && colorScheme === 'light' ? { backgroundColor: 'transparent' } : null,
+      ]}
+    >
       {backgroundSource ? (
         <>
           <Image contentFit="cover" source={backgroundSource} style={StyleSheet.absoluteFill} />
@@ -71,13 +78,9 @@ export function OnboardingScreen({
           />
           <StatusBar style="light" />
         </>
-      ) : (
-        <LinearGradient
-          colors={[...theme.gradients.screen]}
-          locations={theme.gradients.screenLocations}
-          style={StyleSheet.absoluteFill}
-        />
-      )}
+      ) : colorScheme === 'dark' ? (
+        <ScreenGradient style={StyleSheet.absoluteFill} />
+      ) : null}
 
       <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeArea}>
         {illustration ? <View style={styles.illustrationSection}>{illustration}</View> : <View style={styles.photoSpacer} />}

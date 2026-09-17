@@ -1,12 +1,14 @@
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { Smartphone } from 'lucide-react-native';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, Text, View } from 'react-native';
+import { View } from 'react-native';
 
-import { useHiveTheme } from '@/src/hooks/useHiveTheme';
+import { ProfileMenuRow } from '@/src/components/profile/ProfileMenuRow';
+import { SettingsChoiceSheet } from '@/src/components/ui/SettingsChoiceSheet';
 import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import { showErrorToast } from '@/src/stores/toastStore';
-import { canChangeAppIcon, type AppIconId } from '@/src/utils/app-icon';
+import { type AppIconId } from '@/src/utils/app-icon';
 
 type AppIconSelectProps = {
   className?: string;
@@ -19,13 +21,30 @@ const OPTIONS: { value: AppIconId; preview: number }[] = [
 
 export function AppIconSelect({ className }: AppIconSelectProps) {
   const { t } = useTranslation();
-  const theme = useHiveTheme();
   const appIcon = usePreferencesStore((state) => state.appIcon);
   const setAppIcon = usePreferencesStore((state) => state.setAppIcon);
+  const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
-  const nativeSupported = canChangeAppIcon();
+
+  const options = useMemo(
+    () =>
+      OPTIONS.map((option) => ({
+        value: option.value,
+        label: t(`appIcon.${option.value}`),
+        leading: (
+          <Image
+            contentFit="cover"
+            source={option.preview}
+            style={{ width: 28, height: 28, borderRadius: 7 }}
+          />
+        ),
+      })),
+    [t],
+  );
 
   async function handleSelect(icon: AppIconId) {
+    setOpen(false);
+
     if (pending || icon === appIcon) {
       return;
     }
@@ -42,51 +61,21 @@ export function AppIconSelect({ className }: AppIconSelectProps) {
 
   return (
     <View className={className}>
-      <Text className="mb-2 font-inter text-[13px] font-semibold text-hive-foreground">
-        {t('appIcon.label')}
-      </Text>
-
-      <View className="flex-row overflow-hidden rounded-hive-md border border-hive-stroke bg-hive-input-bg p-1">
-        {OPTIONS.map((option) => {
-          const isActive = appIcon === option.value;
-
-          return (
-            <Pressable
-              key={option.value}
-              accessibilityRole="button"
-              accessibilityState={{ selected: isActive, disabled: pending }}
-              className={`h-14 flex-1 flex-row items-center justify-center gap-2 rounded-[14px] ${
-                isActive ? 'bg-hive-primary' : 'bg-transparent'
-              }`}
-              disabled={pending}
-              onPress={() => void handleSelect(option.value)}
-            >
-              <Image
-                contentFit="cover"
-                source={option.preview}
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 7,
-                  borderWidth: 1,
-                  borderColor: isActive ? theme.textOnAccent : theme.stroke,
-                }}
-              />
-              <Text
-                className={`font-inter text-[14px] font-semibold ${
-                  isActive ? 'text-hive-on-accent' : 'text-hive-muted'
-                }`}
-              >
-                {t(`appIcon.${option.value}`)}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      <Text className="mt-2 font-inter text-xs text-hive-muted">
-        {nativeSupported ? t('appIcon.hint') : t('appIcon.unavailableMessage')}
-      </Text>
+      <ProfileMenuRow
+        badge={t(`appIcon.${appIcon}`)}
+        disabled={pending}
+        icon={Smartphone}
+        label={t('appIcon.label')}
+        onPress={() => setOpen(true)}
+      />
+      <SettingsChoiceSheet
+        options={options}
+        selected={appIcon}
+        title={t('appIcon.label')}
+        visible={open}
+        onClose={() => setOpen(false)}
+        onSelect={(value) => void handleSelect(value)}
+      />
     </View>
   );
 }

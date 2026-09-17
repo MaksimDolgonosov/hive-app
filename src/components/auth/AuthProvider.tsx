@@ -34,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const inAuthGroup = rootSegment === '(auth)';
     const inTabs = rootSegment === '(tabs)';
     const inModals = rootSegment === '(modals)';
+    const inSettings = rootSegment === 'settings';
     const isOAuthCallback = isGoogleOAuthCallbackPath(pathname);
 
     if (!hasCompletedOnboarding) {
@@ -61,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (status === 'authenticated') {
-      if (!inTabs && !inModals) {
+      if (!inTabs && !inModals && !inSettings) {
         router.replace('/(tabs)');
         return;
       }

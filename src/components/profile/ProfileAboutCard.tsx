@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, Text, View } from 'react-native';
 
 import { SOCIAL_LINK_META } from '@/src/constants/social-links';
+import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 import type { User } from '@/src/types';
 import {
   getActiveSocialLinks,
@@ -26,6 +27,7 @@ export function ProfileAboutCard({
   emptySocialKey = 'profile.socialEmpty',
 }: ProfileAboutCardProps) {
   const { t } = useTranslation();
+  const theme = useHiveTheme();
   const bio = user.bio?.trim() ?? '';
   const socialLinks = normalizeUserSocialLinks(user.socialLinks);
   const activeLinks = getActiveSocialLinks(socialLinks);
@@ -42,11 +44,16 @@ export function ProfileAboutCard({
             <Pressable
               accessibilityLabel={t('profile.editAbout')}
               accessibilityRole="button"
-              className="ml-auto h-8 w-8 items-center justify-center rounded-full bg-hive-primary/15"
+              className="ml-auto h-8 w-8 items-center justify-center rounded-full"
               hitSlop={8}
+              style={{
+                backgroundColor: theme.surface,
+                borderWidth: 1,
+                borderColor: theme.stroke,
+              }}
               onPress={onEdit}
             >
-              <Pencil color="#FFB800" size={16} />
+              <Pencil color={theme.text} size={16} strokeWidth={2.4} />
             </Pressable>
           ) : null}
         </View>

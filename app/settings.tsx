@@ -25,9 +25,8 @@ export default function ProfileSettingsScreen() {
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingTop: 20,
+          paddingTop: 8,
           paddingBottom: insets.bottom + 32,
-          gap: 16,
         }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}

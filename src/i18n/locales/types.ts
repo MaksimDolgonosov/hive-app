@@ -98,6 +98,8 @@ export type TranslationSchema = {
     loadError: string;
     capturePhoto: string;
     centerOnUser: string;
+    showSatellite: string;
+    showScheme: string;
     saveFavorite: string;
     savePlaceTitle: string;
     savePlaceDescription: string;

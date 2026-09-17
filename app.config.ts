@@ -105,10 +105,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           apiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
         },
       },
-      icon: './assets/images/icon.png',
+      icon: './assets/images/android-icon.png',
       adaptiveIcon: {
         backgroundColor: SPLASH_DARK_BACKGROUND,
-        foregroundImage: './assets/images/icon.png',
+        backgroundImage: './assets/images/android-icon-background.png',
+        foregroundImage: './assets/images/android-icon-foreground.png',
         monochromeImage: './assets/images/android-icon-monochrome.png',
       },
       edgeToEdgeEnabled: true,
@@ -160,14 +161,15 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         [
           {
             name: 'Light',
-            ios: './assets/images/icon-light.png',
             android: {
-              foregroundImage: './assets/images/icon-light.png',
-              backgroundColor: '#FFB800',
+              foregroundImage: './assets/images/android-icon-foreground-light.png',
+              backgroundImage: './assets/images/android-icon-background-light.png',
+              backgroundColor: '#F5A623',
             },
           },
         ],
       ],
+      './plugins/with-ios-orange-alternate-icon',
       [
         'expo-splash-screen',
         {

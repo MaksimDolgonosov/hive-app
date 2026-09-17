@@ -102,6 +102,8 @@ export const en: TranslationSchema = {
     loadError: 'Could not load nearby moments',
     capturePhoto: 'Take photo',
     centerOnUser: 'Center map on my location',
+    showSatellite: 'Show satellite map',
+    showScheme: 'Show map scheme',
     saveFavorite: 'Save map view to favorites',
     savePlaceTitle: 'Favorite place',
     savePlaceDescription:

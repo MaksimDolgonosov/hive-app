@@ -10,6 +10,7 @@ import { HiveMarkerCapture } from '@/src/components/map/HiveMarkerCapture';
 import { LocationAccessGate } from '@/src/components/map/LocationAccessGate';
 import { MapBookmarkButton } from '@/src/components/map/MapBookmarkButton';
 import { MapLocationButton } from '@/src/components/map/MapLocationButton';
+import { MapTypeButton } from '@/src/components/map/MapTypeButton';
 import { SaveMapPlaceModal } from '@/src/components/map/SaveMapPlaceModal';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
@@ -102,6 +103,9 @@ export function MapContainer() {
   const clearPendingMapFocus = useMapStore((state) => state.clearPendingMapFocus);
   const pendingSavedRegion = useMapStore((state) => state.pendingSavedRegion);
   const clearPendingSavedRegion = useMapStore((state) => state.clearPendingSavedRegion);
+  const mapType = useMapStore((state) => state.mapType);
+  const setMapType = useMapStore((state) => state.setMapType);
+  const hydrateMapType = useMapStore((state) => state.hydrateMapType);
 
   const savedPlaces = useSavedMapPlacesStore((state) => state.places);
   const addSavedPlace = useSavedMapPlacesStore((state) => state.addPlace);
@@ -154,6 +158,10 @@ export function MapContainer() {
   }, []);
 
   const { data, isFetching, isError } = useStingsNearby(debouncedBounds);
+
+  useEffect(() => {
+    void hydrateMapType();
+  }, [hydrateMapType]);
 
   useEffect(() => {
     if (initialRegion || hasRestoredCachedRegion.current) {
@@ -310,6 +318,10 @@ export function MapContainer() {
     setDebouncedBounds(regionToBounds(userRegion));
   }
 
+  function toggleMapType() {
+    void setMapType(mapType === 'satellite' ? 'standard' : 'satellite');
+  }
+
   async function openSavePlaceModal() {
     const currentRegion = await readVisibleMapRegion();
     if (!currentRegion) {
@@ -398,7 +410,7 @@ export function MapContainer() {
       {isGoogleMapsConfigured() ? (
         <MapView
           // Android Google Maps applies style only at native mount; iOS updates live.
-          key={Platform.OS === 'android' ? colorScheme : 'map'}
+          key={Platform.OS === 'android' ? `${colorScheme}-${mapType}` : 'map'}
           ref={mapRef}
           style={styles.mapLayer}
           initialRegion={liveRegionRef.current ?? mapRegion}
@@ -410,7 +422,15 @@ export function MapContainer() {
           showsUserLocation
           showsMyLocationButton={false}
           userInterfaceStyle={colorScheme}
-          customMapStyle={colorScheme === 'dark' ? HIVE_DARK_MAP_STYLE : HIVE_LIGHT_MAP_STYLE}
+          // Спутник в UI = hybrid: снимок плюс улицы, как в Google/Yandex.
+          mapType={mapType === 'satellite' ? 'hybrid' : 'standard'}
+          customMapStyle={
+            mapType === 'standard'
+              ? colorScheme === 'dark'
+                ? HIVE_DARK_MAP_STYLE
+                : HIVE_LIGHT_MAP_STYLE
+              : undefined
+          }
           {...(Platform.OS === 'android' ? { googleRenderer: 'LEGACY' as const } : {})}
         >
           {data?.stings.map((sting) => (
@@ -498,7 +518,8 @@ export function MapContainer() {
           </View>
         )}
 
-        <View style={[styles.locationButton, { bottom: getGlassTabBarInset(insets.bottom) + 12 }]}>
+        <View style={[styles.rightControls, { bottom: getGlassTabBarInset(insets.bottom) + 12 }]}>
+          <MapTypeButton mapType={mapType} onPress={toggleMapType} />
           <MapLocationButton disabled={!coords} onPress={centerOnUserLocation} />
         </View>
       </View>
@@ -545,9 +566,11 @@ const styles = StyleSheet.create({
         }
       : null),
   },
-  locationButton: {
+  rightControls: {
     position: 'absolute',
     right: 16,
+    alignItems: 'center',
+    gap: 12,
     ...(Platform.OS === 'android'
       ? {
           elevation: 24,

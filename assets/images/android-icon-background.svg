@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="hive-android-dark-bg" x1="512" y1="0" x2="512" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#241E14"/>
+      <stop offset="0.5" stop-color="#13110C"/>
+      <stop offset="1" stop-color="#0A0907"/>
+    </linearGradient>
+    <radialGradient id="hive-android-dark-glow" cx="50%" cy="46%" r="42%" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#FFB800" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#FFB800" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#hive-android-dark-bg)"/>
+  <rect width="1024" height="1024" fill="url(#hive-android-dark-glow)"/>
+  <rect x="160" y="128" width="288" height="288" rx="64" fill="#FFB800" fill-opacity="0.12"/>
+  <rect x="672" y="592" width="224" height="224" rx="48" fill="#FFB800" fill-opacity="0.08"/>
+  <rect x="96" y="672" width="192" height="192" rx="40" fill="#FFB800" fill-opacity="0.06"/>
+</svg>

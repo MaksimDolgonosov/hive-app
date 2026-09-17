@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Linking, Pressable, Text, View } from 'react-native';
 
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
+import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 
 import { useAvatarUpload } from '@/src/hooks/useAvatarUpload';
 import { useAuthStore } from '@/src/stores/authStore';
@@ -85,6 +86,7 @@ export function ProfileAvatar({
   editable = false,
 }: ProfileAvatarProps) {
   const { t } = useTranslation();
+  const theme = useHiveTheme();
   const { uploadAvatar, removeAvatar, isBusy } = useAvatarUpload();
   const avatarCacheVersion = useAuthStore((state) => state.avatarCacheVersion);
 
@@ -198,15 +200,23 @@ export function ProfileAvatar({
         ) : null}
 
         <View
-          className="absolute items-center justify-center rounded-full border-2 border-hive-bg bg-hive-primary"
+          className="absolute items-center justify-center rounded-full"
           style={{
             width: badgeSize,
             height: badgeSize,
             right: -2,
             bottom: -2,
+            backgroundColor: '#FFFFFF',
+            borderWidth: 2,
+            borderColor: theme.bg,
+            shadowColor: '#000000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.2,
+            shadowRadius: 3,
+            elevation: 3,
           }}
         >
-          <Camera color="#0B0A08" size={Math.round(badgeSize * 0.5)} />
+          <Camera color="#2C1810" size={Math.round(badgeSize * 0.5)} strokeWidth={2.4} />
         </View>
       </View>
     </Pressable>

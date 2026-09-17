@@ -265,7 +265,29 @@
                   "id": "ahU4y",
                   "width": 88,
                   "height": 88,
-                  "fill": "$--primary",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 145,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#FFD54F",
+                        "position": 0
+                      },
+                      {
+                        "color": "#F5A623",
+                        "position": 0.45
+                      },
+                      {
+                        "color": "#FF8C00",
+                        "position": 1
+                      }
+                    ]
+                  },
                   "cornerRadius": 44,
                   "effect": {
                     "type": "shadow",
@@ -2213,7 +2235,29 @@
                   "id": "X544Dd",
                   "width": 88,
                   "height": 88,
-                  "fill": "$--primary",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 145,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#FFD54F",
+                        "position": 0
+                      },
+                      {
+                        "color": "#F5A623",
+                        "position": 0.45
+                      },
+                      {
+                        "color": "#FF8C00",
+                        "position": 1
+                      }
+                    ]
+                  },
                   "cornerRadius": 44,
                   "effect": {
                     "type": "shadow",
@@ -6785,63 +6829,98 @@
             },
             "colors": [
               {
-                "color": "#FFE082",
+                "color": "#FFD54F",
                 "position": 0
               },
               {
                 "color": "#F5A623",
-                "position": 0.4
+                "position": 0.45
               },
               {
-                "color": "#E65100",
+                "color": "#FF8C00",
                 "position": 1
               }
             ]
           },
-          "cornerRadius": 228,
+          "cornerRadius": 228.352,
+          "stroke": "#FFFFFF1F",
+          "strokeWidth": 6.144,
+          "strokeAlignment": "inner",
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#00000073",
+            "offset": {
+              "x": 0,
+              "y": 61.44
+            },
+            "blur": 153.6
+          },
           "layout": "none",
           "children": [
             {
-              "type": "frame",
-              "id": "zTgVk",
-              "x": 160,
-              "y": 128,
-              "name": "GlowTopLeft",
-              "width": 288,
-              "height": 288,
-              "fill": "#FFFFFF20",
-              "cornerRadius": 64
+              "type": "ellipse",
+              "id": "CQnal",
+              "x": 133.12,
+              "y": 133.12,
+              "name": "Glow",
+              "fill": {
+                "type": "gradient",
+                "gradientType": "radial",
+                "enabled": true,
+                "rotation": 0,
+                "size": {
+                  "width": 1,
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#FFFFFF33",
+                    "position": 0
+                  },
+                  {
+                    "color": "#FFFFFF00",
+                    "position": 1
+                  }
+                ]
+              },
+              "width": 757.76,
+              "height": 757.76
             },
             {
               "type": "frame",
-              "id": "WSWTI",
-              "x": 672,
-              "y": 592,
-              "name": "GlowBottomRight",
-              "width": 224,
-              "height": 224,
-              "fill": "#FFFFFF15",
-              "cornerRadius": 48
+              "id": "TSA8T",
+              "x": 153.6,
+              "y": 122.88,
+              "name": "Deco1",
+              "width": 286.72,
+              "height": 286.72,
+              "fill": "#FFFFFF18",
+              "cornerRadius": 61.44,
+              "stroke": "#FFB8003D",
+              "strokeWidth": 8.6016
             },
             {
               "type": "frame",
-              "id": "h6Ud3K",
-              "x": 96,
-              "y": 672,
-              "name": "GlowBottomLeft",
-              "width": 192,
-              "height": 192,
-              "fill": "#FFFFFF10",
-              "cornerRadius": 40
+              "id": "vyFnv",
+              "x": 634.88,
+              "y": 563.2,
+              "name": "Deco2",
+              "width": 225.28,
+              "height": 225.28,
+              "fill": "#FFFFFF12",
+              "cornerRadius": 51.2,
+              "stroke": "#FFB8003D",
+              "strokeWidth": 6.7584
             },
             {
               "type": "icon",
-              "id": "D6Jpdr",
-              "x": 256,
-              "y": 256,
-              "name": "Hexagon",
-              "width": 512,
-              "height": 512,
+              "id": "q2ijK",
+              "x": 88,
+              "y": 142,
+              "name": "Mark",
+              "width": 848,
+              "height": 740,
               "icon": "hexagon",
               "library": "lucide",
               "fill": "#FFFFFF"
@@ -18588,6 +18667,603 @@
               "name": "TabBar",
               "width": "fill_container",
               "opacity": 0.38
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "PmLgp",
+      "x": 2787,
+      "y": 0,
+      "name": "Logo/App-Light",
+      "width": 420,
+      "fill": "$--bg",
+      "cornerRadius": 24,
+      "stroke": "$--border",
+      "strokeWidth": 1,
+      "strokeAlignment": "inner",
+      "layout": "vertical",
+      "gap": 32,
+      "padding": 40,
+      "children": [
+        {
+          "type": "text",
+          "id": "tYXIn",
+          "fill": "$--muted",
+          "content": "Логотип приложения — светлая тема",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "600",
+          "letterSpacing": 1
+        },
+        {
+          "type": "frame",
+          "id": "Y7Tz0",
+          "name": "LogoPrimary",
+          "gap": 16,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "uDX99",
+              "name": "Mark",
+              "clip": true,
+              "width": 72,
+              "height": 72,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 145,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#FFD54F",
+                    "position": 0
+                  },
+                  {
+                    "color": "#F5A623",
+                    "position": 0.45
+                  },
+                  {
+                    "color": "#FF8C00",
+                    "position": 1
+                  }
+                ]
+              },
+              "cornerRadius": 20,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#F5A62359",
+                "offset": {
+                  "x": 0,
+                  "y": 6
+                },
+                "blur": 20
+              },
+              "layout": "none",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "VqwWd",
+                  "x": 9.36,
+                  "y": 9.36,
+                  "name": "Glow",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "radial",
+                    "enabled": true,
+                    "rotation": 0,
+                    "size": {
+                      "width": 1,
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#FFFFFF40",
+                        "position": 0
+                      },
+                      {
+                        "color": "#FFFFFF00",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 53.28,
+                  "height": 53.28
+                },
+                {
+                  "type": "frame",
+                  "id": "Ir723",
+                  "x": 10.799999999999999,
+                  "y": 8.64,
+                  "name": "Deco1",
+                  "width": 20.160000000000004,
+                  "height": 20.160000000000004,
+                  "fill": "#FFFFFF18",
+                  "cornerRadius": 4.32
+                },
+                {
+                  "type": "frame",
+                  "id": "Dfi2h",
+                  "x": 44.64,
+                  "y": 39.6,
+                  "name": "Deco2",
+                  "width": 15.84,
+                  "height": 15.84,
+                  "fill": "#FFFFFF12",
+                  "cornerRadius": 3.6
+                },
+                {
+                  "type": "icon",
+                  "id": "G7PrVE",
+                  "x": 6.1875,
+                  "y": 9.984375,
+                  "name": "Mark",
+                  "width": 59.625,
+                  "height": 52.03125,
+                  "icon": "hexagon",
+                  "library": "lucide",
+                  "fill": "#FFFFFF"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "A2jnA",
+              "layout": "vertical",
+              "gap": 2,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "U9VC8W",
+                  "fill": "$--foreground",
+                  "content": "Hive",
+                  "fontFamily": "Inter",
+                  "fontSize": 36,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Wq6Nd",
+                  "fill": "$--muted",
+                  "content": "Социальная карта моментов",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "UXMEC",
+          "name": "LogoStacked",
+          "layout": "vertical",
+          "gap": 12,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "txp91",
+              "clip": true,
+              "width": 96,
+              "height": 96,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 145,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#FFD54F",
+                    "position": 0
+                  },
+                  {
+                    "color": "#F5A623",
+                    "position": 0.45
+                  },
+                  {
+                    "color": "#FF8C00",
+                    "position": 1
+                  }
+                ]
+              },
+              "cornerRadius": 28,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#F5A62359",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 24
+              },
+              "layout": "none",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "begi7",
+                  "x": 12.48,
+                  "y": 12.48,
+                  "name": "Glow",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "radial",
+                    "enabled": true,
+                    "rotation": 0,
+                    "size": {
+                      "width": 1,
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#FFFFFF40",
+                        "position": 0
+                      },
+                      {
+                        "color": "#FFFFFF00",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 71.03999999999999,
+                  "height": 71.03999999999999
+                },
+                {
+                  "type": "frame",
+                  "id": "I6E1Pb",
+                  "x": 14.399999999999999,
+                  "y": 11.52,
+                  "name": "Deco1",
+                  "width": 26.880000000000003,
+                  "height": 26.880000000000003,
+                  "fill": "#FFFFFF18",
+                  "cornerRadius": 5.76
+                },
+                {
+                  "type": "frame",
+                  "id": "F5QChc",
+                  "x": 59.519999999999996,
+                  "y": 52.800000000000004,
+                  "name": "Deco2",
+                  "width": 21.12,
+                  "height": 21.12,
+                  "fill": "#FFFFFF12",
+                  "cornerRadius": 4.800000000000001
+                },
+                {
+                  "type": "icon",
+                  "id": "xBbak",
+                  "x": 8.25,
+                  "y": 13.3125,
+                  "name": "Mark",
+                  "width": 79.5,
+                  "height": 69.375,
+                  "icon": "hexagon",
+                  "library": "lucide",
+                  "fill": "#FFFFFF"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "G2c4J",
+              "fill": "$--foreground",
+              "content": "Hive",
+              "fontFamily": "Inter",
+              "fontSize": 28,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "jP3L9",
+          "name": "LogoMarkOnly",
+          "gap": 24,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "H7UlCY",
+              "clip": true,
+              "width": 48,
+              "height": 48,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 145,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#FFD54F",
+                    "position": 0
+                  },
+                  {
+                    "color": "#F5A623",
+                    "position": 0.45
+                  },
+                  {
+                    "color": "#FF8C00",
+                    "position": 1
+                  }
+                ]
+              },
+              "cornerRadius": 13.440000000000001,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "IcC8F",
+                  "x": 6.24,
+                  "y": 6.24,
+                  "name": "Glow",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "radial",
+                    "enabled": true,
+                    "rotation": 0,
+                    "size": {
+                      "width": 1,
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#FFFFFF40",
+                        "position": 0
+                      },
+                      {
+                        "color": "#FFFFFF00",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 35.519999999999996,
+                  "height": 35.519999999999996
+                },
+                {
+                  "type": "frame",
+                  "id": "ygFOJ",
+                  "x": 7.199999999999999,
+                  "y": 5.76,
+                  "name": "Deco1",
+                  "width": 13.440000000000001,
+                  "height": 13.440000000000001,
+                  "fill": "#FFFFFF18",
+                  "cornerRadius": 2.88
+                },
+                {
+                  "type": "frame",
+                  "id": "Ks6uJ",
+                  "x": 29.759999999999998,
+                  "y": 26.400000000000002,
+                  "name": "Deco2",
+                  "width": 10.56,
+                  "height": 10.56,
+                  "fill": "#FFFFFF12",
+                  "cornerRadius": 2.4000000000000004
+                },
+                {
+                  "type": "icon",
+                  "id": "RTfir",
+                  "x": 4.125,
+                  "y": 6.65625,
+                  "name": "Mark",
+                  "width": 39.75,
+                  "height": 34.6875,
+                  "icon": "hexagon",
+                  "library": "lucide",
+                  "fill": "#FFFFFF"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "TB7Ln",
+              "clip": true,
+              "width": 64,
+              "height": 64,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 145,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#FFD54F",
+                    "position": 0
+                  },
+                  {
+                    "color": "#F5A623",
+                    "position": 0.45
+                  },
+                  {
+                    "color": "#FF8C00",
+                    "position": 1
+                  }
+                ]
+              },
+              "cornerRadius": 17.92,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "GhdLD",
+                  "x": 8.32,
+                  "y": 8.32,
+                  "name": "Glow",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "radial",
+                    "enabled": true,
+                    "rotation": 0,
+                    "size": {
+                      "width": 1,
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#FFFFFF40",
+                        "position": 0
+                      },
+                      {
+                        "color": "#FFFFFF00",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 47.36,
+                  "height": 47.36
+                },
+                {
+                  "type": "frame",
+                  "id": "DE92C",
+                  "x": 9.6,
+                  "y": 7.68,
+                  "name": "Deco1",
+                  "width": 17.92,
+                  "height": 17.92,
+                  "fill": "#FFFFFF18",
+                  "cornerRadius": 3.84
+                },
+                {
+                  "type": "frame",
+                  "id": "U8sRz",
+                  "x": 39.68,
+                  "y": 35.2,
+                  "name": "Deco2",
+                  "width": 14.08,
+                  "height": 14.08,
+                  "fill": "#FFFFFF12",
+                  "cornerRadius": 3.2
+                },
+                {
+                  "type": "icon",
+                  "id": "UyyQf",
+                  "x": 5.5,
+                  "y": 8.875,
+                  "name": "Mark",
+                  "width": 53,
+                  "height": 46.25,
+                  "icon": "hexagon",
+                  "library": "lucide",
+                  "fill": "#FFFFFF"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "YrQ4X",
+              "clip": true,
+              "width": 96,
+              "height": 96,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 145,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#FFD54F",
+                    "position": 0
+                  },
+                  {
+                    "color": "#F5A623",
+                    "position": 0.45
+                  },
+                  {
+                    "color": "#FF8C00",
+                    "position": 1
+                  }
+                ]
+              },
+              "cornerRadius": 26.880000000000003,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "CYaO2",
+                  "x": 12.48,
+                  "y": 12.48,
+                  "name": "Glow",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "radial",
+                    "enabled": true,
+                    "rotation": 0,
+                    "size": {
+                      "width": 1,
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#FFFFFF40",
+                        "position": 0
+                      },
+                      {
+                        "color": "#FFFFFF00",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 71.03999999999999,
+                  "height": 71.03999999999999
+                },
+                {
+                  "type": "frame",
+                  "id": "Mvbpy",
+                  "x": 14.399999999999999,
+                  "y": 11.52,
+                  "name": "Deco1",
+                  "width": 26.880000000000003,
+                  "height": 26.880000000000003,
+                  "fill": "#FFFFFF18",
+                  "cornerRadius": 5.76
+                },
+                {
+                  "type": "frame",
+                  "id": "u298ER",
+                  "x": 59.519999999999996,
+                  "y": 52.800000000000004,
+                  "name": "Deco2",
+                  "width": 21.12,
+                  "height": 21.12,
+                  "fill": "#FFFFFF12",
+                  "cornerRadius": 4.800000000000001
+                },
+                {
+                  "type": "icon",
+                  "id": "oY0GU",
+                  "x": 8.25,
+                  "y": 13.3125,
+                  "name": "Mark",
+                  "width": 79.5,
+                  "height": 69.375,
+                  "icon": "hexagon",
+                  "library": "lucide",
+                  "fill": "#FFFFFF"
+                }
+              ]
             }
           ]
         }

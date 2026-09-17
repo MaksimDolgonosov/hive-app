@@ -134,7 +134,7 @@ export default function ProfileScreen() {
             accessibilityRole="button"
             accessibilityLabel={t('profile.menuSettings')}
             className="h-10 w-10 items-center justify-center rounded-full border border-hive-stroke bg-hive-surface"
-            onPress={() => router.push('/(modals)/profile/settings' as Href)}
+            onPress={() => router.push('/settings' as Href)}
           >
             <SlidersHorizontal color={theme.textMuted} size={18} strokeWidth={2} />
           </Pressable>
@@ -176,7 +176,7 @@ export default function ProfileScreen() {
           <ProfileMenuRow
             icon={Settings}
             label={t('profile.menuSettings')}
-            onPress={() => router.push('/(modals)/profile/settings' as Href)}
+            onPress={() => router.push('/settings' as Href)}
           />
           <ProfileMenuRow
             icon={LogOut}

@@ -1,7 +1,10 @@
 import { Moon, Sun } from 'lucide-react-native';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, Text, View } from 'react-native';
+import { View } from 'react-native';
 
+import { ProfileMenuRow } from '@/src/components/profile/ProfileMenuRow';
+import { SettingsChoiceSheet } from '@/src/components/ui/SettingsChoiceSheet';
 import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import type { AppColorScheme } from '@/src/theme/tokens';
@@ -20,44 +23,43 @@ export function ThemeSelect({ className }: ThemeSelectProps) {
   const theme = useHiveTheme();
   const colorScheme = usePreferencesStore((state) => state.colorScheme);
   const setColorScheme = usePreferencesStore((state) => state.setColorScheme);
+  const [open, setOpen] = useState(false);
+  const ActiveIcon = colorScheme === 'dark' ? Moon : Sun;
+
+  const options = useMemo(
+    () =>
+      OPTIONS.map((option) => {
+        const Icon = option.icon;
+        return {
+          value: option.value,
+          label: t(`theme.${option.value}`),
+          leading: <Icon color={theme.accent} size={18} strokeWidth={2} />,
+        };
+      }),
+    [t, theme.accent],
+  );
+
+  function handleSelect(scheme: AppColorScheme) {
+    void setColorScheme(scheme);
+    setOpen(false);
+  }
 
   return (
     <View className={className}>
-      <Text className="mb-2 font-inter text-[13px] font-semibold text-hive-foreground">
-        {t('theme.label')}
-      </Text>
-
-      <View className="flex-row overflow-hidden rounded-hive-md border border-hive-stroke bg-hive-input-bg p-1">
-        {OPTIONS.map((option) => {
-          const isActive = colorScheme === option.value;
-          const Icon = option.icon;
-
-          return (
-            <Pressable
-              key={option.value}
-              accessibilityRole="button"
-              accessibilityState={{ selected: isActive }}
-              className={`h-11 flex-1 flex-row items-center justify-center gap-2 rounded-[14px] ${
-                isActive ? 'bg-hive-primary' : 'bg-transparent'
-              }`}
-              onPress={() => void setColorScheme(option.value)}
-            >
-              <Icon
-                color={isActive ? theme.textOnAccent : theme.textMuted}
-                size={16}
-                strokeWidth={2.25}
-              />
-              <Text
-                className={`font-inter text-[14px] font-semibold ${
-                  isActive ? 'text-hive-on-accent' : 'text-hive-muted'
-                }`}
-              >
-                {t(`theme.${option.value}`)}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      <ProfileMenuRow
+        badge={t(`theme.${colorScheme}`)}
+        icon={ActiveIcon}
+        label={t('theme.label')}
+        onPress={() => setOpen(true)}
+      />
+      <SettingsChoiceSheet
+        options={options}
+        selected={colorScheme}
+        title={t('theme.label')}
+        visible={open}
+        onClose={() => setOpen(false)}
+        onSelect={handleSelect}
+      />
     </View>
   );
 }

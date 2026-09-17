@@ -104,6 +104,8 @@ export const ru: TranslationSchema = {
     loadError: 'Не удалось загрузить моменты поблизости',
     capturePhoto: 'Сделать фото',
     centerOnUser: 'Показать моё местоположение',
+    showSatellite: 'Показать спутник',
+    showScheme: 'Показать схему',
     saveFavorite: 'Сохранить вид карты в избранное',
     savePlaceTitle: 'Избранное место',
     savePlaceDescription:

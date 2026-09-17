@@ -123,6 +123,21 @@ export default function RootLayout() {
                   <Stack.Screen name="(auth)" />
                   <Stack.Screen name="(tabs)" />
                   <Stack.Screen
+                    name="settings"
+                    options={{
+                      headerShown: false,
+                      presentation: 'card',
+                      animation: 'slide_from_right',
+                      animationMatchesGesture: true,
+                      gestureEnabled: true,
+                      fullScreenGestureEnabled: true,
+                      gestureDirection: 'horizontal',
+                      contentStyle: {
+                        backgroundColor: palette.gradients.screen[0],
+                      },
+                    }}
+                  />
+                  <Stack.Screen
                     name="(modals)"
                     options={{ headerShown: false, presentation: 'fullScreenModal' }}
                   />

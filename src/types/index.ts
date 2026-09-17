@@ -137,6 +137,9 @@ export interface MapRegion {
   longitudeDelta: number;
 }
 
+/** Схема (дороги) или спутник. Нативный `hybrid` даёт снимок с подписями улиц. */
+export type HiveMapType = 'standard' | 'satellite';
+
 export interface SavedMapPlace {
   id: UUID;
   name: string;

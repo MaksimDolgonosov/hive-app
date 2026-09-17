@@ -258,6 +258,13 @@ export type TranslationSchema = {
     minutesAgo: string;
     hoursAgo: string;
     daysAgo: string;
+    seed: {
+      title: string;
+      hint: string;
+      addPhoto: string;
+      photosDisappearIn: string;
+      singleAuthor: string;
+    };
   };
   sting: {
     photoAlt: string;

@@ -2,16 +2,22 @@ import { useCallback, useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
-import { HiveMarkerFaceStatic } from '@/src/components/map/HiveMarkerFace';
+import { HiveMarkerFaceStatic, type HiveMarkerVariant } from '@/src/components/map/HiveMarkerFace';
 import { getHiveMarkerVisualMetrics } from '@/src/utils/hive-marker-visual';
 
 interface HiveMarkerCaptureProps {
   hiveId: string;
   count: number;
+  variant?: HiveMarkerVariant;
   onCaptured: (hiveId: string, uri: string) => void;
 }
 
-export function HiveMarkerCapture({ hiveId, count, onCaptured }: HiveMarkerCaptureProps) {
+export function HiveMarkerCapture({
+  hiveId,
+  count,
+  variant = 'hive',
+  onCaptured,
+}: HiveMarkerCaptureProps) {
   const viewRef = useRef<View>(null);
   const metrics = getHiveMarkerVisualMetrics(count);
 
@@ -56,7 +62,7 @@ export function HiveMarkerCapture({ hiveId, count, onCaptured }: HiveMarkerCaptu
         void capture();
       }}
     >
-      <HiveMarkerFaceStatic count={count} />
+      <HiveMarkerFaceStatic count={count} variant={variant} />
     </View>
   );
 }

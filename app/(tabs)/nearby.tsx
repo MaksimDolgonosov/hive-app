@@ -16,7 +16,6 @@ import { useLocationStore } from '@/src/stores/locationStore';
 import { useMapStore } from '@/src/stores/mapStore';
 import type { Hive, Sting } from '@/src/types';
 import { haversineDistance } from '@/src/utils/geo';
-import { isActiveHive } from '@/src/utils/hive';
 import { coordsToFeedBounds, regionToBounds } from '@/src/utils/map';
 import { openHive } from '@/src/utils/open-hive';
 
@@ -39,14 +38,14 @@ function buildFeedItems(
     distanceM: haversineDistance(origin, sting.location),
   }));
 
-  const hiveItems: FeedItem[] = hives
-    .filter((hive) => isActiveHive(hive.activeStingsCount))
-    .map((hive) => ({
-      key: `hive-${hive.id}`,
-      type: 'hive',
-      hive,
-      distanceM: haversineDistance(origin, hive.center),
-    }));
+  // Рендерим кластеры любой стадии (§G13): жала соты убраны из stings[],
+  // и без их карточки фото пропали бы из ленты. Стадию карточка учитывает сама.
+  const hiveItems: FeedItem[] = hives.map((hive) => ({
+    key: `hive-${hive.id}`,
+    type: 'hive',
+    hive,
+    distanceM: haversineDistance(origin, hive.center),
+  }));
 
   return [...stingItems, ...hiveItems].sort((a, b) => a.distanceM - b.distanceM);
 }

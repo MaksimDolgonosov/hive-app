@@ -1,7 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 
 import type { Hive, HiveDetailResponse, Sting, StingsNearbyResponse } from '@/src/types';
-import { isActiveHive } from '@/src/utils/hive';
 
 export function upsertStingInNearbyQueries(queryClient: QueryClient, sting: Sting): void {
   queryClient.setQueriesData<StingsNearbyResponse>({ queryKey: ['stings'] }, (cached) => {
@@ -59,12 +58,13 @@ export function upsertHiveInNearbyQueries(queryClient: QueryClient, hive: Hive):
       return cached;
     }
 
+    // Держим кластер любой стадии (§G13): решение о рендере принимает карта/лента.
+    // Если кластер перестал быть кластером, backend присылает hive:dissolved.
     const withoutHive = cached.hives.filter((item) => item.id !== hive.id);
-    const hives = isActiveHive(hive.activeStingsCount) ? [...withoutHive, hive] : withoutHive;
 
     return {
       ...cached,
-      hives,
+      hives: [...withoutHive, hive],
     };
   });
 

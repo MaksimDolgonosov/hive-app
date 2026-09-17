@@ -48,13 +48,22 @@ function isRetryablePublishError(error: unknown): boolean {
   return message.includes('network request failed') || message.includes('network error');
 }
 
-export async function getNearby(bounds: MapBounds): Promise<StingsNearbyResponse> {
+export interface GetNearbyOptions {
+  /** Включить soft-кластеры («соты», §G13) в ответ. */
+  includeSeeds?: boolean;
+}
+
+export async function getNearby(
+  bounds: MapBounds,
+  options?: GetNearbyOptions,
+): Promise<StingsNearbyResponse> {
   const { data } = await apiClient.get<StingsNearbyResponse>('/stings/nearby', {
     params: {
       swLat: bounds.swLat,
       swLng: bounds.swLng,
       neLat: bounds.neLat,
       neLng: bounds.neLng,
+      ...(options?.includeSeeds ? { includeSeeds: true } : {}),
     },
   });
 

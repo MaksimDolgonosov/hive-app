@@ -4,11 +4,13 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
+import { HiveContributorAvatars } from '@/src/components/hive/HiveContributorAvatars';
 import { Timer } from '@/src/components/ui/Timer';
 import { useHiveDetail } from '@/src/hooks/useHiveDetail';
 import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 import type { Hive } from '@/src/types';
 import { formatDistance } from '@/src/utils/geo';
+import { isSeedHive } from '@/src/utils/hive';
 
 const PREVIEW_SLOTS = 3;
 const PREVIEW_HEIGHT = 128;
@@ -24,6 +26,8 @@ export function HiveNearbyCard({ hive, distanceM, onPress }: HiveNearbyCardProps
   const theme = useHiveTheme();
   const { data } = useHiveDetail(hive.id);
   const photoCount = hive.activeStingsCount;
+  const isSeed = isSeedHive(hive);
+  const contributors = hive.topContributors ?? [];
 
   const previewUrls = useMemo(() => {
     if (!data?.stings?.length) {
@@ -89,13 +93,19 @@ export function HiveNearbyCard({ hive, distanceM, onPress }: HiveNearbyCardProps
 
         <View className="flex-1 gap-1.5">
           <Text className="font-display text-[17px] font-bold text-hive-foreground">
-            {t('hive.title')}
+            {isSeed ? t('hive.seed.title') : t('hive.title')}
           </Text>
           <View className="flex-row items-center gap-2">
             <Text className="font-inter text-[13px] font-semibold text-hive-muted">
               {t('hive.photoCount', { count: photoCount })}
             </Text>
-            {/* <HiveContributorAvatars stings={data?.stings ?? []} /> */}
+            {isSeed ? (
+              <Text className="font-inter text-[13px] text-hive-muted">
+                {t('hive.seed.singleAuthor')}
+              </Text>
+            ) : contributors.length > 0 ? (
+              <HiveContributorAvatars contributors={contributors} />
+            ) : null}
             {expiresAt ? (
               <>
                 <View className="h-[3px] w-[3px] rounded-full bg-hive-muted" />

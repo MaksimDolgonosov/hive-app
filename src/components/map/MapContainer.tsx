@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HiveCircle } from '@/src/components/map/HiveCircle';
 import { HiveMarkerCapture } from '@/src/components/map/HiveMarkerCapture';
+import { HiveSeedMarker } from '@/src/components/map/HiveSeedMarker';
 import { LocationAccessGate } from '@/src/components/map/LocationAccessGate';
 import { MapBookmarkButton } from '@/src/components/map/MapBookmarkButton';
 import { MapLocationButton } from '@/src/components/map/MapLocationButton';
@@ -25,7 +26,7 @@ import { useSavedMapPlacesStore } from '@/src/stores/savedMapPlacesStore';
 import { showErrorToast, showInfoToast } from '@/src/stores/toastStore';
 import type { MapBounds, MapRegion } from '@/src/types';
 import { SAVED_MAP_PLACES_MAX } from '@/src/types';
-import { isActiveHive } from '@/src/utils/hive';
+import { isActiveHive, isSeedHive } from '@/src/utils/hive';
 import {
   coordsToUserMapRegion,
   DEFAULT_MAP_REGION,
@@ -393,14 +394,16 @@ export function MapContainer() {
     );
   }
 
-  const activeHives = data?.hives.filter((hive) => isActiveHive(hive.activeStingsCount)) ?? [];
+  const activeHives = data?.hives.filter((hive) => isActiveHive(hive)) ?? [];
+  const seedHives = data?.hives.filter((hive) => isSeedHive(hive)) ?? [];
   const isEmpty =
     debouncedBounds !== null &&
     data !== undefined &&
     !isFetching &&
     !isError &&
     data.stings.length === 0 &&
-    activeHives.length === 0;
+    activeHives.length === 0 &&
+    seedHives.length === 0;
 
   const emptyBannerTop = insets.top + 16;
   const bookmarkTop = emptyBannerTop + EMPTY_BANNER_HEIGHT + 12;
@@ -441,16 +444,22 @@ export function MapContainer() {
               onPress={() => openSting(sting.id)}
             />
           ))}
-          {data?.hives
-            .filter((hive) => isActiveHive(hive.activeStingsCount))
-            .map((hive) => (
-              <HiveCircle
-                key={hive.id}
-                hive={hive}
-                imageUri={hiveMarkerImages[hive.id]}
-                onPress={() => openHive(hive.id)}
-              />
-            ))}
+          {seedHives.map((hive) => (
+            <HiveSeedMarker
+              key={hive.id}
+              hive={hive}
+              imageUri={hiveMarkerImages[hive.id]}
+              onPress={() => openHive(hive.id)}
+            />
+          ))}
+          {activeHives.map((hive) => (
+            <HiveCircle
+              key={hive.id}
+              hive={hive}
+              imageUri={hiveMarkerImages[hive.id]}
+              onPress={() => openHive(hive.id)}
+            />
+          ))}
         </MapView>
       ) : (
         <View className="flex-1 items-center justify-center bg-hive-surface px-8">
@@ -467,9 +476,20 @@ export function MapContainer() {
         {Platform.OS === 'android' &&
           activeHives.map((hive) => (
             <HiveMarkerCapture
-              key={`${hive.id}:${hive.activeStingsCount}`}
+              key={`${hive.id}:hive:${hive.activeStingsCount}`}
               count={hive.activeStingsCount}
               hiveId={hive.id}
+              variant="hive"
+              onCaptured={handleHiveMarkerCaptured}
+            />
+          ))}
+        {Platform.OS === 'android' &&
+          seedHives.map((hive) => (
+            <HiveMarkerCapture
+              key={`${hive.id}:seed:${hive.activeStingsCount}`}
+              count={hive.activeStingsCount}
+              hiveId={hive.id}
+              variant="seed"
               onCaptured={handleHiveMarkerCaptured}
             />
           ))}

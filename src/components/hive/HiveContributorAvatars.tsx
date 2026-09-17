@@ -5,7 +5,7 @@ import { Text, View } from 'react-native';
 import { getProfileInitials } from '@/src/components/profile/ProfileAvatar';
 import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { useAuthStore } from '@/src/stores/authStore';
-import type { Sting } from '@/src/types';
+import type { HiveContributor, Sting } from '@/src/types';
 import { buildAvatarDisplayUri } from '@/src/utils/avatar-url';
 import { resolveStingAuthor } from '@/src/utils/resolve-sting-author';
 
@@ -15,7 +15,10 @@ const DEFAULT_MAX = 5;
 const OVERLAP_RATIO = 0.25;
 
 type HiveContributorAvatarsProps = {
-  stings: Sting[];
+  /** Источник из списка жал (экран улья). */
+  stings?: Sting[];
+  /** Готовый список участников из DTO кластера (§G13) — предпочтителен на карте/в ленте. */
+  contributors?: HiveContributor[];
   size?: number;
   max?: number;
   ringColor?: string;
@@ -23,6 +26,7 @@ type HiveContributorAvatarsProps = {
 
 export function HiveContributorAvatars({
   stings,
+  contributors: providedContributors,
   size = DEFAULT_SIZE,
   max = DEFAULT_MAX,
   ringColor,
@@ -34,10 +38,31 @@ export function HiveContributorAvatars({
   const overlap = size * OVERLAP_RATIO;
 
   const contributors = useMemo(() => {
-    const seen = new Set<string>();
     const unique: { authorId: string; username: string; avatarUrl: string | null }[] = [];
+    const seen = new Set<string>();
 
-    for (const sting of stings) {
+    if (providedContributors) {
+      for (const contributor of providedContributors) {
+        if (seen.has(contributor.userId)) {
+          continue;
+        }
+
+        seen.add(contributor.userId);
+        unique.push({
+          authorId: contributor.userId,
+          username: contributor.username,
+          avatarUrl: contributor.avatarUrl,
+        });
+
+        if (unique.length >= max) {
+          break;
+        }
+      }
+
+      return unique;
+    }
+
+    for (const sting of stings ?? []) {
       if (seen.has(sting.authorId)) {
         continue;
       }
@@ -56,7 +81,7 @@ export function HiveContributorAvatars({
     }
 
     return unique;
-  }, [currentUser, max, stings]);
+  }, [currentUser, max, providedContributors, stings]);
 
   if (contributors.length === 0) {
     return null;

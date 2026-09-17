@@ -12,6 +12,7 @@ import { useHiveDetail } from '@/src/hooks/useHiveDetail';
 import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { useLocationStore } from '@/src/stores/locationStore';
 import { haversineDistance } from '@/src/utils/geo';
+import { isSeedHive } from '@/src/utils/hive';
 
 type HiveDetailContentProps = {
   hiveId: string;
@@ -90,6 +91,7 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
   }
 
   const photoCount = data?.stings.length ?? 0;
+  const isSeed = data ? isSeedHive(data.hive) : false;
   const bottomInset = isInsideHive ? 16 : insets.bottom + 24;
 
   return (
@@ -113,7 +115,9 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
           </View>
         ) : null}
 
-        {isLoading && !data ? <HivePhotoList isLoading stings={[]} onPressSting={openSting} /> : null}
+        {isLoading && !data ? (
+          <HivePhotoList isLoading stings={[]} onPressSting={openSting} />
+        ) : null}
 
         {isError ? (
           <Text className="py-8 text-center font-inter text-sm text-hive-muted">
@@ -127,6 +131,15 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
           </Text>
         ) : null}
 
+        {isSeed ? (
+          <View className="gap-1 rounded-2xl bg-hive-surface2 p-3.5">
+            <Text className="font-display text-[15px] font-bold text-hive-foreground">
+              {t('hive.seed.title')}
+            </Text>
+            <Text className="font-inter text-[13px] text-hive-muted">{t('hive.seed.hint')}</Text>
+          </View>
+        ) : null}
+
         {stingsNewestFirst.length > 0 ? (
           <>
             {hiveExpiresAt ? (
@@ -135,7 +148,7 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
                   <View className="flex-row items-center gap-2">
                     <Clock color={theme.accent} size={18} strokeWidth={2.25} />
                     <Text className="font-inter text-[13px] font-medium text-hive-muted">
-                      {t('hive.dissolvesIn')}
+                      {isSeed ? t('hive.seed.photosDisappearIn') : t('hive.dissolvesIn')}
                     </Text>
                   </View>
                   <Text className="font-display text-[15px] font-bold text-hive-primary">
@@ -160,13 +173,13 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
         <View className="px-5" style={{ paddingBottom: insets.bottom + 16 }}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={t('hive.addPhoto')}
+            accessibilityLabel={isSeed ? t('hive.seed.addPhoto') : t('hive.addPhoto')}
             className="h-[54px] flex-row items-center justify-center gap-2.5 rounded-full bg-hive-primary"
             onPress={openCamera}
           >
             <Camera color={theme.textOnAccent} size={20} strokeWidth={2.25} />
             <Text className="font-inter text-[15px] font-bold text-hive-on-accent">
-              {t('hive.addPhoto')}
+              {isSeed ? t('hive.seed.addPhoto') : t('hive.addPhoto')}
             </Text>
           </Pressable>
         </View>

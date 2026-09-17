@@ -113,17 +113,22 @@ interface User {
 interface Sting {
   id: UUID;
   authorId: UUID;
+  authorUsername: string;
+  authorAvatarUrl: string | null;
+  authorAccountType: 'personal' | 'partner' | 'official';
   imageUrl: string;
   thumbnailUrl: string;
   location: {
     lat: number;
     lng: number;
   };
-  hiveId: UUID | null; // null, если пока одиночное
-  createdAt: string; // ISO 8601
-  expiresAt: string; // ISO 8601, createdAt + 4h
+  hiveId: UUID | null;
+  createdAt: string;
+  expiresAt: string;
   reactionsCount: number;
-  comment: string | null; // опциональный комментарий автора, до 280 символов
+  comment: string | null;
+  shareUrl: string | null;
+  hasLiked?: boolean;
 }
 
 interface Hive {
@@ -131,6 +136,10 @@ interface Hive {
   center: { lat: number; lng: number };
   radiusM: number;
   activeStingsCount: number;
+  activationCount: number;
+  contributorsCount: number;
+  stage: 'seed' | 'hive';
+  topContributors: Array<{ userId: UUID; username: string; avatarUrl: string | null }>;
   createdAt: string;
   updatedAt: string;
 }
@@ -313,13 +322,21 @@ interface AuthTokens {
 ```
 Query params:
   swLat, swLng, neLat, neLng   — bounding box видимой карты (обязательные)
+  includeEchoes?: boolean      — default false
+  includeSeeds?: boolean       — default false
+  minResults?: number          — 0..50
+  maxRadiusM?: number          — default 50000
 ```
 
 ```json
 // Response 200
 {
   "stings": Sting[],
-  "hives": Hive[]
+  "hives": Hive[],
+  "echoes": [],
+  "appliedBounds": { "swLat": 0, "swLng": 0, "neLat": 0, "neLng": 0 },
+  "expanded": false,
+  "appliedRadiusM": 1200
 }
 ```
 
@@ -343,7 +360,13 @@ fields:
 
 ```json
 // Response 201
-{ "sting": Sting }
+{
+  "sting": Sting,
+  "ttlSec": 86400,
+  "zone": { "id": "8811aa...", "status": "open", "ttlSec": 86400 },
+  "awards": [{ "type": "zone_first", "zoneId": "8811aa...", "createdAt": "..." }]
+}
+```
 
 // Response 422 — не прошла серверная анти-спуфинг проверка
 {
@@ -441,9 +464,11 @@ Query params: cursor?: string, limit?: number (default 20, max 50)
 | ---------------- | ------------------------------------------- | -------------------------------------------------------------------- |
 | `sting:created`  | `{ sting: Sting }`                          | Новое жало опубликовано в подписанном регионе                        |
 | `sting:expired`  | `{ stingId: UUID, hiveId: UUID \| null }`   | Жало истекло по TTL (сервер, не клиентский таймер — источник истины) |
-| `hive:updated`   | `{ hive: Hive }`                            | Изменился `activeStingsCount` улья (новое жало вошло/старое истекло) |
-| `hive:dissolved` | `{ hiveId: UUID }`                          | В улье не осталось активных жал — точка исчезает с карты             |
+| `hive:updated`   | `{ hive: Hive }`                            | Изменились счётчики / `stage` (в т.ч. seed→hive)                     |
+| `hive:dissolved` | `{ hiveId: UUID }`                          | В кластере осталось меньше двух активных жал                         |
 | `sting:reaction` | `{ stingId: UUID, reactionsCount: number }` | Изменился счётчик реакций на открытом сейчас `sting/[id]`            |
+| `campaign:started` | `{ campaign }`                            | Кампания стала активной в подписанном регионе                        |
+| `campaign:ended` | `{ campaignId: UUID }`                      | Окно кампании закрылось                                              |
 
 Формат едино для всех событий:
 
@@ -489,3 +514,5 @@ Query params: cursor?: string, limit?: number (default 20, max 50)
 ### 5.5 Версионирование API
 
 Префикс `/api/v1` фиксирован на MVP. Breaking changes — только через `/api/v2`, без изменения поведения `v1` до его вывода из эксплуатации.
+
+Подробные контракты механик роста (зоны, TTL, эхо, инвайты, пуши, кампании, активация улья) — в `BACKEND_GROWTH_TZ.md` и backend `openapi.yaml`.

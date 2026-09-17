@@ -6,7 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HiveDetailContent } from '@/src/components/hive/HiveDetailContent';
 import { ScreenBackground } from '@/src/components/ui/ScreenBackground';
+import { useHiveDetail } from '@/src/hooks/useHiveDetail';
 import { useHiveTheme } from '@/src/hooks/useHiveTheme';
+import { isSeedHive } from '@/src/utils/hive';
 
 export default function HiveDetailScreen() {
   const { t } = useTranslation();
@@ -15,6 +17,9 @@ export default function HiveDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const hiveId = typeof id === 'string' ? id : Array.isArray(id) ? id[0] : null;
+  const { data: hiveDetail } = useHiveDetail(hiveId);
+  const headerTitle =
+    hiveDetail && isSeedHive(hiveDetail.hive) ? t('hive.seed.title') : t('hive.title');
 
   function handleBack() {
     if (router.canGoBack()) {
@@ -40,7 +45,7 @@ export default function HiveDetailScreen() {
           <ChevronLeft color={theme.text} size={24} />
         </Pressable>
         <Text className="flex-1 text-center font-display text-lg font-bold text-hive-foreground">
-          {t('hive.title')}
+          {headerTitle}
         </Text>
         <View className="w-10" />
       </View>

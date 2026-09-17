@@ -272,6 +272,13 @@ export const en: TranslationSchema = {
     minutesAgo: '{{count}} min ago',
     hoursAgo: '{{count}}h ago',
     daysAgo: '{{count}}d ago',
+    seed: {
+      title: 'Seed',
+      hint: 'Someone has already been here. Add yours to start a hive',
+      addPhoto: 'Add photo',
+      photosDisappearIn: 'Photos disappear in',
+      singleAuthor: 'one author',
+    },
   },
   sting: {
     photoAlt: 'Moment photo',

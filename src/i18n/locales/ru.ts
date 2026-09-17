@@ -275,6 +275,13 @@ export const ru: TranslationSchema = {
     minutesAgo: '{{count}} мин назад',
     hoursAgo: '{{count}} ч назад',
     daysAgo: '{{count}} дн назад',
+    seed: {
+      title: 'Сота',
+      hint: 'Здесь уже есть фото. Добавь своё — и появится улей',
+      addPhoto: 'Добавить фото',
+      photosDisappearIn: 'Фото исчезнут через',
+      singleAuthor: 'один автор',
+    },
   },
   sting: {
     photoAlt: 'Фото момента',

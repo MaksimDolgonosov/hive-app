@@ -121,11 +121,29 @@ export interface Sting {
   hasLiked?: boolean;
 }
 
+/** Стадия кластера (§G13): «сота» (соло) или полноценный улей. */
+export type HiveStage = 'seed' | 'hive';
+
+/** Участник улья для аватаров на карте/в ленте без запроса деталей (§G13). */
+export interface HiveContributor {
+  userId: UUID;
+  username: string;
+  avatarUrl: string | null;
+}
+
 export interface Hive {
   id: UUID;
   center: GeoPoint;
   radiusM: number;
   activeStingsCount: number;
+  /** Счётчик активации с капом на автора (§G13). Может отсутствовать на старом backend. */
+  activationCount?: number;
+  /** Уникальные авторы активных жал кластера (§G13). */
+  contributorsCount?: number;
+  /** Стадия кластера (§G13). Отсутствие поля — старый backend, стадия выводится из счётчиков. */
+  stage?: HiveStage;
+  /** До 5 участников по времени последней публикации (§G13). */
+  topContributors?: HiveContributor[];
   createdAt: string;
   updatedAt: string;
 }

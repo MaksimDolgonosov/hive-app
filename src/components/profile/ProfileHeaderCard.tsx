@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 
+import { AccountTypeBadge } from '@/src/components/feed/AccountTypeBadge';
 import type { ProfileStats, User } from '@/src/types';
 
 import { ProfileAvatar } from './ProfileAvatar';
@@ -42,9 +43,12 @@ export function ProfileHeaderCard({
         />
 
         <View className="flex-1 gap-1">
-          <Text className="font-display text-[20px] font-bold text-hive-foreground">
-            {user.username}
-          </Text>
+          <View className="flex-row items-center gap-2">
+            <Text className="font-display text-[20px] font-bold text-hive-foreground">
+              {user.username}
+            </Text>
+            <AccountTypeBadge accountType={user.accountType} />
+          </View>
           <Text className="font-inter text-[13px] text-hive-muted">{subtitle}</Text>
         </View>
       </View>
@@ -55,6 +59,12 @@ export function ProfileHeaderCard({
         <StatItem label={t('profile.statsHives')} value={stats.hives} />
         <View className="h-10 w-px bg-hive-stroke" />
         <StatItem label={t('profile.statsLikes')} value={stats.likes} />
+        {stats.awards != null ? (
+          <>
+            <View className="h-10 w-px bg-hive-stroke" />
+            <StatItem label={t('profile.statsAwards')} value={stats.awards} />
+          </>
+        ) : null}
       </View>
     </View>
   );

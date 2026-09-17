@@ -1,47 +1,67 @@
 import { router, type Href } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { type Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { CampaignBanner, pickSoonestCampaign } from '@/src/components/map/CampaignBanner';
+import { EchoMarker } from '@/src/components/map/EchoMarker';
 import { HiveCircle } from '@/src/components/map/HiveCircle';
 import { HiveMarkerCapture } from '@/src/components/map/HiveMarkerCapture';
 import { HiveSeedMarker } from '@/src/components/map/HiveSeedMarker';
 import { LocationAccessGate } from '@/src/components/map/LocationAccessGate';
 import { MapBookmarkButton } from '@/src/components/map/MapBookmarkButton';
+import { MapEmptyState } from '@/src/components/map/MapEmptyState';
+import { MapFilterChips } from '@/src/components/map/MapFilterChips';
 import { MapLocationButton } from '@/src/components/map/MapLocationButton';
 import { MapTypeButton } from '@/src/components/map/MapTypeButton';
+import { OverviewClusterMarker } from '@/src/components/map/OverviewClusterMarker';
 import { SaveMapPlaceModal } from '@/src/components/map/SaveMapPlaceModal';
+import { WaitlistContent } from '@/src/components/growth/WaitlistContent';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { isGoogleMapsConfigured } from '@/src/config/env';
 import { HIVE_DARK_MAP_STYLE, HIVE_LIGHT_MAP_STYLE } from '@/src/constants/map-style';
+import * as zonesApi from '@/src/api/zones';
+import { useActiveCampaigns } from '@/src/hooks/useActiveCampaigns';
+import { useFilteredMapMarkers } from '@/src/hooks/useFilteredMapMarkers';
 import { useLocation } from '@/src/hooks/useLocation';
 import { useAppColorScheme } from '@/src/hooks/useHiveTheme';
+import { useMapOverview } from '@/src/hooks/useMapOverview';
+import { useNearestSting } from '@/src/hooks/useNearestSting';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
+import { useZoneStatus } from '@/src/hooks/useZoneStatus';
+import { useAuthStore } from '@/src/stores/authStore';
 import { useLocationStore } from '@/src/stores/locationStore';
 import { useMapStore } from '@/src/stores/mapStore';
+import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import { useSavedMapPlacesStore } from '@/src/stores/savedMapPlacesStore';
 import { showErrorToast, showInfoToast } from '@/src/stores/toastStore';
-import type { MapBounds, MapRegion } from '@/src/types';
+import type { MapBounds, MapRegion, StingEchoCell } from '@/src/types';
 import { SAVED_MAP_PLACES_MAX } from '@/src/types';
+import { trackEvent, trackSessionStartOnce } from '@/src/utils/analytics-queue';
+import { getApiErrorCode } from '@/src/utils/api-error';
+import { formatDistance, isPointInBounds } from '@/src/utils/geo';
 import { isActiveHive, isSeedHive } from '@/src/utils/hive';
 import {
   coordsToUserMapRegion,
   DEFAULT_MAP_REGION,
   isDefaultMapRegion,
+  OVERVIEW_ENTER_DELTA,
+  OVERVIEW_EXIT_DELTA,
   regionToBounds,
 } from '@/src/utils/map';
 import { openHive } from '@/src/utils/open-hive';
 import { resolveMapViewRegion } from '@/src/utils/resolve-map-view-region';
-import { showMessageToast } from '@/src/utils/show-toast';
+import { showApiErrorToast, showMessageToast } from '@/src/utils/show-toast';
 
 import { StingMarker, StingMarkerCapture } from './StingMarker';
 
 const REGION_DEBOUNCE_MS = 300;
 const PUBLISH_FOCUS_DELTA = 0.008;
-const EMPTY_BANNER_HEIGHT = 72;
+const MAX_ECHO_MARKERS = 300;
+const FILTER_CHIPS_HEIGHT = 40;
 
 function resolveStartupRegion(): MapRegion | null {
   const pendingSaved = useMapStore.getState().pendingSavedRegion;
@@ -62,11 +82,6 @@ function resolveStartupRegion(): MapRegion | null {
   return null;
 }
 
-/**
- * Наводиться на пользователя можно только при холодном старте карты.
- * После перемонтирования (возврат из модалки, смена вкладки) камера уже
- * задана сохранённым местом или прошлым кадром, и перехватывать её нельзя.
- */
 function shouldCenterOnUserAtStartup(): boolean {
   const { pendingSavedRegion, region } = useMapStore.getState();
 
@@ -95,6 +110,10 @@ export function MapContainer() {
   const hasCenteredOnUser = useRef(false);
   const hasRestoredCachedRegion = useRef(false);
   const hasRecoveredFromDefaultRegion = useRef(false);
+  const emptyShownRef = useRef(false);
+  const [isOverview, setIsOverview] = useState(false);
+  const [joiningWaitlist, setJoiningWaitlist] = useState(false);
+  const [waitlistJoined, setWaitlistJoined] = useState(false);
 
   const { coords, status: locationStatus, requestPermission } = useLocation();
   const region = useMapStore((state) => state.region);
@@ -107,6 +126,12 @@ export function MapContainer() {
   const mapType = useMapStore((state) => state.mapType);
   const setMapType = useMapStore((state) => state.setMapType);
   const hydrateMapType = useMapStore((state) => state.hydrateMapType);
+  const mapFilter = useMapStore((state) => state.mapFilter);
+  const setMapFilter = useMapStore((state) => state.setMapFilter);
+  const pendingCampaignId = useMapStore((state) => state.pendingCampaignId);
+  const setPendingCampaignId = useMapStore((state) => state.setPendingCampaignId);
+  const echoLayerEnabled = usePreferencesStore((state) => state.echoLayerEnabled);
+  const user = useAuthStore((state) => state.user);
 
   const savedPlaces = useSavedMapPlacesStore((state) => state.places);
   const addSavedPlace = useSavedMapPlacesStore((state) => state.addPlace);
@@ -119,6 +144,15 @@ export function MapContainer() {
   const [stingMarkerImages, setStingMarkerImages] = useState<Record<string, string>>({});
   const [initialRegion, setInitialRegion] = useState<MapRegion | null>(resolveStartupRegion);
   const [centerOnUserAtStartup] = useState(shouldCenterOnUserAtStartup);
+
+  const zoneCoords = coords
+    ? { lat: coords.latitude, lng: coords.longitude }
+    : region
+      ? { lat: region.latitude, lng: region.longitude }
+      : null;
+  const zoneQuery = useZoneStatus(zoneCoords);
+  const campaignsQuery = useActiveCampaigns(zoneCoords);
+  const activeCampaign = pickSoonestCampaign(campaignsQuery.data?.campaigns);
 
   const applyMapRegion = useCallback(
     (nextRegion: MapRegion, options?: { syncStore?: boolean; programmatic?: boolean }) => {
@@ -158,11 +192,117 @@ export function MapContainer() {
     });
   }, []);
 
-  const { data, isFetching, isError } = useStingsNearby(debouncedBounds);
+  const { data, isFetching, isError } = useStingsNearby(debouncedBounds, {
+    minResults: 10,
+    includeEchoes: echoLayerEnabled,
+    enabled: !isOverview,
+  });
+
+  const overviewQuery = useMapOverview(debouncedBounds, region?.latitudeDelta ?? null, isOverview);
+
+  const filtered = useFilteredMapMarkers(data, mapFilter);
+  const activeHives = filtered.hives.filter((hive) => isActiveHive(hive));
+  const seedHives = mapFilter === 'all' ? filtered.hives.filter((hive) => isSeedHive(hive)) : [];
+  const echoes =
+    echoLayerEnabled && !isOverview ? (data?.echoes ?? []).slice(0, MAX_ECHO_MARKERS) : [];
+
+  const isEmpty =
+    !isOverview &&
+    debouncedBounds !== null &&
+    data !== undefined &&
+    !isFetching &&
+    !isError &&
+    filtered.stings.length === 0 &&
+    activeHives.length === 0 &&
+    seedHives.length === 0;
+
+  const hasUnfilteredContent = (data?.stings.length ?? 0) > 0 || (data?.hives.length ?? 0) > 0;
+  const filterEmpty =
+    !isOverview &&
+    mapFilter !== 'all' &&
+    hasUnfilteredContent &&
+    filtered.stings.length === 0 &&
+    activeHives.length === 0 &&
+    seedHives.length === 0;
+
+  const nearestQuery = useNearestSting(zoneCoords, isEmpty);
+  const nearestSting = nearestQuery.data?.stings[0] ?? null;
+  const nearestDistanceM = nearestQuery.data?.distanceM ?? null;
 
   useEffect(() => {
     void hydrateMapType();
   }, [hydrateMapType]);
+
+  useEffect(() => {
+    const delta = region?.latitudeDelta;
+    if (delta == null) {
+      return;
+    }
+
+    setIsOverview((current) => {
+      if (!current && delta > OVERVIEW_ENTER_DELTA) {
+        return true;
+      }
+      if (current && delta < OVERVIEW_EXIT_DELTA) {
+        return false;
+      }
+      return current;
+    });
+  }, [region?.latitudeDelta]);
+
+  useEffect(() => {
+    if (!data || !debouncedBounds || isOverview) {
+      return;
+    }
+
+    const viewportStings = data.stings.filter((sting) =>
+      isPointInBounds(sting.location, debouncedBounds),
+    );
+    const viewportHives = data.hives.filter(
+      (hive) => isActiveHive(hive) && isPointInBounds(hive.center, debouncedBounds),
+    );
+    const viewportSeeds = data.hives.filter(
+      (hive) => isSeedHive(hive) && isPointInBounds(hive.center, debouncedBounds),
+    );
+    const viewportEchoes = (data.echoes ?? []).filter((echo) =>
+      isPointInBounds(echo.center, debouncedBounds),
+    );
+
+    trackSessionStartOnce({
+      zoneId: zoneQuery.data?.id,
+      props: {
+        stingsInViewport: viewportStings.length,
+        hivesInViewport: viewportHives.length,
+        seedsInViewport: viewportSeeds.length,
+        echoes: viewportEchoes.length,
+        expanded: Boolean(data.expanded),
+      },
+    });
+  }, [data, debouncedBounds, isOverview, zoneQuery.data?.id]);
+
+  useEffect(() => {
+    if (!isEmpty) {
+      emptyShownRef.current = false;
+      return;
+    }
+
+    if (emptyShownRef.current) {
+      return;
+    }
+
+    emptyShownRef.current = true;
+    trackEvent('map_empty_shown', { zoneId: zoneQuery.data?.id });
+  }, [isEmpty, zoneQuery.data?.id]);
+
+  useEffect(() => {
+    if (!pendingCampaignId || !activeCampaign) {
+      return;
+    }
+
+    if (pendingCampaignId === activeCampaign.id) {
+      setPendingCampaignId(null);
+    }
+  }, [activeCampaign, pendingCampaignId, setPendingCampaignId]);
 
   useEffect(() => {
     if (initialRegion || hasRestoredCachedRegion.current) {
@@ -377,6 +517,59 @@ export function MapContainer() {
     }
   }
 
+  function handleEchoPress(echo: StingEchoCell) {
+    showInfoToast({ message: t('growth.echoToast', { count: echo.count }) });
+  }
+
+  function handleEmptyCta(cta: 'capture' | 'nearest' | 'invite') {
+    trackEvent('empty_cta_tap', { zoneId: zoneQuery.data?.id, props: { cta } });
+
+    if (cta === 'capture') {
+      router.push('/(modals)/camera' as Href);
+      return;
+    }
+
+    if (cta === 'invite') {
+      router.push('/(modals)/profile/invites' as Href);
+      return;
+    }
+
+    if (nearestSting) {
+      trackEvent('nearest_sting_opened', { zoneId: zoneQuery.data?.id });
+      useMapStore.getState().requestMapFocus({
+        lat: nearestSting.location.lat,
+        lng: nearestSting.location.lng,
+        stingId: nearestSting.id,
+        hiveId: null,
+      });
+    }
+  }
+
+  async function handleJoinWaitlist() {
+    if (!coords || joiningWaitlist) {
+      return;
+    }
+
+    setJoiningWaitlist(true);
+    try {
+      await zonesApi.joinWaitlist({
+        lat: coords.latitude,
+        lng: coords.longitude,
+        email: user?.email ?? undefined,
+      });
+      setWaitlistJoined(true);
+      trackEvent('waitlist_submitted', { zoneId: zoneQuery.data?.id });
+    } catch (error) {
+      if (getApiErrorCode(error) === 'WAITLIST_ALREADY_JOINED') {
+        setWaitlistJoined(true);
+        return;
+      }
+      showApiErrorToast(error);
+    } finally {
+      setJoiningWaitlist(false);
+    }
+  }
+
   const savePlaceDefaultName = t('map.savePlaceDefaultName', {
     index: savedPlaces.length + 1,
   });
@@ -394,25 +587,26 @@ export function MapContainer() {
     );
   }
 
-  const activeHives = data?.hives.filter((hive) => isActiveHive(hive)) ?? [];
-  const seedHives = data?.hives.filter((hive) => isSeedHive(hive)) ?? [];
-  const isEmpty =
-    debouncedBounds !== null &&
-    data !== undefined &&
-    !isFetching &&
-    !isError &&
-    data.stings.length === 0 &&
-    activeHives.length === 0 &&
-    seedHives.length === 0;
+  if (zoneQuery.data?.status === 'waitlist') {
+    return (
+      <WaitlistContent
+        joining={joiningWaitlist}
+        joined={waitlistJoined}
+        zone={zoneQuery.data}
+        onJoin={() => void handleJoinWaitlist()}
+      />
+    );
+  }
 
-  const emptyBannerTop = insets.top + 16;
-  const bookmarkTop = emptyBannerTop + EMPTY_BANNER_HEIGHT + 12;
+  const chipsTop = insets.top + 12;
+  const bannerTop = chipsTop + FILTER_CHIPS_HEIGHT + 10;
+  const hasTopBanner = Boolean(activeCampaign) || Boolean(data?.expanded) || isEmpty || filterEmpty;
+  const bookmarkTop = hasTopBanner ? bannerTop + 88 : bannerTop;
 
   return (
     <View className="flex-1">
       {isGoogleMapsConfigured() ? (
         <MapView
-          // Android Google Maps applies style only at native mount; iOS updates live.
           key={Platform.OS === 'android' ? `${colorScheme}-${mapType}` : 'map'}
           ref={mapRef}
           style={styles.mapLayer}
@@ -425,7 +619,6 @@ export function MapContainer() {
           showsUserLocation
           showsMyLocationButton={false}
           userInterfaceStyle={colorScheme}
-          // Спутник в UI = hybrid: снимок плюс улицы, как в Google/Yandex.
           mapType={mapType === 'satellite' ? 'hybrid' : 'standard'}
           customMapStyle={
             mapType === 'standard'
@@ -436,30 +629,53 @@ export function MapContainer() {
           }
           {...(Platform.OS === 'android' ? { googleRenderer: 'LEGACY' as const } : {})}
         >
-          {data?.stings.map((sting) => (
-            <StingMarker
-              key={sting.id}
-              sting={sting}
-              imageUri={stingMarkerImages[sting.id]}
-              onPress={() => openSting(sting.id)}
-            />
-          ))}
-          {seedHives.map((hive) => (
-            <HiveSeedMarker
-              key={hive.id}
-              hive={hive}
-              imageUri={hiveMarkerImages[hive.id]}
-              onPress={() => openHive(hive.id)}
-            />
-          ))}
-          {activeHives.map((hive) => (
-            <HiveCircle
-              key={hive.id}
-              hive={hive}
-              imageUri={hiveMarkerImages[hive.id]}
-              onPress={() => openHive(hive.id)}
-            />
-          ))}
+          {isOverview
+            ? (overviewQuery.data?.clusters ?? []).map((cluster) => (
+                <OverviewClusterMarker
+                  key={cluster.cellId}
+                  cluster={cluster}
+                  onPress={(nextRegion) => applyMapRegion(nextRegion, { programmatic: true })}
+                />
+              ))
+            : null}
+          {!isOverview
+            ? echoes.map((echo) => (
+                <EchoMarker key={echo.cellId} echo={echo} onPress={handleEchoPress} />
+              ))
+            : null}
+          {!isOverview
+            ? filtered.stings.map((sting) => (
+                <StingMarker
+                  key={sting.id}
+                  sting={sting}
+                  imageUri={stingMarkerImages[sting.id]}
+                  onPress={() => openSting(sting.id)}
+                />
+              ))
+            : null}
+          {!isOverview
+            ? seedHives.map((hive) => (
+                <HiveSeedMarker
+                  key={hive.id}
+                  hive={hive}
+                  imageUri={hiveMarkerImages[hive.id]}
+                  onPress={() => {
+                    trackEvent('seed_marker_tap', { zoneId: zoneQuery.data?.id });
+                    openHive(hive.id);
+                  }}
+                />
+              ))
+            : null}
+          {!isOverview
+            ? activeHives.map((hive) => (
+                <HiveCircle
+                  key={hive.id}
+                  hive={hive}
+                  imageUri={hiveMarkerImages[hive.id]}
+                  onPress={() => openHive(hive.id)}
+                />
+              ))
+            : null}
         </MapView>
       ) : (
         <View className="flex-1 items-center justify-center bg-hive-surface px-8">
@@ -474,6 +690,7 @@ export function MapContainer() {
 
       <View pointerEvents="box-none" style={styles.overlayLayer}>
         {Platform.OS === 'android' &&
+          !isOverview &&
           activeHives.map((hive) => (
             <HiveMarkerCapture
               key={`${hive.id}:hive:${hive.activeStingsCount}`}
@@ -484,6 +701,7 @@ export function MapContainer() {
             />
           ))}
         {Platform.OS === 'android' &&
+          !isOverview &&
           seedHives.map((hive) => (
             <HiveMarkerCapture
               key={`${hive.id}:seed:${hive.activeStingsCount}`}
@@ -494,7 +712,8 @@ export function MapContainer() {
             />
           ))}
         {Platform.OS === 'android' &&
-          (data?.stings ?? []).map((sting) => (
+          !isOverview &&
+          filtered.stings.map((sting) => (
             <StingMarkerCapture
               key={sting.id}
               sting={sting}
@@ -502,20 +721,66 @@ export function MapContainer() {
             />
           ))}
 
-        {isEmpty && (
-          <View
-            pointerEvents="none"
-            className="absolute left-4 right-4 rounded-hive-md bg-hive-surface/95 px-4 py-3 shadow-sm"
-            style={{ top: emptyBannerTop }}
-          >
-            <Text className="text-center font-inter text-sm font-semibold text-hive-foreground">
-              {t('map.emptyTitle')}
-            </Text>
-            <Text className="mt-1 text-center font-inter text-xs text-hive-muted">
-              {t('map.emptyMessage')}
-            </Text>
+        {!isOverview ? (
+          <View pointerEvents="box-none" style={[styles.filterChips, { top: chipsTop }]}>
+            <MapFilterChips value={mapFilter} onChange={setMapFilter} />
           </View>
-        )}
+        ) : null}
+
+        <View
+          pointerEvents="box-none"
+          className="absolute left-4 right-4 gap-2"
+          style={{ top: bannerTop }}
+        >
+          {activeCampaign ? (
+            <CampaignBanner
+              campaign={activeCampaign}
+              onPress={() => router.push('/(modals)/camera' as Href)}
+            />
+          ) : null}
+
+          {data?.expanded && data.appliedRadiusM ? (
+            <View
+              pointerEvents="none"
+              className="rounded-hive-md bg-hive-surface/95 px-4 py-2.5 shadow-sm"
+            >
+              <Text className="text-center font-inter text-xs font-semibold text-hive-muted">
+                {t('growth.expandedRadius', { distance: formatDistance(data.appliedRadiusM) })}
+              </Text>
+            </View>
+          ) : null}
+
+          {isEmpty ? (
+            <MapEmptyState
+              isFirstEver={Boolean(zoneQuery.data?.isFirstEver)}
+              nearestDistanceM={nearestDistanceM}
+              ttlSec={zoneQuery.data?.ttlSec}
+              onCapture={() => handleEmptyCta('capture')}
+              onInvite={() => handleEmptyCta('invite')}
+              onNearest={() => handleEmptyCta('nearest')}
+            />
+          ) : null}
+
+          {filterEmpty ? (
+            <View className="rounded-hive-md bg-hive-surface/95 px-4 py-3 shadow-sm">
+              <Text className="text-center font-inter text-sm font-semibold text-hive-foreground">
+                {t('map.filter.emptyTitle')}
+              </Text>
+              <Text className="mt-1 text-center font-inter text-xs text-hive-muted">
+                {t('map.filter.emptyMessage')}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                className="mt-2"
+                onPress={() => setMapFilter('all')}
+              >
+                <Text className="text-center font-inter text-sm font-bold text-hive-primary">
+                  {t('map.filter.reset')}
+                </Text>
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
 
         {isFetching && (
           <View style={[styles.fetchingBadge, { top: bookmarkTop }]}>
@@ -567,6 +832,11 @@ const styles = StyleSheet.create({
           elevation: 2,
         }
       : null),
+  },
+  filterChips: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
   },
   fetchingBadge: {
     position: 'absolute',

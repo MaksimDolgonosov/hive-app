@@ -90,6 +90,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       supportsTablet: false,
       bundleIdentifier: 'com.hive.app',
       icon: './assets/Hive.icon',
+      associatedDomains: ['applinks:hive.app'],
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
@@ -114,22 +115,34 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
-      ...(googleAndroidOAuthScheme
-        ? {
-            intentFilters: [
+      intentFilters: [
+        ...(googleAndroidOAuthScheme
+          ? [
               {
-                action: 'VIEW',
+                action: 'VIEW' as const,
                 data: [
                   {
                     scheme: googleAndroidOAuthScheme,
                     pathPrefix: '/oauth2redirect',
                   },
                 ],
-                category: ['BROWSABLE', 'DEFAULT'],
+                category: ['BROWSABLE' as const, 'DEFAULT' as const],
               },
-            ],
-          }
-        : {}),
+            ]
+          : []),
+        {
+          action: 'VIEW',
+          autoVerify: true,
+          data: [
+            {
+              scheme: 'https',
+              host: 'hive.app',
+              pathPrefix: '/i',
+            },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+      ],
     },
     plugins: [
       'expo-router',
@@ -154,6 +167,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         {
           photosPermission: 'Hive использует галерею для выбора фото профиля.',
           cameraPermission: 'Hive использует камеру для фото профиля.',
+        },
+      ],
+      [
+        'expo-notifications',
+        {
+          icon: './assets/images/icon.png',
+          color: '#FFB800',
+          defaultChannel: 'default',
         },
       ],
       [

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
@@ -6,18 +6,27 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HiveNearbyCard } from '@/src/components/feed/HiveNearbyCard';
 import { NearbyCard } from '@/src/components/feed/NearbyCard';
+import { MapEmptyState } from '@/src/components/map/MapEmptyState';
 import { LocationAccessGate } from '@/src/components/map/LocationAccessGate';
+import { WaitlistContent } from '@/src/components/growth/WaitlistContent';
 import { ScreenBackground } from '@/src/components/ui/ScreenBackground';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
+import * as zonesApi from '@/src/api/zones';
 import { useLocation } from '@/src/hooks/useLocation';
+import { useNearestSting } from '@/src/hooks/useNearestSting';
 import { useStingsNearby } from '@/src/hooks/useStingsNearby';
+import { useZoneStatus } from '@/src/hooks/useZoneStatus';
+import { useAuthStore } from '@/src/stores/authStore';
 import { useLocationStore } from '@/src/stores/locationStore';
 import { useMapStore } from '@/src/stores/mapStore';
 import type { Hive, Sting } from '@/src/types';
-import { haversineDistance } from '@/src/utils/geo';
+import { trackEvent } from '@/src/utils/analytics-queue';
+import { getApiErrorCode } from '@/src/utils/api-error';
+import { formatDistance, haversineDistance } from '@/src/utils/geo';
 import { coordsToFeedBounds, regionToBounds } from '@/src/utils/map';
 import { openHive } from '@/src/utils/open-hive';
+import { showApiErrorToast } from '@/src/utils/show-toast';
 
 type FeedItem =
   | { key: string; type: 'sting'; sting: Sting; distanceM: number }
@@ -75,7 +84,16 @@ export default function NearbyScreen() {
 
   const effectiveCoords = coords ?? lastKnownCoords;
 
-  const { data, isFetching, isError, refetch, isRefetching } = useStingsNearby(bounds);
+  const { data, isFetching, isError, refetch, isRefetching } = useStingsNearby(bounds, {
+    minResults: 20,
+  });
+  const zoneCoords = effectiveCoords
+    ? { lat: effectiveCoords.latitude, lng: effectiveCoords.longitude }
+    : null;
+  const zoneQuery = useZoneStatus(zoneCoords);
+  const user = useAuthStore((state) => state.user);
+  const [joiningWaitlist, setJoiningWaitlist] = useState(false);
+  const [waitlistJoined, setWaitlistJoined] = useState(false);
 
   const feedItems = useMemo(() => {
     if (!effectiveCoords || !data) {
@@ -90,8 +108,62 @@ export default function NearbyScreen() {
     );
   }, [data, effectiveCoords]);
 
+  const isFeedEmpty = Boolean(data) && !isFetching && !isError && feedItems.length === 0;
+  const nearestQuery = useNearestSting(zoneCoords, isFeedEmpty);
+
   function openSting(stingId: string) {
     router.push(`/(modals)/sting/${stingId}` as Href);
+  }
+
+  function handleEmptyCta(cta: 'capture' | 'nearest' | 'invite') {
+    trackEvent('empty_cta_tap', { zoneId: zoneQuery.data?.id, props: { cta } });
+
+    if (cta === 'capture') {
+      router.push('/(modals)/camera' as Href);
+      return;
+    }
+
+    if (cta === 'invite') {
+      router.push('/(modals)/profile/invites' as Href);
+      return;
+    }
+
+    const nearest = nearestQuery.data?.stings[0];
+    if (nearest) {
+      trackEvent('nearest_sting_opened', { zoneId: zoneQuery.data?.id });
+      useMapStore.getState().requestMapFocus({
+        lat: nearest.location.lat,
+        lng: nearest.location.lng,
+        stingId: nearest.id,
+        hiveId: null,
+      });
+      router.push('/(tabs)' as Href);
+    }
+  }
+
+  async function handleJoinWaitlist() {
+    if (!effectiveCoords || joiningWaitlist) {
+      return;
+    }
+
+    setJoiningWaitlist(true);
+    try {
+      await zonesApi.joinWaitlist({
+        lat: effectiveCoords.latitude,
+        lng: effectiveCoords.longitude,
+        email: user?.email ?? undefined,
+      });
+      setWaitlistJoined(true);
+      trackEvent('waitlist_submitted', { zoneId: zoneQuery.data?.id });
+    } catch (error) {
+      if (getApiErrorCode(error) === 'WAITLIST_ALREADY_JOINED') {
+        setWaitlistJoined(true);
+        return;
+      }
+      showApiErrorToast(error);
+    } finally {
+      setJoiningWaitlist(false);
+    }
   }
 
   const listBottomInset = getGlassTabBarInset(insets.bottom) + 16;
@@ -104,6 +176,19 @@ export default function NearbyScreen() {
         status={locationStatus}
         onRequestPermission={() => void requestPermission()}
       />
+    );
+  }
+
+  if (zoneQuery.data?.status === 'waitlist') {
+    return (
+      <ScreenBackground>
+        <WaitlistContent
+          joining={joiningWaitlist}
+          joined={waitlistJoined}
+          zone={zoneQuery.data}
+          onJoin={() => void handleJoinWaitlist()}
+        />
+      </ScreenBackground>
     );
   }
 
@@ -123,6 +208,14 @@ export default function NearbyScreen() {
           </Text>
         </View>
       </View>
+
+      {data?.expanded && data.appliedRadiusM ? (
+        <View className="mx-5 mb-3 rounded-hive-md bg-hive-surface px-4 py-2.5">
+          <Text className="text-center font-inter text-xs font-semibold text-hive-muted">
+            {t('growth.expandedRadius', { distance: formatDistance(data.appliedRadiusM) })}
+          </Text>
+        </View>
+      ) : null}
 
       <FlatList
         contentContainerStyle={{
@@ -181,13 +274,15 @@ export default function NearbyScreen() {
               </Pressable>
             </View>
           ) : (
-            <View className="flex-1 items-center justify-center px-8 py-16">
-              <Text className="text-center font-inter text-base font-semibold text-hive-foreground">
-                {t('nearby.emptyTitle')}
-              </Text>
-              <Text className="mt-2 text-center font-inter text-sm text-hive-muted">
-                {t('nearby.emptyMessage')}
-              </Text>
+            <View className="flex-1 items-center justify-center px-4 py-8">
+              <MapEmptyState
+                isFirstEver={Boolean(zoneQuery.data?.isFirstEver)}
+                nearestDistanceM={nearestQuery.data?.distanceM ?? null}
+                ttlSec={zoneQuery.data?.ttlSec}
+                onCapture={() => handleEmptyCta('capture')}
+                onInvite={() => handleEmptyCta('invite')}
+                onNearest={() => handleEmptyCta('nearest')}
+              />
             </View>
           )
         }

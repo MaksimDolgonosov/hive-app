@@ -135,7 +135,10 @@ export default function CameraScreen() {
                 style={StyleSheet.absoluteFillObject}
               />
               <View style={StyleSheet.absoluteFillObject} className="bg-black/55" />
-              <View style={StyleSheet.absoluteFillObject} className="items-center justify-center gap-5 px-8">
+              <View
+                style={StyleSheet.absoluteFillObject}
+                className="items-center justify-center gap-5 px-8"
+              >
                 <HiveLoader size={88} strokeWidth={3} />
                 <Text className="text-center font-inter text-base font-medium text-hive-primary">
                   {t('camera.verifyingPhoto')}
@@ -179,10 +182,7 @@ export default function CameraScreen() {
           facing={facing}
           onSelect={setPreset}
         />
-        <CaptureButton
-          disabled={!isReady || isCapturing}
-          onPress={() => void handleCapture()}
-        />
+        <CaptureButton disabled={!isReady || isCapturing} onPress={() => void handleCapture()} />
       </View>
     </View>
   );

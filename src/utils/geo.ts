@@ -1,4 +1,4 @@
-import type { GeoPoint } from '@/src/types';
+import type { GeoPoint, MapBounds } from '@/src/types';
 
 const EARTH_RADIUS_M = 6_371_000;
 
@@ -20,6 +20,14 @@ export function haversineDistance(a: GeoPoint, b: GeoPoint): number {
   return 2 * EARTH_RADIUS_M * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
+/**
+ * Округление координаты до ~100 м для ключей React Query: без него дрожание
+ * GPS создаёт новый ключ на каждый тик и кэш растёт бесконечно (§17).
+ */
+export function roundCoord(value: number): number {
+  return Math.round(value * 1000) / 1000;
+}
+
 export function formatDistance(meters: number): string {
   if (meters < 1000) {
     return `${Math.round(meters)} м`;
@@ -27,4 +35,13 @@ export function formatDistance(meters: number): string {
 
   const km = meters / 1000;
   return km < 10 ? `${km.toFixed(1)} км` : `${Math.round(km)} км`;
+}
+
+export function isPointInBounds(point: GeoPoint, bounds: MapBounds): boolean {
+  return (
+    point.lat >= bounds.swLat &&
+    point.lat <= bounds.neLat &&
+    point.lng >= bounds.swLng &&
+    point.lng <= bounds.neLng
+  );
 }

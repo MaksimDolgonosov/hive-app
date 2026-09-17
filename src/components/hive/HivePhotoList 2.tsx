@@ -42,13 +42,7 @@ function HivePhotoSkeleton() {
   );
 }
 
-function HivePhotoCell({
-  sting,
-  onPress,
-}: {
-  sting: Sting;
-  onPress: (stingId: string) => void;
-}) {
+function HivePhotoCell({ sting, onPress }: { sting: Sting; onPress: (stingId: string) => void }) {
   const { t } = useTranslation();
   const theme = useHiveTheme();
   const uri = sting.thumbnailUrl || sting.imageUrl;

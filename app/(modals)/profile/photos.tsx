@@ -1,25 +1,30 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
-import { profilePhotoGridPadding, ProfilePhotoGrid } from '@/src/components/profile/ProfilePhotoGrid';
+import {
+  profilePhotoGridPadding,
+  ProfilePhotoGrid,
+} from '@/src/components/profile/ProfilePhotoGrid';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { useMyStings } from '@/src/hooks/useProfileCollections';
 
 export default function MyPhotosScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { data, isLoading, isError, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useMyStings();
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useMyStings();
 
   const stings = useMemo(() => data?.pages.flatMap((page) => page.stings) ?? [], [data?.pages]);
 
@@ -82,7 +87,8 @@ export default function MyPhotosScreen() {
           showsVerticalScrollIndicator={false}
           onScroll={({ nativeEvent }) => {
             const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-            const nearBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 120;
+            const nearBottom =
+              layoutMeasurement.height + contentOffset.y >= contentSize.height - 120;
 
             if (nearBottom && hasNextPage && !isFetchingNextPage) {
               void fetchNextPage();

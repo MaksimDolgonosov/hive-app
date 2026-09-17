@@ -2,14 +2,10 @@ import { router, type Href, useSegments } from 'expo-router';
 import { useCallback } from 'react';
 
 import { useAuthStore } from '@/src/stores/authStore';
+import { exitOnboarding } from '@/src/utils/auth-navigation';
 
 type OnboardingSegment =
-  | 'welcome'
-  | 'step1'
-  | 'step2'
-  | 'step3'
-  | 'location-permission'
-  | 'camera-permission';
+  'welcome' | 'step1' | 'step2' | 'step3' | 'location-permission' | 'camera-permission';
 
 function getOnboardingSegment(segments: string[]): OnboardingSegment | null {
   const onboardingIndex = segments.indexOf('(onboarding)');
@@ -41,7 +37,7 @@ export function useOnboardingSkip() {
 
     if (screen === 'camera-permission') {
       await completeOnboarding();
-      router.replace('/(auth)/login' as Href);
+      exitOnboarding();
       return;
     }
 

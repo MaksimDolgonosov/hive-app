@@ -16,11 +16,29 @@ servers:
 
 tags:
   - name: auth
-    description: Регистрация, вход, управление токенами
+    description: Регистрация, вход, OTP, управление токенами
   - name: stings
     description: Публикация и просмотр жал
   - name: hives
     description: Просмотр ульев (кластеров жал)
+  - name: zones
+    description: Гео-зоны плотности и TTL
+  - name: map
+    description: Обзор карты на дальнем зуме
+  - name: campaigns
+    description: Час улья и событийные кампании
+  - name: invites
+    description: Инвайты и атрибуция
+  - name: waitlist
+    description: Гео-вейтлист
+  - name: devices
+    description: Push-устройства
+  - name: notifications
+    description: Настройки уведомлений
+  - name: analytics
+    description: События роста
+  - name: admin
+    description: Админ-эндпоинты роста
 
 security:
   - bearerAuth: []
@@ -32,7 +50,10 @@ paths:
   /auth/register:
     post:
       tags: [auth]
-      summary: Регистрация нового пользователя
+      summary: Регистрация — создаёт pending-аккаунт и отправляет OTP на email
+      description: >
+        Токены не выдаются. После получения кода клиент вызывает `POST /auth/otp/verify`.
+        Если email уже есть и не подтверждён — обновляются пароль/username и высылается новый код.
       security: []
       requestBody:
         required: true
@@ -42,44 +63,56 @@ paths:
               $ref: '#/components/schemas/RegisterRequest'
       responses:
         '201':
-          description: Пользователь создан, требуется подтверждение email
+          description: OTP отправлен, требуется подтверждение email
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OtpChallengeResponse'
+                $ref: '#/components/schemas/OtpDispatchResponse'
         '409':
-          description: Email уже подтверждён
+          description: Email уже подтверждён или username занят
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '422':
           $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/OtpRateLimited'
 
   /auth/otp/verify:
     post:
       tags: [auth]
-      summary: Подтверждение OTP при регистрации
+      summary: Подтверждение OTP регистрации — активация аккаунта и выдача сессии
       security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/VerifyOtpRequest'
+              $ref: '#/components/schemas/OtpVerifyRequest'
       responses:
         '200':
-          description: Email подтверждён, сессия выдана
+          description: Email подтверждён, выдана сессия
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthSession'
+                $ref: '#/components/schemas/AuthSessionResponse'
         '400':
-          description: OTP_INVALID / OTP_EXPIRED / OTP_MAX_ATTEMPTS / VALIDATION_ERROR
+          description: OTP_INVALID / OTP_EXPIRED / OTP_MAX_ATTEMPTS
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Нет активного challenge (OTP_NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/OtpRateLimited'
 
   /auth/otp/resend:
     post:
@@ -91,20 +124,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ResendOtpRequest'
+              $ref: '#/components/schemas/OtpResendRequest'
       responses:
         '200':
-          description: Новый код отправлен (или anti-enumeration для password_reset)
+          description: Код отправлен (или тот же ответ без письма — anti-enumeration для password_reset)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OtpChallengeResponse'
+                $ref: '#/components/schemas/OtpDispatchResponse'
         '429':
-          description: OTP_RESEND_COOLDOWN / OTP_RATE_LIMITED
+          description: OTP_RESEND_COOLDOWN или OTP_RATE_LIMITED
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
 
   /auth/login:
     post:
@@ -123,12 +158,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  user:
-                    $ref: '#/components/schemas/User'
-                  tokens:
-                    $ref: '#/components/schemas/AuthTokens'
+                $ref: '#/components/schemas/AuthSessionResponse'
         '401':
           description: Неверные учётные данные
           content:
@@ -136,57 +166,76 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Email не подтверждён
+          description: Email не подтверждён (EMAIL_NOT_VERIFIED) — клиент открывает экран OTP
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/OtpRateLimited'
 
   /auth/password/forgot:
     post:
       tags: [auth]
-      summary: Запрос кода сброса пароля
+      summary: Запрос OTP для сброса пароля
+      description: >
+        Ответ всегда одинаковый, даже если email не найден или не подтверждён (anti-enumeration).
+        Письмо уходит только существующему подтверждённому пользователю.
       security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ForgotPasswordRequest'
+              $ref: '#/components/schemas/PasswordForgotRequest'
       responses:
         '200':
-          description: Всегда успешный ответ (anti-enumeration)
+          description: Унифицированный успешный ответ
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OtpChallengeResponse'
+                $ref: '#/components/schemas/OtpDispatchResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/OtpRateLimited'
 
   /auth/password/reset:
     post:
       tags: [auth]
-      summary: Сброс пароля по OTP-коду
+      summary: Сброс пароля по OTP (вариант A — один запрос)
+      description: >
+        При успехе пароль обновляется, все refresh-токены отзываются, выдаётся новая сессия.
       security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ResetPasswordRequest'
+              $ref: '#/components/schemas/PasswordResetRequest'
       responses:
         '200':
-          description: Пароль обновлён, сессия выдана
+          description: Пароль изменён, выдана новая сессия
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthSession'
-        '204':
-          description: Пароль обновлён, сессия не выдана — клиент ведёт на login
+                $ref: '#/components/schemas/AuthSessionResponse'
         '400':
-          description: OTP_INVALID / OTP_EXPIRED / OTP_MAX_ATTEMPTS / VALIDATION_ERROR
+          description: OTP_INVALID / OTP_EXPIRED / OTP_MAX_ATTEMPTS
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Нет активного challenge (OTP_NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/OtpRateLimited'
 
   /auth/refresh:
     post:
@@ -238,34 +287,53 @@ paths:
         '204':
           description: Токен отозван
 
-  /auth/me:
-    get:
-      tags: [auth]
-      summary: Текущий авторизованный пользователь
-      responses:
-        '200':
-          description: Данные пользователя
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  user:
-                    $ref: '#/components/schemas/User'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-
   /auth/me/stats:
     get:
       tags: [auth]
-      summary: Статистика и превью профиля текущего пользователя
+      summary: Активная статистика профиля
+      description: Метрики по неистёкшим жала пользователя (окно TTL 4 часа).
       responses:
         '200':
-          description: Статистика и недавние фото
+          description: Статистика и превью последних фото
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileOverview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me/awards:
+    get:
+      tags: [auth]
+      summary: Награды текущего пользователя
+      parameters:
+        - in: query
+          name: cursor
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20, maximum: 50 }
+      responses:
+        '200':
+          description: Страница наград
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me/settings:
+    patch:
+      tags: [auth]
+      summary: allowEcho и allowSharing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                allowEcho: { type: boolean }
+                allowSharing: { type: boolean }
+      responses:
+        '200':
+          description: Настройки приватности
         '401':
           $ref: '#/components/responses/Unauthorized'
 
@@ -293,6 +361,8 @@ paths:
                 $ref: '#/components/schemas/StingsPage'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
 
   /auth/me/hives:
     get:
@@ -318,6 +388,8 @@ paths:
                 $ref: '#/components/schemas/UserHivesPage'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
 
   /auth/me/liked-stings:
     get:
@@ -343,6 +415,88 @@ paths:
                 $ref: '#/components/schemas/StingsPage'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Текущий авторизованный пользователь
+      responses:
+        '200':
+          description: Данные пользователя
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags: [auth]
+      summary: Удаление аккаунта и связанных персональных данных
+      description: |
+        Удаляет текущего пользователя, его сессии, OTP-челленджи, аватар,
+        опубликованные фото и реакции. Требуется для App Store Guideline 5.1.1(v).
+      responses:
+        '204':
+          description: Аккаунт удалён
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me/avatar:
+    post:
+      tags: [auth]
+      summary: Загрузка или замена аватара
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [avatar]
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  description: JPEG, максимум 2 МБ
+      responses:
+        '200':
+          description: Аватар обновлён
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      tags: [auth]
+      summary: Удаление аватара
+      responses:
+        '200':
+          description: Аватар удалён
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
   # ---------------------------------------------------------------------
   # STINGS
@@ -356,6 +510,18 @@ paths:
         - $ref: '#/components/parameters/SwLng'
         - $ref: '#/components/parameters/NeLat'
         - $ref: '#/components/parameters/NeLng'
+        - in: query
+          name: includeEchoes
+          schema: { type: boolean, default: false }
+        - in: query
+          name: includeSeeds
+          schema: { type: boolean, default: false }
+        - in: query
+          name: minResults
+          schema: { type: integer, minimum: 0, maximum: 50, default: 0 }
+        - in: query
+          name: maxRadiusM
+          schema: { type: integer, minimum: 1, default: 50000 }
       responses:
         '200':
           description: Список жал и ульев в bounding box
@@ -372,10 +538,56 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Hive'
+                  echoes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        cellId: { type: string }
+                        center: { $ref: '#/components/schemas/GeoPoint' }
+                        count: { type: integer }
+                        lastSeenAt: { type: string, format: date-time }
+                  appliedBounds:
+                    $ref: '#/components/schemas/GeoPoint'
+                  expanded:
+                    type: boolean
+                  appliedRadiusM:
+                    type: number
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
           $ref: '#/components/responses/ValidationError'
+
+  /stings/nearest:
+    get:
+      tags: [stings]
+      summary: Ближайшие активные жала
+      parameters:
+        - in: query
+          name: lat
+          required: true
+          schema: { type: number }
+        - in: query
+          name: lng
+          required: true
+          schema: { type: number }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 10, default: 1 }
+      responses:
+        '200':
+          description: Ближайшие жала и дистанция в метрах
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stings:
+                    type: array
+                    items: { $ref: '#/components/schemas/Sting' }
+                  distanceM:
+                    type: number
+                    nullable: true
 
   /stings:
     post:
@@ -427,20 +639,47 @@ paths:
                 properties:
                   sting:
                     $ref: '#/components/schemas/Sting'
+                  ttlSec:
+                    type: integer
+                  zone:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      status: { type: string, enum: [open, waitlist] }
+                      ttlSec: { type: integer }
+                  awards:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum: [zone_first, zone_revival, hive_ignited, hive_founder]
+                        zoneId: { type: string }
+                        createdAt: { type: string, format: date-time }
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
-          description: Не пройдена серверная анти-спуфинг проверка
+          description: Не пройдена серверная анти-спуфинг или NSFW-проверка
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error:
-                  code: STING_VALIDATION_FAILED
-                  message: Фото не прошло проверку подлинности
-                  details:
-                    reason: EXIF_MISMATCH
+              examples:
+                validationFailed:
+                  summary: Анти-спуфинг
+                  value:
+                    error:
+                      code: STING_VALIDATION_FAILED
+                      message: Фото не прошло проверку подлинности
+                      details:
+                        reason: EXIF_MISMATCH
+                moderationFailed:
+                  summary: NSFW-модерация
+                  value:
+                    error:
+                      code: CONTENT_MODERATION_FAILED
+                      message: Фото не прошло проверку безопасности
         '429':
           description: Превышен лимит частоты публикаций
           content:
@@ -536,6 +775,168 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  # ---------------------------------------------------------------------
+  # GROWTH
+  # ---------------------------------------------------------------------
+  /zones/current:
+    get:
+      tags: [zones]
+      summary: Текущая зона и TTL до съёмки
+      parameters:
+        - in: query
+          name: lat
+          required: true
+          schema: { type: number }
+        - in: query
+          name: lng
+          required: true
+          schema: { type: number }
+      responses:
+        '200':
+          description: Зона
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  zone:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      status: { type: string, enum: [open, waitlist] }
+                      ttlSec: { type: integer }
+                      activeStings: { type: integer }
+                      isFirstEver: { type: boolean }
+                      waitlistCount: { type: integer }
+                      threshold: { type: integer }
+
+  /map/overview:
+    get:
+      tags: [map]
+      summary: Агрегаты карты на дальнем зуме
+      parameters:
+        - $ref: '#/components/parameters/SwLat'
+        - $ref: '#/components/parameters/SwLng'
+        - $ref: '#/components/parameters/NeLat'
+        - $ref: '#/components/parameters/NeLng'
+        - in: query
+          name: zoom
+          required: true
+          schema: { type: number }
+      responses:
+        '200':
+          description: Кластеры без фото отдельных жал
+
+  /campaigns/active:
+    get:
+      tags: [campaigns]
+      summary: Активные кампании в точке
+      parameters:
+        - in: query
+          name: lat
+          required: true
+          schema: { type: number }
+        - in: query
+          name: lng
+          required: true
+          schema: { type: number }
+      responses:
+        '200':
+          description: Список кампаний
+
+  /invites:
+    post:
+      tags: [invites]
+      summary: Создать инвайт-код
+      responses:
+        '201':
+          description: Код создан
+
+  /invites/me:
+    get:
+      tags: [invites]
+      summary: Инвайты текущего пользователя
+
+  /invites/{code}:
+    get:
+      tags: [invites]
+      security: []
+      summary: Публичная проверка кода
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema: { type: string }
+
+  /waitlist:
+    post:
+      tags: [waitlist]
+      security: []
+      summary: Заявка в гео-вейтлист
+      responses:
+        '404':
+          description: FEATURE_DISABLED, если WAITLIST_ENABLED=false
+
+  /devices:
+    post:
+      tags: [devices]
+      summary: Зарегистрировать Expo push token
+      responses:
+        '204':
+          description: Сохранено
+
+  /devices/{deviceId}:
+    delete:
+      tags: [devices]
+      summary: Удалить устройство
+      parameters:
+        - in: path
+          name: deviceId
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Удалено
+
+  /notifications/settings:
+    get:
+      tags: [notifications]
+      summary: Настройки пушей
+    patch:
+      tags: [notifications]
+      summary: Частичное обновление настроек пушей
+
+  /analytics/events:
+    post:
+      tags: [analytics]
+      security: []
+      summary: Батч клиентских событий роста
+
+  /admin/campaigns:
+    post:
+      tags: [admin]
+      summary: Создать кампанию (роль admin)
+
+  /admin/users/{id}/account-type:
+    post:
+      tags: [admin]
+      summary: Сменить accountType пользователя
+
+  /admin/metrics/density:
+    get:
+      tags: [admin]
+      summary: Метрики плотности зоны
+
+  /admin/metrics/retention:
+    get:
+      tags: [admin]
+      summary: Retention по зоне первой сессии
+
+  /admin/metrics/growth:
+    get:
+      tags: [admin]
+      summary: kFactor и виральные метрики
 
   # ---------------------------------------------------------------------
   # HIVES
@@ -673,6 +1074,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    OtpRateLimited:
+      description: Превышен лимит запросов OTP/auth
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
 
   schemas:
     User:
@@ -692,6 +1099,67 @@ components:
           format: date-time
       required: [id, username, avatarUrl, createdAt]
 
+    ProfileStats:
+      type: object
+      properties:
+        photos:
+          type: integer
+          description: Активные опубликованные жала пользователя
+        hives:
+          type: integer
+          description: Уникальные улья с участием фото пользователя
+        likes:
+          type: integer
+          description: Сумма reactionsCount на активных жала пользователя
+      required: [photos, hives, likes]
+
+    ProfileOverview:
+      type: object
+      properties:
+        stats:
+          $ref: '#/components/schemas/ProfileStats'
+        recentPhotos:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: До 4 thumbnailUrl последних активных жала
+      required: [stats, recentPhotos]
+
+    StingsPage:
+      type: object
+      properties:
+        stings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sting'
+        nextCursor:
+          type: string
+          nullable: true
+      required: [stings, nextCursor]
+
+    UserHiveSummary:
+      allOf:
+        - $ref: '#/components/schemas/Hive'
+        - type: object
+          properties:
+            userStingsCount:
+              type: integer
+              description: Число активных жал пользователя в этом улье
+          required: [userStingsCount]
+
+    UserHivesPage:
+      type: object
+      properties:
+        hives:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserHiveSummary'
+        nextCursor:
+          type: string
+          nullable: true
+      required: [hives, nextCursor]
+
     AuthTokens:
       type: object
       properties:
@@ -707,7 +1175,7 @@ components:
           description: Срок действия accessToken
       required: [accessToken, refreshToken, expiresAt]
 
-    AuthSession:
+    AuthSessionResponse:
       type: object
       properties:
         user:
@@ -716,11 +1184,7 @@ components:
           $ref: '#/components/schemas/AuthTokens'
       required: [user, tokens]
 
-    OtpPurpose:
-      type: string
-      enum: [register, password_reset]
-
-    OtpChallengeResponse:
+    OtpDispatchResponse:
       type: object
       properties:
         status:
@@ -730,7 +1194,8 @@ components:
           type: string
           format: email
         purpose:
-          $ref: '#/components/schemas/OtpPurpose'
+          type: string
+          enum: [register, password_reset]
         expiresInSec:
           type: integer
           example: 600
@@ -739,7 +1204,7 @@ components:
           example: 60
       required: [status, email, purpose, expiresInSec, resendAvailableInSec]
 
-    VerifyOtpRequest:
+    OtpVerifyRequest:
       type: object
       required: [email, code, purpose]
       properties:
@@ -748,11 +1213,13 @@ components:
           format: email
         code:
           type: string
-          pattern: '^[0-9]{6}$'
+          pattern: '^\d{6}$'
+          example: '123456'
         purpose:
-          $ref: '#/components/schemas/OtpPurpose'
+          type: string
+          enum: [register]
 
-    ResendOtpRequest:
+    OtpResendRequest:
       type: object
       required: [email, purpose]
       properties:
@@ -760,17 +1227,24 @@ components:
           type: string
           format: email
         purpose:
-          $ref: '#/components/schemas/OtpPurpose'
+          type: string
+          enum: [register, password_reset]
+        locale:
+          type: string
+          enum: [ru, en]
 
-    ForgotPasswordRequest:
+    PasswordForgotRequest:
       type: object
       required: [email]
       properties:
         email:
           type: string
           format: email
+        locale:
+          type: string
+          enum: [ru, en]
 
-    ResetPasswordRequest:
+    PasswordResetRequest:
       type: object
       required: [email, code, newPassword]
       properties:
@@ -779,7 +1253,7 @@ components:
           format: email
         code:
           type: string
-          pattern: '^[0-9]{6}$'
+          pattern: '^\d{6}$'
         newPassword:
           type: string
           format: password
@@ -828,10 +1302,16 @@ components:
       properties:
         id:
           type: string
-          format: uuid
         authorId:
           type: string
-          format: uuid
+        authorUsername:
+          type: string
+        authorAvatarUrl:
+          type: string
+          nullable: true
+        authorAccountType:
+          type: string
+          enum: [personal, partner, official]
         imageUrl:
           type: string
           format: uri
@@ -842,21 +1322,23 @@ components:
           $ref: '#/components/schemas/GeoPoint'
         hiveId:
           type: string
-          format: uuid
           nullable: true
-          description: null, если жало пока не вошло в кластер
         createdAt:
           type: string
           format: date-time
         expiresAt:
           type: string
           format: date-time
-          description: createdAt + 4 часа
         reactionsCount:
           type: integer
+        comment:
+          type: string
+          nullable: true
+        shareUrl:
+          type: string
+          nullable: true
         hasLiked:
           type: boolean
-          description: Поставил ли текущий пользователь like (только для авторизованных запросов)
       required:
         - id
         - authorId
@@ -867,20 +1349,34 @@ components:
         - createdAt
         - expiresAt
         - reactionsCount
+        - shareUrl
 
     Hive:
       type: object
       properties:
         id:
           type: string
-          format: uuid
         center:
           $ref: '#/components/schemas/GeoPoint'
         radiusM:
           type: number
-          format: float
         activeStingsCount:
           type: integer
+        activationCount:
+          type: integer
+        contributorsCount:
+          type: integer
+        stage:
+          type: string
+          enum: [seed, hive]
+        topContributors:
+          type: array
+          items:
+            type: object
+            properties:
+              userId: { type: string }
+              username: { type: string }
+              avatarUrl: { type: string, nullable: true }
         createdAt:
           type: string
           format: date-time
@@ -892,61 +1388,11 @@ components:
         - center
         - radiusM
         - activeStingsCount
+        - activationCount
+        - contributorsCount
+        - stage
         - createdAt
         - updatedAt
-
-    ProfileOverview:
-      type: object
-      properties:
-        stats:
-          type: object
-          properties:
-            photos:
-              type: integer
-            hives:
-              type: integer
-            likes:
-              type: integer
-          required: [photos, hives, likes]
-        recentPhotos:
-          type: array
-          items:
-            type: string
-            format: uri
-      required: [stats, recentPhotos]
-
-    StingsPage:
-      type: object
-      properties:
-        stings:
-          type: array
-          items:
-            $ref: '#/components/schemas/Sting'
-        nextCursor:
-          type: string
-          nullable: true
-      required: [stings, nextCursor]
-
-    UserHiveSummary:
-      allOf:
-        - $ref: '#/components/schemas/Hive'
-        - type: object
-          properties:
-            userStingsCount:
-              type: integer
-          required: [userStingsCount]
-
-    UserHivesPage:
-      type: object
-      properties:
-        hives:
-          type: array
-          items:
-            $ref: '#/components/schemas/UserHiveSummary'
-        nextCursor:
-          type: string
-          nullable: true
-      required: [hives, nextCursor]
 
     ErrorResponse:
       type: object

@@ -10,11 +10,5 @@ type PrivacyPolicyLinkProps = {
 export function PrivacyPolicyLink({ onPress }: PrivacyPolicyLinkProps) {
   const { t } = useTranslation();
 
-  return (
-    <ProfileMenuRow
-      icon={Shield}
-      label={t('profile.privacyPolicyTitle')}
-      onPress={onPress}
-    />
-  );
+  return <ProfileMenuRow icon={Shield} label={t('profile.privacyPolicyTitle')} onPress={onPress} />;
 }

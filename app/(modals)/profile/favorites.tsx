@@ -16,8 +16,16 @@ export default function FavoritesScreen() {
   const insets = useSafeAreaInsets();
   const { coords } = useLocation();
 
-  const { data, isLoading, isError, refetch, isRefetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useLikedStings();
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useLikedStings();
 
   const stings = useMemo(() => data?.pages.flatMap((page) => page.stings) ?? [], [data?.pages]);
 
@@ -78,18 +86,11 @@ export default function FavoritesScreen() {
           }
           renderItem={({ item }) => {
             const distanceM = coords
-              ? haversineDistance(
-                  { lat: coords.latitude, lng: coords.longitude },
-                  item.location,
-                )
+              ? haversineDistance({ lat: coords.latitude, lng: coords.longitude }, item.location)
               : 0;
 
             return (
-              <NearbyCard
-                distanceM={distanceM}
-                sting={item}
-                onPress={() => openSting(item.id)}
-              />
+              <NearbyCard distanceM={distanceM} sting={item} onPress={() => openSting(item.id)} />
             );
           }}
           ListEmptyComponent={

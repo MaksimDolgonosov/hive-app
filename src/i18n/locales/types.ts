@@ -121,6 +121,15 @@ export type TranslationSchema = {
     emptyMessage: string;
     mapsKeyMissingTitle: string;
     mapsKeyMissingMessage: string;
+    filter: {
+      all: string;
+      fresh: string;
+      hives: string;
+      expiring: string;
+      emptyTitle: string;
+      emptyMessage: string;
+      reset: string;
+    };
   };
   tabs: {
     map: string;
@@ -146,8 +155,11 @@ export type TranslationSchema = {
     statsPhotos: string;
     statsHives: string;
     statsLikes: string;
+    statsAwards: string;
     menuPhotos: string;
     menuHives: string;
+    menuAwards: string;
+    menuInvites: string;
     menuSavedPlaces: string;
     menuFavorites: string;
     menuSettings: string;
@@ -162,6 +174,7 @@ export type TranslationSchema = {
     recentPhotos: string;
     viewAll: string;
     splashPreviewLabel: string;
+    onboardingPreviewLabel: string;
     splashPreviewTitle: string;
     splashPreviewHint: string;
     splashPreviewClose: string;
@@ -229,13 +242,20 @@ export type TranslationSchema = {
     start: string;
     skip: string;
     welcomeTitle: string;
+    welcomeSubtitle: string;
     welcomeDescription: string;
     step1Title: string;
+    step1Subtitle: string;
     step1Description: string;
     step2Title: string;
+    step2Subtitle: string;
     step2Description: string;
     step3Title: string;
+    step3Subtitle: string;
     step3Description: string;
+    galleryUnavailable: string;
+    lifetimeBadge: string;
+    publishedAtLocation: string;
     locationTitle: string;
     locationSubtitle: string;
     locationDescription: string;
@@ -266,11 +286,116 @@ export type TranslationSchema = {
       singleAuthor: string;
     };
   };
+  /** Механики роста: пустые состояния с CTA, радиус, эхо, первый снимок (§G2, §G3, §G5, §G6). */
+  growth: {
+    emptyFirstTitle: string;
+    emptyQuietTitle: string;
+    emptyTtl: string;
+    emptyTtlPending: string;
+    ctaCapture: string;
+    ctaNearest: string;
+    ctaInvite: string;
+    expandedRadius: string;
+    echoToast: string;
+    echoToggleLabel: string;
+    echoToggleHint: string;
+    allowEchoLabel: string;
+    allowEchoHint: string;
+    firstCaptureTitle: string;
+    firstCaptureDescription: string;
+    firstCaptureTtl: string;
+    firstCaptureAction: string;
+    firstCaptureLater: string;
+  };
+  /** Кампании и «час улья» (§G7). */
+  campaign: {
+    hiveHour: string;
+    event: string;
+    endsIn: string;
+    ttlBonus: string;
+    action: string;
+    participants: string;
+  };
+  /** Инвайты, атрибуция и вейтлист (§G8). */
+  invite: {
+    title: string;
+    subtitle: string;
+    codeLabel: string;
+    copy: string;
+    copied: string;
+    share: string;
+    shareMessage: string;
+    accepted: string;
+    bonusHint: string;
+    create: string;
+    loadError: string;
+    emptyTitle: string;
+    emptyMessage: string;
+    invitedBy: string;
+    waitlistTitle: string;
+    waitlistMessage: string;
+    waitlistAction: string;
+    waitlistJoinedTitle: string;
+    waitlistJoinedMessage: string;
+  };
+  /** Награды первооткрывателя и зажигания улья (§G5, §G13). */
+  awards: {
+    title: string;
+    zoneFirst: string;
+    zoneFirstHint: string;
+    zoneRevival: string;
+    zoneRevivalHint: string;
+    hiveIgnited: string;
+    hiveIgnitedHint: string;
+    hiveFounder: string;
+    hiveFounderHint: string;
+    unknown: string;
+    toastTitle: string;
+    emptyTitle: string;
+    emptyMessage: string;
+    loadError: string;
+  };
+  /** Push-уведомления (§G10). */
+  push: {
+    explainTitle: string;
+    explainDescription: string;
+    allow: string;
+    later: string;
+    devBuildRequired: string;
+    settingsTitle: string;
+    reactions: string;
+    reactionsHint: string;
+    nearbyActivity: string;
+    nearbyActivityHint: string;
+    campaigns: string;
+    campaignsHint: string;
+    expiringSting: string;
+    expiringStingHint: string;
+    inviteAccepted: string;
+    inviteAcceptedHint: string;
+  };
+  /** Шаринг жала наружу (§G9). */
+  share: {
+    action: string;
+    message: string;
+    allowSharingLabel: string;
+    allowSharingHint: string;
+  };
+  /** Бейджи типов аккаунта (§G11). */
+  accountType: {
+    partner: string;
+    official: string;
+  };
   sting: {
     photoAlt: string;
     close: string;
     notFound: string;
     expiresIn: string;
+    ttlHours: string;
+    ttlDays: string;
+    ttlNotice: string;
+    ttlNoticePending: string;
+    ttlCountdownDaysHours: string;
     like: string;
     unlike: string;
     reactFailedTitle: string;
@@ -357,5 +482,9 @@ export type TranslationSchema = {
     GOOGLE_ACCOUNT_CONFLICT: string;
     ACCOUNT_DISABLED: string;
     USER_NOT_FOUND: string;
+    FEATURE_DISABLED: string;
+    INVITE_EXPIRED: string;
+    INVITE_LIMIT_REACHED: string;
+    WAITLIST_ALREADY_JOINED: string;
   };
 };

@@ -19,11 +19,13 @@ import { STING_COMMENT_MAX_LENGTH } from '@/src/api/stings';
 import { AuthButton } from '@/src/components/auth/AuthButton';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { usePublishSting } from '@/src/hooks/usePublishSting';
+import { useZoneStatus } from '@/src/hooks/useZoneStatus';
 import { useCameraStore } from '@/src/stores/cameraStore';
 import { logApiError } from '@/src/utils/api-error';
 import { normalizeAccuracy } from '@/src/utils/exif';
 import { notifyPublishSuccess } from '@/src/utils/haptics';
 import { showApiErrorToast } from '@/src/utils/show-toast';
+import { formatTtl } from '@/src/utils/ttl';
 
 const LOW_ACCURACY_THRESHOLD_M = 50;
 const STALE_CAPTURE_THRESHOLD_MS = 90_000;
@@ -45,6 +47,13 @@ export default function PreviewScreen() {
   const isCameraCapture = useCameraStore((state) => state.isCameraCapture);
   const clearPhoto = useCameraStore((state) => state.clearPhoto);
   const clearCapture = useCameraStore((state) => state.clearCapture);
+
+  // Фактический TTL зоны, включая бонус активной кампании (§G1, §G7):
+  // значение считает сервер, клиент только показывает.
+  const zone = useZoneStatus(captureCoords);
+  const ttlNotice = zone.data
+    ? t('sting.ttlNotice', { ttl: formatTtl(zone.data.ttlSec) })
+    : t('sting.ttlNoticePending');
 
   const isLowAccuracy = captureAccuracy !== null && captureAccuracy > LOW_ACCURACY_THRESHOLD_M;
 
@@ -217,6 +226,8 @@ export default function PreviewScreen() {
 
         {isKeyboardVisible ? null : (
           <>
+            <Text className="text-center font-inter text-xs text-white/70">{ttlNotice}</Text>
+
             <AuthButton
               loading={publishSting.isPending}
               title={t('camera.publish')}

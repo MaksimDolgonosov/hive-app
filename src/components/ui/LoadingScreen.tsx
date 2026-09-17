@@ -1,5 +1,7 @@
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
+import { Hexagon } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, Ellipse, RadialGradient, Stop } from 'react-native-svg';
@@ -11,10 +13,11 @@ import { en } from '@/src/i18n/locales/en';
 import { ru } from '@/src/i18n/locales/ru';
 import { useLocaleStore } from '@/src/stores/localeStore';
 
-const LIGHT_ICON = require('../../../assets/images/splash-icon.png');
 const DARK_ICON = require('../../../assets/Hive.icon/Assets/icon.png');
 const ICON_SIZE = 128;
 const ICON_RADIUS = Math.round(ICON_SIZE * 0.223);
+/** Как LogoMark на Screen/Splash в hive-design.pen: ромб ~106×92 внутри 128. */
+const LIGHT_MARK_SIZE = 90;
 const LIGHT_LOADER_COLOR = '#F5A623';
 const LIGHT_GLOW_COLOR = '#FF8C00';
 const DARK_LOGO_BACKING = '#13110C';
@@ -80,16 +83,26 @@ export function LoadingScreen({ bottomOffset = 0 }: LoadingScreenProps) {
             style={[
               styles.logoWrap,
               {
-                backgroundColor: isDark ? DARK_LOGO_BACKING : glowColor,
+                backgroundColor: isDark ? DARK_LOGO_BACKING : undefined,
                 shadowColor: glowColor,
               },
             ]}
           >
-            <Image
-              contentFit="cover"
-              source={isDark ? DARK_ICON : LIGHT_ICON}
-              style={styles.logoMark}
-            />
+            {isDark ? (
+              <Image contentFit="cover" source={DARK_ICON} style={styles.logoMark} />
+            ) : (
+              <LinearGradient
+                colors={[...theme.gradients.logoMark]}
+                end={{ x: 0.85, y: 1 }}
+                locations={theme.gradients.logoMarkLocations}
+                start={{ x: 0.15, y: 0 }}
+                style={styles.lightMark}
+              >
+                <View style={styles.lightDeco1} />
+                <View style={styles.lightDeco2} />
+                <Hexagon color="#FFFFFF" size={LIGHT_MARK_SIZE} strokeWidth={2} />
+              </LinearGradient>
+            )}
           </View>
         </View>
         <View style={styles.wordmark}>
@@ -157,6 +170,32 @@ const styles = StyleSheet.create({
     height: ICON_SIZE,
     borderRadius: ICON_RADIUS,
     overflow: 'hidden',
+  },
+  lightMark: {
+    width: ICON_SIZE,
+    height: ICON_SIZE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: ICON_RADIUS,
+    overflow: 'hidden',
+  },
+  lightDeco1: {
+    position: 'absolute',
+    top: 15,
+    left: 19,
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+  },
+  lightDeco2: {
+    position: 'absolute',
+    top: 70,
+    left: 79,
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
   },
   wordmark: {
     alignItems: 'center',

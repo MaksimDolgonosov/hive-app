@@ -23,13 +23,27 @@ export const EMPTY_SOCIAL_LINKS: UserSocialLinks = {
 export const PROFILE_BIO_MAX_LENGTH = 280;
 export const PROFILE_SOCIAL_LINK_MAX_LENGTH = 200;
 
+/**
+ * Тип аккаунта (§G11). Неизвестное значение трактуется как `personal`
+ * — см. `resolveAccountType`.
+ */
+export type AccountType = 'personal' | 'partner' | 'official';
+
 export interface User {
   id: UUID;
   username: string;
+  email?: string | null;
   avatarUrl: string | null;
   bio?: string | null;
   socialLinks?: UserSocialLinks;
+  accountType?: AccountType;
   createdAt: string;
+}
+
+/** Серверные настройки приватности (§G2, §G9). Живут только в React Query. */
+export interface UserPrivacySettings {
+  allowEcho: boolean;
+  allowSharing: boolean;
 }
 
 export interface UpdateProfileInput {
@@ -41,6 +55,8 @@ export interface ProfileStats {
   photos: number;
   hives: number;
   likes: number;
+  /** Число наград (§G5). Может отсутствовать на старом backend. */
+  awards?: number;
 }
 
 export interface ProfileOverview {
@@ -108,6 +124,8 @@ export interface Sting {
   authorId: UUID;
   authorUsername?: string;
   authorAvatarUrl?: string | null;
+  /** Тип аккаунта автора для бейджа (§G11). */
+  authorAccountType?: AccountType;
   imageUrl: string;
   thumbnailUrl: string;
   location: GeoPoint;
@@ -117,6 +135,8 @@ export interface Sting {
   reactionsCount: number;
   /** Текстовый комментарий автора (опционально). */
   comment?: string | null;
+  /** Публичная ссылка для шаринга (§G9). `null` — автор запретил шаринг. */
+  shareUrl?: string | null;
   /** Поставил ли текущий пользователь like (есть в GET /stings/:id и POST /reactions). */
   hasLiked?: boolean;
 }
@@ -175,9 +195,36 @@ export interface MapBounds {
   neLng: number;
 }
 
+/** Эфемерный фильтр маркеров карты (`RN_FRONTEND_TZ.md` §9). */
+export type MapFilter = 'all' | 'fresh' | 'hives' | 'expiring';
+
+/**
+ * Агрегированный след истёкших жал (§G2). Без фото, без автора и без точных
+ * координат: центр — это центр H3-ячейки, а не место съёмки.
+ */
+export interface StingEchoCell {
+  cellId: string;
+  center: GeoPoint;
+  count: number;
+  lastSeenAt: string;
+}
+
 export interface StingsNearbyResponse {
   stings: Sting[];
   hives: Hive[];
+  /** Приходит только при `includeEchoes=true` (§G2). */
+  echoes?: StingEchoCell[];
+  /** Область, которую сервер фактически применил (§G3). */
+  appliedBounds?: MapBounds;
+  /** Сервер расширил область, чтобы набрать `minResults` (§G3). */
+  expanded?: boolean;
+  appliedRadiusM?: number;
+}
+
+export interface NearestStingsResponse {
+  stings: Sting[];
+  /** `null` — активных жал нет вовсе (§G3). */
+  distanceM: number | null;
 }
 
 export interface HiveDetailResponse {
@@ -202,6 +249,185 @@ export interface UserHiveSummary extends Hive {
 export interface UserHivesPage {
   hives: UserHiveSummary[];
   nextCursor: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// Зоны и TTL (§G1) / вейтлист (§G8.3)
+// ---------------------------------------------------------------------------
+
+export type ZoneStatus = 'open' | 'waitlist';
+
+export interface Zone {
+  id: string;
+  status: ZoneStatus;
+  /** Фактический TTL, который применится к публикации в этой зоне. */
+  ttlSec: number;
+  activeStings: number;
+  /** В зоне не было ни одного жала за всё время (§G5). */
+  isFirstEver: boolean;
+  /** Только при `status: 'waitlist'` (§G8.3). */
+  waitlistCount?: number;
+  threshold?: number;
+}
+
+export interface WaitlistResponse {
+  zoneId: string;
+  status: ZoneStatus;
+  currentCount: number;
+  threshold: number;
+}
+
+// ---------------------------------------------------------------------------
+// Награды (§G5, §G13)
+// ---------------------------------------------------------------------------
+
+export type AwardType = 'zone_first' | 'zone_revival' | 'hive_ignited' | 'hive_founder';
+
+export interface Award {
+  id?: UUID;
+  type: AwardType;
+  zoneId: string;
+  stingId?: UUID;
+  hiveId?: UUID;
+  center?: GeoPoint;
+  createdAt: string;
+}
+
+export interface AwardsPage {
+  awards: Award[];
+  nextCursor: string | null;
+}
+
+/** Ответ `POST /stings` (§G1, §G5). */
+export interface PublishStingResponse {
+  sting: Sting;
+  ttlSec?: number;
+  zone?: Pick<Zone, 'id' | 'status' | 'ttlSec'>;
+  awards?: Award[];
+}
+
+// ---------------------------------------------------------------------------
+// Обзор карты на дальнем зуме (§G4)
+// ---------------------------------------------------------------------------
+
+export interface MapOverviewCluster {
+  cellId: string;
+  center: GeoPoint;
+  radiusM: number;
+  activeStingsCount: number;
+  activeHivesCount: number;
+  /** Название из реверс-геокодинга; клиент обязан выдержать `null`. */
+  label: string | null;
+}
+
+export interface MapOverviewResponse {
+  clusters: MapOverviewCluster[];
+  resolution: number;
+}
+
+// ---------------------------------------------------------------------------
+// Кампании и «час улья» (§G7)
+// ---------------------------------------------------------------------------
+
+export type CampaignKind = 'hive_hour' | 'event';
+
+export interface Campaign {
+  id: UUID;
+  kind: CampaignKind;
+  /** Ключ i18n для заголовка, напр. `campaign.hiveHour`. */
+  i18nKey: string;
+  startsAt: string;
+  endsAt: string;
+  ttlBonusSec: number;
+  participantsCount?: number;
+}
+
+export interface ActiveCampaignsResponse {
+  campaigns: Campaign[];
+}
+
+// ---------------------------------------------------------------------------
+// Инвайты (§G8)
+// ---------------------------------------------------------------------------
+
+export interface Invite {
+  code: string;
+  url?: string;
+  usesLimit: number;
+  usesCount: number;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface CreatedInvite {
+  code: string;
+  url: string;
+  usesLeft: number;
+  expiresAt: string;
+}
+
+export interface MyInvitesResponse {
+  invites: Invite[];
+  acceptedCount: number;
+  usesLeft: number;
+}
+
+export interface PublicInviteResponse {
+  valid: boolean;
+  ownerUsername: string | null;
+  zoneCenter: GeoPoint | null;
+}
+
+// ---------------------------------------------------------------------------
+// Push-уведомления (§G10)
+// ---------------------------------------------------------------------------
+
+export interface NotificationSettings {
+  reactions: boolean;
+  nearbyActivity: boolean;
+  campaigns: boolean;
+  expiringSting: boolean;
+  inviteAccepted: boolean;
+}
+
+export type NotificationSettingKey = keyof NotificationSettings;
+
+export interface RegisterDeviceInput {
+  expoPushToken: string;
+  platform: 'ios' | 'android';
+  deviceId: string;
+  locale: string;
+  timezone: string;
+}
+
+// ---------------------------------------------------------------------------
+// Аналитика роста (§G12)
+// ---------------------------------------------------------------------------
+
+export type AnalyticsEventName =
+  | 'app_open'
+  | 'session_start'
+  | 'map_empty_shown'
+  | 'empty_cta_tap'
+  | 'nearest_sting_opened'
+  | 'first_sting_published'
+  | 'sting_published'
+  | 'invite_created'
+  | 'share_opened'
+  | 'push_opened'
+  | 'campaign_banner_shown'
+  | 'waitlist_submitted'
+  | 'seed_marker_tap';
+
+/**
+ * Событие аналитики. В `props` запрещены персональные данные: email, точные
+ * координаты пользователя, `authorId` (§G12). Гео — только `zoneId`.
+ */
+export interface AnalyticsEvent {
+  name: AnalyticsEventName;
+  occurredAt: string;
+  zoneId?: string;
+  props?: Record<string, string | number | boolean | null>;
 }
 
 export interface ApiErrorBody {

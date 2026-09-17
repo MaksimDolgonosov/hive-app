@@ -21,6 +21,8 @@ import {
 } from './onboarding-storage';
 import { useSavedMapPlacesStore } from './savedMapPlacesStore';
 import { clearTokens, loadTokens, saveTokens } from './secure-storage';
+import { clearPendingInviteCode, loadPendingInviteCode } from './invite-storage';
+import { unregisterPushDevice } from '@/src/utils/push-device';
 
 type ResetPasswordResult = 'session' | 'login_required';
 
@@ -47,7 +49,6 @@ interface AuthState {
   clearSession: () => Promise<void>;
   hydrate: () => Promise<void>;
   completeOnboarding: () => Promise<void>;
-  resetOnboarding: () => Promise<void>;
   setPendingOtp: (input: {
     email: string;
     purpose: OtpPurpose;
@@ -190,11 +191,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ hasCompletedOnboarding: true });
   },
 
-  resetOnboarding: async () => {
-    await clearOnboardingCompleted();
-    set({ hasCompletedOnboarding: false });
-  },
-
   setPendingOtp: ({ email, purpose, expiresInSec, resendAvailableInSec }) => {
     const sameEmail = get().pendingEmail === email;
     set({
@@ -215,7 +211,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   register: async (input) => {
-    const challenge = await authApi.register(input);
+    const inviteCode = await loadPendingInviteCode();
+    const challenge = await authApi.register({
+      ...input,
+      ...(inviteCode ? { inviteCode } : {}),
+    });
     set(pendingFromChallenge(challenge));
   },
 
@@ -229,13 +229,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (get().refreshToken || get().accessToken) {
       await get().clearSession();
     }
-    const { user, tokens } = await authApi.loginWithGoogle(input);
+    const inviteCode = await loadPendingInviteCode();
+    const { user, tokens } = await authApi.loginWithGoogle({
+      ...input,
+      ...(inviteCode ? { inviteCode } : {}),
+    });
     await get().setSession(user, tokens);
+    await clearPendingInviteCode();
   },
 
   verifyOtp: async (input) => {
     const { user, tokens } = await authApi.verifyOtp(input);
     await get().setSession(user, tokens);
+    await clearPendingInviteCode();
   },
 
   resendOtp: async (input) => {
@@ -271,6 +277,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
+    await unregisterPushDevice();
     const refreshToken = get().refreshToken;
     if (refreshToken) {
       try {

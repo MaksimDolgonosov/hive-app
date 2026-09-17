@@ -17,8 +17,7 @@ import { prepareStingPhotoForUpload } from '@/src/utils/prepare-sting-upload';
 const CAPTURE_JPEG_QUALITY = 0.9;
 
 export type CaptureResult =
-  | { ok: true }
-  | { ok: false; reason: 'location_denied' | 'location_unavailable' | 'camera' };
+  { ok: true } | { ok: false; reason: 'location_denied' | 'location_unavailable' | 'camera' };
 
 type CaptureCoords = {
   latitude: number;
@@ -28,10 +27,12 @@ type CaptureCoords = {
   source: 'locationStore' | 'mapRegion';
 };
 
-function resolveCaptureCoordsFromStore(mapRegion: {
-  latitude: number;
-  longitude: number;
-} | null): CaptureCoords | null {
+function resolveCaptureCoordsFromStore(
+  mapRegion: {
+    latitude: number;
+    longitude: number;
+  } | null,
+): CaptureCoords | null {
   const storedCoords = useLocationStore.getState().coords;
 
   if (storedCoords) {

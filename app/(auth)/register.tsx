@@ -1,6 +1,6 @@
 import { Link, router } from 'expo-router';
 import { Lock, Mail, User } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -11,7 +11,9 @@ import { AuthLogo } from '@/src/components/auth/AuthLogo';
 import { AuthScreenLayout } from '@/src/components/auth/AuthScreenLayout';
 import { AuthSocialLogin } from '@/src/components/auth/AuthSocialLogin';
 import { PrivacyConsentCheckbox } from '@/src/components/auth/PrivacyConsentCheckbox';
+import { usePublicInvite } from '@/src/hooks/useInvites';
 import { useAuthStore } from '@/src/stores/authStore';
+import { loadPendingInviteCode } from '@/src/stores/invite-storage';
 import { getApiErrorCode, getApiErrorMessage } from '@/src/utils/api-error';
 import { privacyPolicyHref, verifyOtpHref } from '@/src/utils/auth-navigation';
 import { isValidEmail, normalizeEmail } from '@/src/utils/email';
@@ -31,6 +33,12 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(true);
   const [privacyError, setPrivacyError] = useState<string | undefined>();
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const publicInvite = usePublicInvite(inviteCode);
+
+  useEffect(() => {
+    void loadPendingInviteCode().then(setInviteCode);
+  }, []);
 
   function clearFieldErrors() {
     setUsernameError(undefined);
@@ -117,6 +125,15 @@ export default function RegisterScreen() {
       <AuthLogo />
 
       <AuthFormCard title={t('auth.registerTitle')} subtitle={t('auth.registerCardSubtitle')}>
+        {publicInvite.data?.valid && publicInvite.data.ownerUsername ? (
+          <Text className="mb-3 text-center font-inter text-sm font-semibold text-hive-primary">
+            {t('invite.invitedBy', { username: publicInvite.data.ownerUsername })}
+          </Text>
+        ) : publicInvite.data && !publicInvite.data.valid ? (
+          <Text className="mb-3 text-center font-inter text-sm text-hive-muted">
+            {t('errors.INVITE_EXPIRED')}
+          </Text>
+        ) : null}
         <AuthInput
           autoCapitalize="words"
           autoComplete="name"

@@ -95,9 +95,12 @@ export function StingMarkerCapture({ sting, onCaptured }: StingMarkerCaptureProp
   }, [onCaptured, sting.id]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      void capture();
-    }, displayUri ? 200 : 80);
+    const timer = setTimeout(
+      () => {
+        void capture();
+      },
+      displayUri ? 200 : 80,
+    );
 
     return () => clearTimeout(timer);
   }, [capture, displayUri]);

@@ -11,11 +11,32 @@ export function normalizeUserSocialLinks(links?: UserSocialLinks | null): UserSo
   };
 }
 
+export function withInstagramVisibility(
+  links: UserSocialLinks,
+  instagramLinksAllowed: boolean,
+): UserSocialLinks {
+  if (instagramLinksAllowed) {
+    return links;
+  }
+
+  return { ...links, instagram: null };
+}
+
+export function editableSocialLinkKeys(instagramLinksAllowed: boolean): SocialLinkKey[] {
+  if (instagramLinksAllowed) {
+    return [...SOCIAL_LINK_KEYS];
+  }
+
+  return SOCIAL_LINK_KEYS.filter((key) => key !== 'instagram');
+}
+
 export function hasAnySocialLink(links: UserSocialLinks): boolean {
   return SOCIAL_LINK_KEYS.some((key) => Boolean(links[key]));
 }
 
-export function getActiveSocialLinks(links: UserSocialLinks): Array<{ key: SocialLinkKey; url: string }> {
+export function getActiveSocialLinks(
+  links: UserSocialLinks,
+): Array<{ key: SocialLinkKey; url: string }> {
   return SOCIAL_LINK_KEYS.flatMap((key) => {
     const url = links[key];
     return url ? [{ key, url }] : [];

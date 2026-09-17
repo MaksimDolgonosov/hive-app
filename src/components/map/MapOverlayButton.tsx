@@ -42,7 +42,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: BUTTON_SIZE / 2,
-    backgroundColor: Platform.OS === 'android' ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 255, 255, 0.58)',
+    backgroundColor:
+      Platform.OS === 'android' ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 255, 255, 0.58)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.5)',
     overflow: 'hidden',

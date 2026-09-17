@@ -23,6 +23,20 @@ export const DEFAULT_MAP_REGION: MapRegion = {
 export const FEED_REGION_DELTA = 0.05;
 export const USER_MAP_REGION_DELTA = 0.01;
 
+/** Порог дальнего зума для слоя обзора города (§G4). */
+export const OVERVIEW_DELTA_THRESHOLD = 0.5;
+export const OVERVIEW_ENTER_DELTA = OVERVIEW_DELTA_THRESHOLD * 1.1;
+export const OVERVIEW_EXIT_DELTA = OVERVIEW_DELTA_THRESHOLD * 0.9;
+
+/** Приблизительный zoom Google Maps из latitudeDelta. */
+export function regionZoom(latitudeDelta: number): number {
+  if (latitudeDelta <= 0) {
+    return 12;
+  }
+
+  return Math.max(1, Math.min(20, Math.log2(360 / latitudeDelta)));
+}
+
 export function isDefaultMapRegion(region: MapRegion): boolean {
   return (
     Math.abs(region.latitude - DEFAULT_MAP_REGION.latitude) < 0.0001 &&

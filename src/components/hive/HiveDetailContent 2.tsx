@@ -113,7 +113,9 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
           </View>
         ) : null}
 
-        {isLoading && !data ? <HivePhotoList isLoading stings={[]} onPressSting={openSting} /> : null}
+        {isLoading && !data ? (
+          <HivePhotoList isLoading stings={[]} onPressSting={openSting} />
+        ) : null}
 
         {isError ? (
           <Text className="py-8 text-center font-inter text-sm text-hive-muted">

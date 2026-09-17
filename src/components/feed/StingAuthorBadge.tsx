@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
 import { Pressable, Text, View } from 'react-native';
 
+import { AccountTypeBadge } from '@/src/components/feed/AccountTypeBadge';
 import { getProfileInitials } from '@/src/components/profile/ProfileAvatar';
 import { buildAvatarDisplayUri } from '@/src/utils/avatar-url';
 import { HiveTheme } from '@/src/theme/tokens';
@@ -11,6 +12,7 @@ type StingAuthorBadgeProps = {
   username: string;
   avatarUrl: string | null;
   avatarCacheVersion?: number;
+  accountType?: string | null;
   onPress?: () => void;
 };
 
@@ -18,6 +20,7 @@ export function StingAuthorBadge({
   username,
   avatarUrl,
   avatarCacheVersion = 0,
+  accountType,
   onPress,
 }: StingAuthorBadgeProps) {
   const displayUri = avatarUrl ? buildAvatarDisplayUri(avatarUrl, avatarCacheVersion) : null;
@@ -57,6 +60,7 @@ export function StingAuthorBadge({
       >
         {username}
       </Text>
+      <AccountTypeBadge accountType={accountType} />
     </View>
   );
 

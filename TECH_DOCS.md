@@ -24,73 +24,73 @@
 
 Отвечает только за композицию экранов и навигацию. Не содержит бизнес-логики — экраны импортируют хуки/компоненты из `src/` и просто их компонуют.
 
-| Путь                          | Назначение                                                                                                                                                                   |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/_layout.tsx`             | Корневой layout: подключение провайдеров (React Query, Zustand hydration, тема), auth-guard (редирект на `(onboarding)` или `(tabs)` в зависимости от состояния `authStore`) |
-| `app/(tabs)/_layout.tsx`      | Таб-бар с тремя вкладками: Карта / Рядом / Профиль                                                                                                                           |
-| `app/(tabs)/index.tsx`        | Экран карты — рендерит `MapContainer`, подписан на `mapStore` и `useStingsNearby`                                                                                            |
-| `app/(tabs)/nearby.tsx`       | Лента ближайших жал списком (альтернатива карте для плохого GPS/предпочтений)                                                                                                |
-| `app/(tabs)/profile.tsx`      | Профиль, настройки, выход                                                                                                                                                    |
-| `app/(modals)/_layout.tsx`    | Stack-навигатор с `presentation: 'modal'` для camera/preview/sting-detail                                                                                                    |
-| `app/(modals)/camera.tsx`     | Полноэкранная камера                                                                                                                                                         |
-| `app/(modals)/preview.tsx`    | Просмотр снятого фото перед публикацией + подтверждение                                                                                                                      |
-| `app/(modals)/sting/[id].tsx` | Детальный просмотр одного жала по id                                                                                                                                         |
-| `app/(onboarding)/*`          | Линейный флоу из 3 шагов, показывается один раз (флаг в `authStore`/AsyncStorage)                                                                                            |
+| Путь | Назначение |
+|---|---|
+| `app/_layout.tsx` | Корневой layout: подключение провайдеров (React Query, Zustand hydration, тема), auth-guard (редирект на `(onboarding)` или `(tabs)` в зависимости от состояния `authStore`) |
+| `app/(tabs)/_layout.tsx` | Таб-бар с тремя вкладками: Карта / Рядом / Профиль |
+| `app/(tabs)/index.tsx` | Экран карты — рендерит `MapContainer`, подписан на `mapStore` и `useStingsNearby` |
+| `app/(tabs)/nearby.tsx` | Лента ближайших жал списком (альтернатива карте для плохого GPS/предпочтений) |
+| `app/(tabs)/profile.tsx` | Профиль, настройки, выход |
+| `app/(modals)/_layout.tsx` | Stack-навигатор с `presentation: 'modal'` для camera/preview/sting-detail |
+| `app/(modals)/camera.tsx` | Полноэкранная камера |
+| `app/(modals)/preview.tsx` | Просмотр снятого фото перед публикацией + подтверждение |
+| `app/(modals)/sting/[id].tsx` | Детальный просмотр одного жала по id |
+| `app/(onboarding)/*` | Линейный флоу из 3 шагов, показывается один раз (флаг в `authStore`/AsyncStorage) |
 
 **Auth-guard**: логика в корневом `_layout.tsx` — читает `authStore.status` (`idle | authenticated | unauthenticated`) и вызывает `router.replace()` соответственно. Экраны `(tabs)` и `(modals)` не должны сами проверять авторизацию.
 
 ### 1.2 `src/api/` — HTTP/WS клиент
 
-| Файл           | Назначение                                                                                                                                                                                                                                                |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `client.ts`    | Единственный `axios.create()` инстанс. Interceptor на request — подставляет `Authorization: Bearer <accessToken>` из `authStore`. Interceptor на response 401 — пытается `refreshToken`, при неудаче — logout. Базовый URL из `app.json` → `extra.apiUrl` |
-| `auth.ts`      | Обёртки над эндпоинтами `/auth/*` (см. раздел 3.1)                                                                                                                                                                                                        |
-| `stings.ts`    | Обёртки над `/stings/*` (см. 3.2)                                                                                                                                                                                                                         |
-| `hives.ts`     | Обёртки над `/hives/*` (см. 3.3)                                                                                                                                                                                                                          |
-| `websocket.ts` | Синглтон-менеджер сокета: `connect()`, `disconnect()`, `subscribe(event, cb)`, авто-reconnect с экспоненциальным backoff, ре-подписка на регион карты при reconnect                                                                                       |
+| Файл | Назначение |
+|---|---|
+| `client.ts` | Единственный `axios.create()` инстанс. Interceptor на request — подставляет `Authorization: Bearer <accessToken>` из `authStore`. Interceptor на response 401 — пытается `refreshToken`, при неудаче — logout. Базовый URL из `app.json` → `extra.apiUrl` |
+| `auth.ts` | Обёртки над эндпоинтами `/auth/*` (см. раздел 3.1) |
+| `stings.ts` | Обёртки над `/stings/*` (см. 3.2) |
+| `hives.ts` | Обёртки над `/hives/*` (см. 3.3) |
+| `websocket.ts` | Синглтон-менеджер сокета: `connect()`, `disconnect()`, `subscribe(event, cb)`, авто-reconnect с экспоненциальным backoff, ре-подписка на регион карты при reconnect |
 
 Каждый файл экспортирует только async-функции, возвращающие уже типизированные данные (не `AxiosResponse`) — форма ответа описана в разделе 3.
 
 ### 1.3 `src/components/`
 
-| Модуль                     | Назначение                                                                                                                                                                                    |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `map/MapContainer.tsx`     | Обёртка над `react-native-maps`. Держит `region`, дебаунсит изменение региона (300мс) и триггерит `useStingsNearby` с новыми bounds. Рендерит `StingMarker`/`HiveCircle` из полученных данных |
-| `map/StingMarker.tsx`      | Одиночный пин. Цвет/прозрачность зависят от `expiresAt` (см. `useCountdown`)                                                                                                                  |
-| `map/HiveCircle.tsx`       | Кластерный маркер. Размер/пульсация зависят от `photoCount`. При тапе — открывает `HiveBottomSheet` через `mapStore.selectedHiveId`                                                           |
-| `camera/CameraView.tsx`    | Обёртка над `expo-camera`. Не содержит UI кнопок — только видоискатель + permission-стейт                                                                                                     |
-| `camera/CaptureButton.tsx` | Кнопка затвора. На `onPress` — haptic (`utils/haptics.ts`) + вызывает `useCamera().capture()`                                                                                                 |
-| `ui/Timer.tsx`             | Презентационный компонент обратного отсчёта, принимает `expiresAt`, сам ничего не запрашивает (использует `useCountdown` внутри)                                                              |
-| `ui/Avatar.tsx`            | Аватар пользователя с фоллбеком на инициалы                                                                                                                                                   |
-| `ui/HiveBottomSheet.tsx`   | Bottom sheet со списком фото улья. Данные — через `useQuery(['hive', id])`                                                                                                                    |
-| `feed/NearbyCard.tsx`      | Карточка для `nearby.tsx` — превью, дистанция, таймер                                                                                                                                         |
+| Модуль | Назначение |
+|---|---|
+| `map/MapContainer.tsx` | Обёртка над `react-native-maps`. Держит `region`, дебаунсит изменение региона (300мс) и триггерит `useStingsNearby` с новыми bounds. Рендерит `StingMarker`/`HiveCircle` из полученных данных |
+| `map/StingMarker.tsx` | Одиночный пин. Цвет/прозрачность зависят от `expiresAt` (см. `useCountdown`) |
+| `map/HiveCircle.tsx` | Кластерный маркер. Размер/пульсация зависят от `photoCount`. При тапе — открывает `HiveBottomSheet` через `mapStore.selectedHiveId` |
+| `camera/CameraView.tsx` | Обёртка над `expo-camera`. Не содержит UI кнопок — только видоискатель + permission-стейт |
+| `camera/CaptureButton.tsx` | Кнопка затвора. На `onPress` — haptic (`utils/haptics.ts`) + вызывает `useCamera().capture()` |
+| `ui/Timer.tsx` | Презентационный компонент обратного отсчёта, принимает `expiresAt`, сам ничего не запрашивает (использует `useCountdown` внутри) |
+| `ui/Avatar.tsx` | Аватар пользователя с фоллбеком на инициалы |
+| `ui/HiveBottomSheet.tsx` | Bottom sheet со списком фото улья. Данные — через `useQuery(['hive', id])` |
+| `feed/NearbyCard.tsx` | Карточка для `nearby.tsx` — превью, дистанция, таймер |
 
 ### 1.4 `src/hooks/`
 
-| Хук                  | Назначение                                                                                                                                                                                          |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `useLocation.ts`     | Обёртка над `expo-location`. Возвращает `{ coords, accuracy, status }`, следит за permission, при `accuracy > 50м` возвращает флаг `isLowAccuracy` для UI-предупреждения перед публикацией          |
+| Хук | Назначение |
+|---|---|
+| `useLocation.ts` | Обёртка над `expo-location`. Возвращает `{ coords, accuracy, status }`, следит за permission, при `accuracy > 50м` возвращает флаг `isLowAccuracy` для UI-предупреждения перед публикацией |
 | `useStingsNearby.ts` | React Query hook: `useQuery(['stings', bounds], () => stings.getNearby(bounds))`. `staleTime` короткий (30с), т.к. данные "живые"; инвалидируется также WS-событием `sting:created`/`sting:expired` |
-| `useCamera.ts`       | Инкапсулирует запрос permissions, вызов `expo-camera`, запись временного файла, передачу его в `cameraStore`                                                                                        |
-| `useCountdown.ts`    | `(expiresAt: string) => { remainingMs, remainingLabel, isExpired }`. Обновляется через `setInterval` 1 раз/сек, останавливается при `isExpired`                                                     |
+| `useCamera.ts` | Инкапсулирует запрос permissions, вызов `expo-camera`, запись временного файла, передачу его в `cameraStore` |
+| `useCountdown.ts` | `(expiresAt: string) => { remainingMs, remainingLabel, isExpired }`. Обновляется через `setInterval` 1 раз/сек, останавливается при `isExpired` |
 
 ### 1.5 `src/stores/` (Zustand)
 
-| Store            | Состояние                                                                                                                                              |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `authStore.ts`   | `user`, `accessToken`, `refreshToken`, `status`, `hasCompletedOnboarding`. Персистится в `expo-secure-store` (токены) / AsyncStorage (флаг онбординга) |
-| `mapStore.ts`    | `region`, `selectedHiveId`, `selectedStingId` — чисто UI-состояние карты, не серверные данные (те — в React Query кэше)                                |
-| `cameraStore.ts` | `capturedUri`, `captureCoords`, `captureAccuracy` — временное состояние между `camera.tsx` и `preview.tsx`, очищается после публикации или отмены      |
+| Store | Состояние |
+|---|---|
+| `authStore.ts` | `user`, `accessToken`, `refreshToken`, `status`, `hasCompletedOnboarding`. Персистится в `expo-secure-store` (токены) / AsyncStorage (флаг онбординга) |
+| `mapStore.ts` | `region`, `selectedHiveId`, `selectedStingId` — чисто UI-состояние карты, не серверные данные (те — в React Query кэше) |
+| `cameraStore.ts` | `capturedUri`, `captureCoords`, `captureAccuracy` — временное состояние между `camera.tsx` и `preview.tsx`, очищается после публикации или отмены |
 
 **Принцип разделения:** серверные данные (жала, ульи, профиль) живут в React Query. Zustand — только для эфемерного клиентского UI-состояния и авторизации. Это исключает дублирование источника истины.
 
 ### 1.6 `src/utils/`
 
-| Файл            | Назначение                                                                                                                                                                                                                                                                                                             |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `geo.ts`        | `haversineDistance(a, b)`, `isWithinRadius(point, center, radiusM)` — используется для клиентской проверки перед отправкой (сервер всегда перепроверяет)                                                                                                                                                               |
+| Файл | Назначение |
+|---|---|
+| `geo.ts` | `haversineDistance(a, b)`, `isWithinRadius(point, center, radiusM)` — используется для клиентской проверки перед отправкой (сервер всегда перепроверяет) |
 | `validation.ts` | Клиентские проверки перед аплоадом: свежесть EXIF-таймстампа фото относительно текущего момента (защита от re-upload старых фото), проверка что файл пришёл из `capturedUri` камеры, а не из document picker. **Это только UX-предупреждение** — авторитетная проверка анти-спуфинга обязана быть на сервере (см. 5.3) |
-| `haptics.ts`    | Именованные паттерны (`impactCapture`, `notifyPublishSuccess`) поверх `expo-haptics`, чтобы не разбрасывать сырые вызовы по компонентам                                                                                                                                                                                |
+| `haptics.ts` | Именованные паттерны (`impactCapture`, `notifyPublishSuccess`) поверх `expo-haptics`, чтобы не разбрасывать сырые вызовы по компонентам |
 
 ### 1.7 `src/types/index.ts`
 
@@ -122,13 +122,13 @@ interface Sting {
     lat: number;
     lng: number;
   };
-  hiveId: UUID | null;
-  createdAt: string;
-  expiresAt: string;
+  hiveId: UUID | null;      // null, если пока одиночное (для seed при includeSeeds=false тоже null в nearby)
+  createdAt: string;        // ISO 8601
+  expiresAt: string;        // ISO 8601, TTL зоны (+ бонусы кампании/улья, ≤ 72ч)
   reactionsCount: number;
   comment: string | null;
   shareUrl: string | null;
-  hasLiked?: boolean;
+  hasLiked?: boolean;       // для авторизованных GET-запросов
 }
 
 interface Hive {
@@ -145,9 +145,9 @@ interface Hive {
 }
 
 interface AuthTokens {
-  accessToken: string; // JWT, TTL ~15 мин
-  refreshToken: string; // TTL ~30 дней
-  expiresAt: string; // ISO 8601, срок действия accessToken
+  accessToken: string;   // JWT, TTL ~15 мин
+  refreshToken: string;  // TTL ~30 дней
+  expiresAt: string;     // ISO 8601, срок действия accessToken
 }
 ```
 
@@ -155,7 +155,7 @@ interface AuthTokens {
 
 ## 3. API контракты
 
-Базовый префикс: `/api/v1`. Формат: JSON. Аутентификация — `Authorization: Bearer <accessToken>` для всех эндпоинтов, кроме `/auth/register`, `/auth/login`, `/auth/otp/*`, `/auth/password/forgot`, `/auth/password/reset`, `/auth/refresh`.
+Базовый префикс: `/api/v1`. Формат: JSON. Аутентификация — `Authorization: Bearer <accessToken>` для всех эндпоинтов, кроме `/auth/register`, `/auth/otp/verify`, `/auth/otp/resend`, `/auth/login`, `/auth/password/forgot`, `/auth/password/reset`, `/auth/refresh`.
 
 Единый формат ошибки:
 
@@ -171,10 +171,9 @@ interface AuthTokens {
 
 ### 3.1 Auth
 
-Публичные эндпоинты OTP и сброса пароля вызываются **без Bearer**; на клиенте — с `skipAuthRefresh: true`. Регистрация **не** выдаёт сессию до успешного `otp/verify`.
+Регистрация по email — двухшаговая: `register` создаёт пользователя `pending` и шлёт 6-значный OTP (TTL 10 минут, max 5 попыток, cooldown resend 60 с). Токены выдаются только после `otp/verify`. Сброс пароля — вариант A (один запрос `password/reset` с email + code + newPassword); после успеха все refresh-токены отзываются и выдаётся новая сессия.
 
 #### `POST /auth/register`
-
 ```json
 // Request
 { "email": "user@example.com", "password": "string", "username": "string" }
@@ -188,23 +187,30 @@ interface AuthTokens {
   "resendAvailableInSec": 60
 }
 
-// Response 409 USER_ALREADY_EXISTS — email уже подтверждён
+// Response 409 — email уже подтверждён или username занят
+{ "error": { "code": "USER_ALREADY_EXISTS", "message": "..." } }
 ```
 
+Если email есть, но `emailVerified=false`, пароль/username обновляются и высылается новый код (токены не выдаются).
+
 #### `POST /auth/otp/verify`
-
-Только `purpose: "register"`. Успех активирует аккаунт и выдаёт сессию.
-
 ```json
 // Request
 { "email": "user@example.com", "code": "123456", "purpose": "register" }
 
 // Response 200
 { "user": User, "tokens": AuthTokens }
+
+// Response 400
+{ "error": { "code": "OTP_INVALID" | "OTP_EXPIRED" | "OTP_MAX_ATTEMPTS", "message": "..." } }
+
+// Response 404
+{ "error": { "code": "OTP_NOT_FOUND", "message": "..." } }
 ```
 
-#### `POST /auth/otp/resend`
+Побочные эффекты: `emailVerified=true`, `status=active`.
 
+#### `POST /auth/otp/resend`
 ```json
 // Request
 { "email": "user@example.com", "purpose": "register" | "password_reset" }
@@ -217,12 +223,14 @@ interface AuthTokens {
   "expiresInSec": 600,
   "resendAvailableInSec": 60
 }
+
+// Response 429 — слишком рано или превышен лимит отправок
+{ "error": { "code": "OTP_RESEND_COOLDOWN" | "OTP_RATE_LIMITED", "message": "...", "details": { "retryAfterSec": 42 } } }
 ```
 
-Для `password_reset` ответ одинаков, даже если email не найден (anti-enumeration).
+Для `purpose=password_reset`: даже если email не найден, возвращается тот же успешный ответ (anti-enumeration).
 
 #### `POST /auth/login`
-
 ```json
 // Request
 { "email": "user@example.com", "password": "string" }
@@ -230,10 +238,10 @@ interface AuthTokens {
 // Response 200
 { "user": User, "tokens": AuthTokens }
 
-// Response 401 INVALID_CREDENTIALS
+// Response 401
 { "error": { "code": "INVALID_CREDENTIALS", "message": "..." } }
 
-// Response 403 EMAIL_NOT_VERIFIED — credentials верны, email не подтверждён
+// Response 403 — аккаунт не подтверждён; клиент открывает экран OTP и может вызвать /auth/otp/resend
 {
   "error": {
     "code": "EMAIL_NOT_VERIFIED",
@@ -244,12 +252,11 @@ interface AuthTokens {
 ```
 
 #### `POST /auth/password/forgot`
-
 ```json
 // Request
 { "email": "user@example.com" }
 
-// Response 200 — всегда одинаковый UX, без утечки существования аккаунта
+// Response 200 — всегда, в том числе если email не существует (anti-enumeration)
 {
   "status": "otp_sent",
   "email": "user@example.com",
@@ -260,21 +267,17 @@ interface AuthTokens {
 ```
 
 #### `POST /auth/password/reset`
-
-Один запрос: код + новый пароль (вариант A).
-
 ```json
 // Request
 { "email": "user@example.com", "code": "123456", "newPassword": "string" }
 
-// Response 200 — сессия выдана
+// Response 200
 { "user": User, "tokens": AuthTokens }
-
-// Response 204 — сессия не выдана, клиент ведёт на login
 ```
 
-#### `POST /auth/refresh`
+После успеха старый пароль больше не работает, все refresh-токены пользователя отозваны.
 
+#### `POST /auth/refresh`
 ```json
 // Request
 { "refreshToken": "string" }
@@ -286,7 +289,6 @@ interface AuthTokens {
 ```
 
 #### `POST /auth/logout`
-
 ```json
 // Request
 { "refreshToken": "string" }
@@ -294,8 +296,23 @@ interface AuthTokens {
 // Response 204
 ```
 
-#### `GET /auth/me`
+#### `GET /auth/me/stats`
 
+Активная статистика профиля (только неистёкшие жala, TTL 4 часа).
+
+```json
+// Response 200
+{
+  "stats": {
+    "photos": 3,
+    "hives": 1,
+    "likes": 12
+  },
+  "recentPhotos": ["https://.../thumb.jpg"]
+}
+```
+
+#### `GET /auth/me`
 ```json
 // Response 200
 { "user": User }
@@ -316,16 +333,15 @@ interface AuthTokens {
 ### 3.2 Stings
 
 #### `GET /stings/nearby`
-
 Запрос жал в пределах видимой области карты. Возвращает только **активные** (не истёкшие) жала; истёкшие сервер не отдаёт вовсе.
 
 ```
 Query params:
   swLat, swLng, neLat, neLng   — bounding box видимой карты (обязательные)
-  includeEchoes?: boolean      — default false
-  includeSeeds?: boolean       — default false
-  minResults?: number          — 0..50
-  maxRadiusM?: number          — default 50000
+  includeEchoes?: boolean      — default false; ячейки эха истёкших жал
+  includeSeeds?: boolean       — default false; seed-кластеры в hives[]
+  minResults?: number          — 0..50, расширять bbox пока не наберётся столько жал
+  maxRadiusM?: number          — предел расширения, default 50000
 ```
 
 ```json
@@ -333,17 +349,21 @@ Query params:
 {
   "stings": Sting[],
   "hives": Hive[],
-  "echoes": [],
+  "echoes": [{ "cellId": "8911aa...", "center": { "lat": 0, "lng": 0 }, "count": 4, "lastSeenAt": "..." }],
   "appliedBounds": { "swLat": 0, "swLng": 0, "neLat": 0, "neLng": 0 },
   "expanded": false,
   "appliedRadiusM": 1200
 }
 ```
 
+Без новых параметров поведение прежнее: `expanded: false`, `appliedBounds` = запрошенный bbox, `hives` только `stage: 'hive'`. При `includeSeeds=false` жала seed-кластеров приходят в `stings[]` с `hiveId: null`, чтобы старый клиент их не прятал.
+
+#### `GET /stings/nearest`
+`lat`, `lng`, `limit` 1..10. `$geoNear`, max 300 км. `{ stings, distanceM }` (`distanceM` = null, если активных жал нет).
+
 > Сервер сам решает кластеризацию: жала, попавшие в `hiveId`, не дублируются как отдельные точки на карте — клиент рендерит `HiveCircle` вместо набора `StingMarker`.
 
 #### `POST /stings`
-
 Публикация нового жала. **Только multipart** — фото передаётся файлом, не base64/URL.
 
 ```
@@ -355,7 +375,6 @@ fields:
   lng: number
   accuracy: number          // метры, точность GPS в момент съёмки
   capturedAt: string        // ISO 8601, клиентский таймстамп съёмки
-  comment?: string            // опционально, до 280 символов
 ```
 
 ```json
@@ -367,6 +386,8 @@ fields:
   "awards": [{ "type": "zone_first", "zoneId": "8811aa...", "createdAt": "..." }]
 }
 ```
+
+`awards` отсутствует, если наград нет. TTL фиксируется в `expiresAt` в момент публикации и больше не меняется.
 
 // Response 422 — не прошла серверная анти-спуфинг проверка
 {
@@ -382,7 +403,6 @@ fields:
 ```
 
 #### `GET /stings/:id`
-
 ```json
 // Response 200
 { "sting": Sting }
@@ -392,8 +412,12 @@ fields:
 ```
 
 #### `DELETE /stings/:id`
-
 Удаление собственного жала до истечения TTL. Только автор.
+
+При успешном удалении backend:
+1. Удаляет из storage оригинал и thumbnail (`deleteStingImages` — R2 `DeleteObject` или локальный файл).
+2. Удаляет документ `Sting` и связанные реакции.
+3. Пересчитывает улей / шлёт `sting:expired` и при необходимости `hive:updated` / `hive:dissolved`.
 
 ```
 // Response 204
@@ -402,20 +426,23 @@ fields:
 
 #### `POST /stings/:id/reactions`
 
+Toggle like для текущего пользователя: повторный запрос снимает реакцию.
+
 ```json
 // Request
 { "type": "like" }
 
 // Response 200
-{ "reactionsCount": 14 }
+{ "reactionsCount": 14, "hasLiked": true }
 ```
+
+`GET /stings/:id`, `GET /stings/nearby` и списки в hive возвращают `hasLiked` для текущего пользователя.
 
 ---
 
 ### 3.3 Hives
 
 #### `GET /hives/:id`
-
 ```json
 // Response 200
 {
@@ -425,7 +452,6 @@ fields:
 ```
 
 #### `GET /hives/:id/stings`
-
 Отдельный пагинированный эндпоинт — используется, если в улье может быть много фото и весь список получать сразу нецелесообразно.
 
 ```
@@ -460,47 +486,43 @@ Query params: cursor?: string, limit?: number (default 20, max 50)
 
 ### События сервера
 
-| Event            | Payload                                     | Когда                                                                |
-| ---------------- | ------------------------------------------- | -------------------------------------------------------------------- |
-| `sting:created`  | `{ sting: Sting }`                          | Новое жало опубликовано в подписанном регионе                        |
-| `sting:expired`  | `{ stingId: UUID, hiveId: UUID \| null }`   | Жало истекло по TTL (сервер, не клиентский таймер — источник истины) |
-| `hive:updated`   | `{ hive: Hive }`                            | Изменились счётчики / `stage` (в т.ч. seed→hive)                     |
-| `hive:dissolved` | `{ hiveId: UUID }`                          | В кластере осталось меньше двух активных жал                         |
-| `sting:reaction` | `{ stingId: UUID, reactionsCount: number }` | Изменился счётчик реакций на открытом сейчас `sting/[id]`            |
-| `campaign:started` | `{ campaign }`                            | Кампания стала активной в подписанном регионе                        |
-| `campaign:ended` | `{ campaignId: UUID }`                      | Окно кампании закрылось                                              |
+| Event | Payload | Когда |
+|---|---|---|
+| `sting:created` | `{ sting: Sting }` | Новое жало опубликовано в подписанном регионе |
+| `sting:expired` | `{ stingId: UUID, hiveId: UUID \| null }` | Жало истекло по TTL (сервер, не клиентский таймер — источник истины) |
+| `hive:updated` | `{ hive: Hive }` | Изменились счётчики / `stage` (в т.ч. seed→hive). Отдельного события зажигания нет |
+| `hive:dissolved` | `{ hiveId: UUID }` | В кластере осталось < 2 активных жал |
+| `sting:reaction` | `{ stingId: UUID, reactionsCount: number }` | Изменился счётчик реакций на открытом сейчас `sting/[id]` |
+| `campaign:started` | `{ campaign }` | Кампания стала активной в подписанном регионе |
+| `campaign:ended` | `{ campaignId: UUID }` | Окно кампании закрылось |
 
 Формат едино для всех событий:
 
 ```json
-{ "type": "sting:created", "payload": {/* ... */} }
+{ "type": "sting:created", "payload": { /* ... */ } }
 ```
 
 **Интеграция с React Query:** обработчики в `websocket.ts` не хранят собственное состояние — они вызывают `queryClient.setQueryData` / `invalidateQueries` для ключей `['stings', bounds]` и `['hive', id]`, чтобы WS был единственным источником realtime-обновлений, а компоненты не подписывались на сокет напрямую.
 
 ### Client → Server (кроме подписки)
 
-| Event                | Payload | Назначение                                                                                                                  |
-| -------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `unsubscribe:region` | `{}`    | Отправляется при уходе с экрана карты (фоновый режим) для экономии трафика                                                  |
-| `ping`               | `{}`    | Keepalive раз в 25с; сервер обязан ответить `pong` в течение 5с, иначе клиент считает соединение мёртвым и переподключается |
+| Event | Payload | Назначение |
+|---|---|---|
+| `unsubscribe:region` | `{}` | Отправляется при уходе с экрана карты (фоновый режим) для экономии трафика |
+| `ping` | `{}` | Keepalive раз в 25с; сервер обязан ответить `pong` в течение 5с, иначе клиент считает соединение мёртвым и переподключается |
 
 ---
 
 ## 5. Общие соглашения
 
 ### 5.1 Формат времени
-
 Всегда ISO 8601 UTC (`2026-07-27T14:30:00.000Z`). Форматирование в локальное время — только на клиенте.
 
 ### 5.2 Пагинация
-
 Курсорная (не offset-based) везде, где применимо — данные "живые" и постоянно меняются, offset даёт дубликаты/пропуски.
 
 ### 5.3 Анти-спуфинг публикации (сервер — источник истины)
-
 Клиентские проверки в `utils/validation.ts` — это только немедленная обратная связь пользователю. Сервер обязан независимо:
-
 - сверять `capturedAt` из запроса с временем получения запроса (окно допуска, например ±2 минуты);
 - сверять `lat/lng` из запроса с точностью GPS (`accuracy`), отклонять при подозрительно идеальных координатах;
 - по возможности сверять EXIF-метаданные исходного файла с заявленными координатами/временем.
@@ -508,11 +530,39 @@ Query params: cursor?: string, limit?: number (default 20, max 50)
 Ни одна из этих проверок не должна приниматься "на веру" от клиента.
 
 ### 5.4 Идемпотентность публикации
-
 `POST /stings` должен поддерживать заголовок `Idempotency-Key` (UUID, генерируется клиентом при старте публикации) — на случай повторной отправки при обрыве связи, чтобы не создавать дубликат жала.
 
 ### 5.5 Версионирование API
-
 Префикс `/api/v1` фиксирован на MVP. Breaking changes — только через `/api/v2`, без изменения поведения `v1` до его вывода из эксплуатации.
 
-Подробные контракты механик роста (зоны, TTL, эхо, инвайты, пуши, кампании, активация улья) — в `BACKEND_GROWTH_TZ.md` и backend `openapi.yaml`.
+---
+
+## 6. Механики роста (контракты)
+
+Источник истины — `BACKEND_GROWTH_TZ.md`. Ниже — реализованные пути.
+
+| Метод | Путь | Auth | Назначение |
+|---|---|---|---|
+| GET | `/zones/current?lat&lng` | Bearer | TTL зоны, `isFirstEver`, waitlist-поля |
+| GET | `/stings/nearest?lat&lng&limit` | Bearer | Ближайшие активные жала, `distanceM` |
+| GET | `/map/overview?swLat&swLng&neLat&neLng&zoom` | Bearer | Агрегаты res 5/6, без фото |
+| GET | `/campaigns/active?lat&lng` | Bearer | Активные кампании в точке |
+| POST | `/invites` | Bearer | Код приглашения, квота 5 +2/принятый, потолок 25 |
+| GET | `/invites/me` | Bearer | Список кодов и `usesLeft` |
+| GET | `/invites/{code}` | public | `valid`, username, центр зоны |
+| POST | `/waitlist` | public | Гео-вейтлист; при `WAITLIST_ENABLED=false` → 404 `FEATURE_DISABLED` |
+| GET | `/share/stings/{id}` | public HTML | OG-страница (не `/api/v1`) |
+| POST | `/devices` | Bearer | Expo push token, 204 |
+| DELETE | `/devices/{deviceId}` | Bearer | 204 |
+| GET/PATCH | `/notifications/settings` | Bearer | Тумблеры пушей |
+| PATCH | `/auth/me/settings` | Bearer | `allowEcho`, `allowSharing` |
+| GET | `/auth/me/awards` | Bearer | Награды пользователя |
+| POST | `/analytics/events` | optional | Батч до 50 событий |
+| POST | `/admin/campaigns` | admin | Создание кампании |
+| POST | `/admin/users/{id}/account-type` | admin | `personal` / `partner` / `official` |
+| GET | `/admin/metrics/density` | admin | viewportDensity, emptySessionRate, DAU, p |
+| GET | `/admin/metrics/retention` | admin | D1/D7/D30 по зоне |
+| GET | `/admin/metrics/growth` | admin | kFactor, инвайты, share |
+
+Улей активен (`stage: hive`), когда `activationCount >= HIVE_ACTIVATION_THRESHOLD` при капе `HIVE_AUTHOR_WEIGHT_CAP` на автора. Соло-стопка — `seed`, в `hives[]` по умолчанию не попадает.
+

@@ -1,10 +1,10 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Trash2, X } from 'lucide-react-native';
+import { Share2, Trash2, X } from 'lucide-react-native';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Share, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -28,7 +28,9 @@ import { buildAvatarDisplayUri } from '@/src/utils/avatar-url';
 import { openUserProfile } from '@/src/utils/open-user-profile';
 import { resolveStingAuthor } from '@/src/utils/resolve-sting-author';
 import { StingLikeButton } from '@/src/components/feed/StingLikeButton';
+import { AccountTypeBadge } from '@/src/components/feed/AccountTypeBadge';
 import { showApiErrorToast } from '@/src/utils/show-toast';
+import { trackEvent } from '@/src/utils/analytics-queue';
 
 const AUTHOR_AVATAR_SIZE = 40;
 const DISMISS_THRESHOLD = 120;
@@ -128,6 +130,22 @@ export default function StingDetailScreen() {
     });
   }
 
+  async function handleShare(target: Sting) {
+    if (!target.shareUrl) {
+      return;
+    }
+
+    trackEvent('share_opened');
+    try {
+      await Share.share({
+        message: t('share.message'),
+        url: target.shareUrl,
+      });
+    } catch {
+      // Cancel in the system sheet is not an error.
+    }
+  }
+
   async function handleDelete() {
     if (!stingId || deleteSting.isPending) {
       return;
@@ -184,7 +202,9 @@ export default function StingDetailScreen() {
           className="mt-6 rounded-full bg-hive-primary px-6 py-3"
           onPress={handleClose}
         >
-          <Text className="font-inter text-base font-bold text-hive-on-accent">{t('sting.close')}</Text>
+          <Text className="font-inter text-base font-bold text-hive-on-accent">
+            {t('sting.close')}
+          </Text>
         </Pressable>
       </View>
     );
@@ -208,6 +228,7 @@ export default function StingDetailScreen() {
           onDelete={handleDeletePress}
           onOpenAuthorProfile={handleOpenAuthorProfile}
           onReact={handleReact}
+          onShare={() => void handleShare(sting)}
         />
       </Animated.View>
     </GestureDetector>
@@ -229,6 +250,7 @@ type StingDetailBodyProps = {
   onDelete: () => void;
   onOpenAuthorProfile: () => void;
   onReact: () => void;
+  onShare: () => void;
 };
 
 function StingDetailBody({
@@ -246,6 +268,7 @@ function StingDetailBody({
   onDelete,
   onOpenAuthorProfile,
   onReact,
+  onShare,
 }: StingDetailBodyProps) {
   return (
     <>
@@ -302,6 +325,17 @@ function StingDetailBody({
           </View>
 
           <View className="flex-row items-center gap-2">
+            {sting.shareUrl ? (
+              <Pressable
+                accessibilityLabel={t('share.action')}
+                accessibilityRole="button"
+                className="h-10 w-10 items-center justify-center rounded-full bg-white/15"
+                onPress={onShare}
+              >
+                <Share2 color="#FFFFFF" size={18} />
+              </Pressable>
+            ) : null}
+
             {author ? (
               <Pressable
                 accessibilityLabel={t('sting.viewAuthorProfile', { username: author.username })}
@@ -340,12 +374,12 @@ function StingDetailBody({
                   </LinearGradient>
                 )}
 
-                <Text
-                  className="max-w-[88px] font-inter text-sm font-semibold text-white"
-                  numberOfLines={1}
-                >
-                  {author.username}
-                </Text>
+                <View className="max-w-[88px]">
+                  <Text className="font-inter text-sm font-semibold text-white" numberOfLines={1}>
+                    {author.username}
+                  </Text>
+                  <AccountTypeBadge accountType={sting.authorAccountType} />
+                </View>
               </Pressable>
             ) : null}
 

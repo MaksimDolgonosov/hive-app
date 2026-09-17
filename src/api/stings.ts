@@ -3,7 +3,13 @@ import { isAxiosError } from 'axios';
 import { Platform } from 'react-native';
 
 import { apiClient } from '@/src/api/client';
-import type { MapBounds, Sting, StingsNearbyResponse } from '@/src/types';
+import type {
+  MapBounds,
+  NearestStingsResponse,
+  PublishStingResponse,
+  Sting,
+  StingsNearbyResponse,
+} from '@/src/types';
 
 export interface PublishStingInput {
   photoUri: string;
@@ -51,6 +57,12 @@ function isRetryablePublishError(error: unknown): boolean {
 export interface GetNearbyOptions {
   /** Включить soft-кластеры («соты», §G13) в ответ. */
   includeSeeds?: boolean;
+  /** Включить слой эха истёкших жал (§G2). */
+  includeEchoes?: boolean;
+  /** Целевое число жал: сервер расширяет bbox, пока их не наберётся (§G3). */
+  minResults?: number;
+  /** Предел расширения области (§G3). */
+  maxRadiusM?: number;
 }
 
 export async function getNearby(
@@ -64,7 +76,23 @@ export async function getNearby(
       neLat: bounds.neLat,
       neLng: bounds.neLng,
       ...(options?.includeSeeds ? { includeSeeds: true } : {}),
+      ...(options?.includeEchoes ? { includeEchoes: true } : {}),
+      ...(options?.minResults ? { minResults: options.minResults } : {}),
+      ...(options?.maxRadiusM ? { maxRadiusM: options.maxRadiusM } : {}),
     },
+  });
+
+  return data;
+}
+
+/** Ближайшие активные жала за пределами вьюпорта (§G3). */
+export async function getNearest(params: {
+  lat: number;
+  lng: number;
+  limit?: number;
+}): Promise<NearestStingsResponse> {
+  const { data } = await apiClient.get<NearestStingsResponse>('/stings/nearest', {
+    params: { lat: params.lat, lng: params.lng, limit: params.limit ?? 1 },
   });
 
   return data;
@@ -91,7 +119,7 @@ export async function remove(id: string): Promise<void> {
   await apiClient.delete(`/stings/${id}`);
 }
 
-export async function create(input: PublishStingInput): Promise<{ sting: Sting }> {
+export async function create(input: PublishStingInput): Promise<PublishStingResponse> {
   const photoFile = new File(input.photoUri);
 
   if (!photoFile.exists) {
@@ -144,7 +172,11 @@ export async function create(input: PublishStingInput): Promise<{ sting: Sting }
 
   for (let attempt = 0; attempt < PUBLISH_NETWORK_RETRIES; attempt += 1) {
     try {
-      const { data } = await apiClient.post<{ sting: Sting }>('/stings', formData, requestConfig);
+      const { data } = await apiClient.post<PublishStingResponse>(
+        '/stings',
+        formData,
+        requestConfig,
+      );
       return data;
     } catch (error) {
       lastError = error;

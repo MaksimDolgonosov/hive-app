@@ -67,7 +67,9 @@ export function LocationAccessGate({
           className="mt-6 rounded-full bg-hive-primary px-6 py-3"
           onPress={() => void Linking.openSettings()}
         >
-          <Text className="font-inter text-base font-bold text-hive-on-accent">{t('map.openSettings')}</Text>
+          <Text className="font-inter text-base font-bold text-hive-on-accent">
+            {t('map.openSettings')}
+          </Text>
         </Pressable>
       </ScreenBackground>
     );

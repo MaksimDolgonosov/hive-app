@@ -131,10 +131,7 @@ function parseExifDateTimeUtc(dateTime: string): string | null {
   return parsed.toISOString();
 }
 
-function readGpsCoordinate(
-  dms: unknown,
-  ref: unknown,
-): number | null {
+function readGpsCoordinate(dms: unknown, ref: unknown): number | null {
   if (!Array.isArray(dms) || typeof ref !== 'string') {
     return null;
   }

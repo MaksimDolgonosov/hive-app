@@ -22,6 +22,8 @@ const SERVER_EVENTS = [
   'hive:updated',
   'hive:dissolved',
   'sting:reaction',
+  'campaign:started',
+  'campaign:ended',
 ] as const;
 
 type ServerEvent = (typeof SERVER_EVENTS)[number];
@@ -251,10 +253,7 @@ class WebSocketManager {
       return;
     }
 
-    const delay = Math.min(
-      RECONNECT_BASE_MS * 2 ** this.reconnectAttempt,
-      RECONNECT_MAX_MS,
-    );
+    const delay = Math.min(RECONNECT_BASE_MS * 2 ** this.reconnectAttempt, RECONNECT_MAX_MS);
 
     this.reconnectAttempt += 1;
     logDev(`reconnect in ${delay}ms`);
@@ -290,6 +289,10 @@ class WebSocketManager {
         return;
       case 'sting:reaction':
         this.handleStingReaction(payload as { stingId: string; reactionsCount: number });
+        return;
+      case 'campaign:started':
+      case 'campaign:ended':
+        void queryClient.invalidateQueries({ queryKey: ['campaigns'] });
         return;
       default:
         logDev('ignored event', { type });

@@ -2,13 +2,16 @@ import { Pencil } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, Text, View } from 'react-native';
 
+import { SocialLinkIcon } from '@/src/components/profile/SocialLinkIcon';
 import { SOCIAL_LINK_META } from '@/src/constants/social-links';
 import { useHiveTheme } from '@/src/hooks/useHiveTheme';
+import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import type { User } from '@/src/types';
 import {
   getActiveSocialLinks,
   hasAnySocialLink,
   normalizeUserSocialLinks,
+  withInstagramVisibility,
 } from '@/src/utils/social-links';
 
 import { ProfileGlassCard } from './ProfileGlassCard';
@@ -28,8 +31,12 @@ export function ProfileAboutCard({
 }: ProfileAboutCardProps) {
   const { t } = useTranslation();
   const theme = useHiveTheme();
+  const instagramLinksAllowed = usePreferencesStore((state) => state.instagramLinksAllowed);
   const bio = user.bio?.trim() ?? '';
-  const socialLinks = normalizeUserSocialLinks(user.socialLinks);
+  const socialLinks = withInstagramVisibility(
+    normalizeUserSocialLinks(user.socialLinks),
+    instagramLinksAllowed,
+  );
   const activeLinks = getActiveSocialLinks(socialLinks);
   const hasContent = bio.length > 0 || hasAnySocialLink(socialLinks);
 
@@ -53,7 +60,7 @@ export function ProfileAboutCard({
               }}
               onPress={onEdit}
             >
-              <Pencil color={theme.text} size={16} strokeWidth={2.4} />
+              <Pencil color={theme.accent} size={16} strokeWidth={2.4} />
             </Pressable>
           ) : null}
         </View>
@@ -68,7 +75,6 @@ export function ProfileAboutCard({
           <View className="flex-row flex-wrap gap-2">
             {activeLinks.map(({ key, url }) => {
               const meta = SOCIAL_LINK_META[key];
-              const Icon = meta.icon;
 
               return (
                 <Pressable
@@ -78,7 +84,7 @@ export function ProfileAboutCard({
                   className="flex-row items-center gap-2 rounded-full border border-[#FFFFFF14] bg-hive-input-bg px-3 py-2"
                   onPress={() => void Linking.openURL(url)}
                 >
-                  <Icon color={meta.color} size={16} />
+                  <SocialLinkIcon socialKey={key} />
                   <Text className="font-inter text-xs font-medium text-hive-foreground">
                     {t(meta.labelKey)}
                   </Text>

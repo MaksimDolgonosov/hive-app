@@ -28,6 +28,7 @@ export async function register(input: {
   email: string;
   password: string;
   username: string;
+  inviteCode?: string;
 }): Promise<OtpChallengeResponse> {
   const { data } = await apiClient.post<OtpChallengeResponse>('/auth/register', input, {
     skipAuthRefresh: true,
@@ -86,7 +87,10 @@ export async function resetPassword(input: ResetPasswordInput): Promise<AuthSess
   return data;
 }
 
-export async function loginWithGoogle(input: { idToken: string }): Promise<AuthSession> {
+export async function loginWithGoogle(input: {
+  idToken: string;
+  inviteCode?: string;
+}): Promise<AuthSession> {
   const { data } = await apiClient.post<AuthSession>('/auth/google', input, {
     skipAuthRefresh: true,
   });

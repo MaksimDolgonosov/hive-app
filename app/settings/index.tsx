@@ -1,11 +1,14 @@
 import { router, type Href } from 'expo-router';
+import { Bell, Share2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DeleteAccountSetting } from '@/src/components/profile/DeleteAccountSetting';
+import { OnboardingPreviewLink } from '@/src/components/profile/OnboardingPreviewLink';
 import { PrivacyPolicyLink } from '@/src/components/profile/PrivacyPolicyLink';
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
+import { ProfileMenuRow } from '@/src/components/profile/ProfileMenuRow';
 import { PublishBuzzSetting } from '@/src/components/profile/PublishBuzzSetting';
 import { SplashPreviewLink } from '@/src/components/profile/SplashPreviewLink';
 import { AppIconSelect } from '@/src/components/ui/AppIconSelect';
@@ -35,8 +38,19 @@ export default function ProfileSettingsScreen() {
         <ThemeSelect />
         <AppIconSelect />
         <SplashPreviewLink onPress={() => router.push('/(modals)/splash' as Href)} />
-        <PrivacyPolicyLink onPress={() => router.push('/(modals)/privacy-policy' as Href)} />
+        <OnboardingPreviewLink onPress={() => router.push('/(onboarding)/welcome' as Href)} />
         <PublishBuzzSetting />
+        <ProfileMenuRow
+          icon={Bell}
+          label={t('push.settingsTitle')}
+          onPress={() => router.push('/settings/notifications' as Href)}
+        />
+        <ProfileMenuRow
+          icon={Share2}
+          label={t('share.action')}
+          onPress={() => router.push('/settings/sharing' as Href)}
+        />
+        <PrivacyPolicyLink onPress={() => router.push('/(modals)/privacy-policy' as Href)} />
         <DeleteAccountSetting />
       </ScrollView>
     </ProfileCollectionLayout>

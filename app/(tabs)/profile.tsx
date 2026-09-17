@@ -1,6 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { router, type Href } from 'expo-router';
 import {
+  Award,
   Bookmark,
   Heart,
   Hexagon,
@@ -8,6 +9,7 @@ import {
   LogOut,
   Settings,
   SlidersHorizontal,
+  UserPlus,
 } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,6 +34,7 @@ const EMPTY_STATS: ProfileStats = {
   photos: 0,
   hives: 0,
   likes: 0,
+  awards: 0,
 };
 
 function formatMemberDate(isoDate: string, locale: string): string {
@@ -161,6 +164,17 @@ export default function ProfileScreen() {
             icon={Hexagon}
             label={t('profile.menuHives')}
             onPress={() => router.push('/(modals)/profile/hives' as Href)}
+          />
+          <ProfileMenuRow
+            badge={stats.awards ? stats.awards : undefined}
+            icon={Award}
+            label={t('profile.menuAwards')}
+            onPress={() => router.push('/(modals)/profile/awards' as Href)}
+          />
+          <ProfileMenuRow
+            icon={UserPlus}
+            label={t('profile.menuInvites')}
+            onPress={() => router.push('/(modals)/profile/invites' as Href)}
           />
           <ProfileMenuRow
             badge={savedPlacesCount > 0 ? savedPlacesCount : undefined}

@@ -59,7 +59,11 @@ export function ProfileRecentPhotos({
       {layout === 'grid' ? (
         <RecentPhotosGrid photoUrls={photoUrls} />
       ) : (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8 }}
+        >
           {hasPhotos
             ? photoUrls.slice(0, STRIP_PREVIEW_COUNT).map((uri) => (
                 <Image

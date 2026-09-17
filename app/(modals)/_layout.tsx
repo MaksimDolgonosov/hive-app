@@ -7,6 +7,9 @@ export default function ModalsLayout() {
       <Stack.Screen name="splash" />
       <Stack.Screen name="privacy-policy" options={{ presentation: 'card' }} />
       <Stack.Screen name="preview" options={{ presentation: 'card' }} />
+      <Stack.Screen name="first-capture" options={{ presentation: 'fullScreenModal' }} />
+      <Stack.Screen name="push-permission" options={{ presentation: 'fullScreenModal' }} />
+      <Stack.Screen name="waitlist" options={{ presentation: 'card' }} />
       <Stack.Screen name="sting/[id]" options={{ presentation: 'card' }} />
       <Stack.Screen
         name="hive/[id]"

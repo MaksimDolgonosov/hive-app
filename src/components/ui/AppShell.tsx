@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { ErrorToast } from '@/src/components/ui/ErrorToast';
 import { OfflineBanner } from '@/src/components/ui/OfflineBanner';
 import { ScreenGradient } from '@/src/components/ui/ScreenGradient';
+import { useAnalytics } from '@/src/hooks/useAnalytics';
 import { useAppColorScheme, useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { HIVE_NATIVEWIND_VARS } from '@/src/theme/nativewind-vars';
 
@@ -14,6 +15,7 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   const colorScheme = useAppColorScheme();
   const theme = useHiveTheme();
+  useAnalytics();
   const overlays = (
     <>
       <OfflineBanner />

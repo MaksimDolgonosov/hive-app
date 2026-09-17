@@ -31,9 +31,7 @@ export function ErrorToast() {
     >
       <View
         className={`flex-row items-start gap-3 rounded-hive-md border px-4 py-3 shadow-md ${
-          isError
-            ? 'border-hive-danger/40 bg-[#2A1614]'
-            : 'border-hive-stroke bg-hive-surface'
+          isError ? 'border-hive-danger/40 bg-[#2A1614]' : 'border-hive-stroke bg-hive-surface'
         }`}
       >
         <AlertCircle color={isError ? '#DC2626' : '#FFB800'} size={20} strokeWidth={2.5} />

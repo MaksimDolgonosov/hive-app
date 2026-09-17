@@ -15,7 +15,11 @@ function StatSkeleton() {
 function PhotoSkeleton() {
   return (
     <View className="flex-1 overflow-hidden rounded-2xl" style={{ aspectRatio: 3 / 4 }}>
-      <SkeletonBlock borderRadius={16} height={1} style={{ flex: 1, width: '100%', height: '100%' }} />
+      <SkeletonBlock
+        borderRadius={16}
+        height={1}
+        style={{ flex: 1, width: '100%', height: '100%' }}
+      />
     </View>
   );
 }

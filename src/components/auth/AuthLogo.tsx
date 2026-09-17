@@ -36,7 +36,12 @@ export function AuthLogo({ subtitle }: AuthLogoProps) {
             className="h-8 w-8 items-center justify-center rounded-[8px]"
             style={{ backgroundColor: theme.accent }}
           >
-            <Hexagon color={theme.textOnAccent} fill={theme.textOnAccent} size={18} strokeWidth={0} />
+            <Hexagon
+              color={theme.textOnAccent}
+              fill={theme.textOnAccent}
+              size={18}
+              strokeWidth={0}
+            />
           </View>
         )}
         <Text className="font-display text-[19px] font-bold uppercase tracking-[1.6px] text-hive-foreground">

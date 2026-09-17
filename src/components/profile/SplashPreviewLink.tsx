@@ -11,10 +11,6 @@ export function SplashPreviewLink({ onPress }: SplashPreviewLinkProps) {
   const { t } = useTranslation();
 
   return (
-    <ProfileMenuRow
-      icon={Sparkles}
-      label={t('profile.splashPreviewLabel')}
-      onPress={onPress}
-    />
+    <ProfileMenuRow icon={Sparkles} label={t('profile.splashPreviewLabel')} onPress={onPress} />
   );
 }

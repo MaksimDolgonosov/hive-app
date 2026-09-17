@@ -61,16 +61,14 @@ export function NearbyCard({ sting, distanceM, onPress, onAuthorPress }: NearbyC
 
         <View className="absolute bottom-3 left-3 right-3 gap-1.5">
           {sting.comment ? (
-            <Text
-              className="font-display text-[18px] font-bold text-[#F6F2EA]"
-              numberOfLines={1}
-            >
+            <Text className="font-display text-[18px] font-bold text-[#F6F2EA]" numberOfLines={1}>
               {sting.comment}
             </Text>
           ) : null}
 
           <View className="flex-row items-center justify-between">
             <StingAuthorBadge
+              accountType={sting.authorAccountType}
               avatarCacheVersion={avatarCacheVersion}
               avatarUrl={author.avatarUrl}
               username={author.username}

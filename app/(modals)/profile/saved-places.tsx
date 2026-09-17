@@ -44,14 +44,18 @@ export default function SavedPlacesScreen() {
   }
 
   function confirmDelete(place: SavedMapPlace) {
-    Alert.alert(t('map.savedPlacesDeleteTitle'), t('map.savedPlacesDeleteMessage', { name: place.name }), [
-      { text: t('map.savePlaceCancel'), style: 'cancel' },
-      {
-        text: t('map.savedPlacesDeleteConfirm'),
-        style: 'destructive',
-        onPress: () => void removePlace(place.id),
-      },
-    ]);
+    Alert.alert(
+      t('map.savedPlacesDeleteTitle'),
+      t('map.savedPlacesDeleteMessage', { name: place.name }),
+      [
+        { text: t('map.savePlaceCancel'), style: 'cancel' },
+        {
+          text: t('map.savedPlacesDeleteConfirm'),
+          style: 'destructive',
+          onPress: () => void removePlace(place.id),
+        },
+      ],
+    );
   }
 
   const listBottomInset = insets.bottom + 24;
@@ -93,7 +97,10 @@ export default function SavedPlacesScreen() {
               </View>
 
               <View className="min-w-0 flex-1">
-                <Text className="font-inter text-base font-semibold text-hive-foreground" numberOfLines={1}>
+                <Text
+                  className="font-inter text-base font-semibold text-hive-foreground"
+                  numberOfLines={1}
+                >
                   {item.name}
                 </Text>
                 <Text className="mt-0.5 font-inter text-xs text-hive-muted">

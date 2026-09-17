@@ -85,7 +85,12 @@ export default function RootLayout() {
 
   if (!isReady) {
     return (
-      <View style={[{ flex: 1, backgroundColor: HiveThemes[colorScheme].bg }, HIVE_NATIVEWIND_VARS[colorScheme]]}>
+      <View
+        style={[
+          { flex: 1, backgroundColor: HiveThemes[colorScheme].bg },
+          HIVE_NATIVEWIND_VARS[colorScheme],
+        ]}
+      >
         <LoadingScreen />
       </View>
     );

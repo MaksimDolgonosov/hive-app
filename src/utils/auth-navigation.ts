@@ -1,5 +1,6 @@
 import { router, type Href } from 'expo-router';
 
+import { useAuthStore } from '@/src/stores/authStore';
 import type { OtpPurpose } from '@/src/types';
 
 export function goBackOrReplace(fallback: Href) {
@@ -29,4 +30,13 @@ export function forgotPasswordHref(email?: string): Href {
 
 export function privacyPolicyHref(): Href {
   return '/(auth)/privacy-policy' as Href;
+}
+
+export function exitOnboarding() {
+  if (useAuthStore.getState().status === 'authenticated') {
+    router.replace('/settings' as Href);
+    return;
+  }
+
+  router.replace('/(auth)/login' as Href);
 }

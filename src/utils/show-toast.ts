@@ -7,10 +7,7 @@ type ShowApiErrorToastOptions = {
   fallbackKey?: string;
 };
 
-export function showApiErrorToast(
-  error: unknown,
-  options: ShowApiErrorToastOptions = {},
-): void {
+export function showApiErrorToast(error: unknown, options: ShowApiErrorToastOptions = {}): void {
   const { titleKey, fallbackKey = 'errors.generic' } = options;
 
   showErrorToast({

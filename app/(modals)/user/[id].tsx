@@ -45,10 +45,7 @@ export default function PublicUserProfileScreen() {
       return '';
     }
 
-    const date = formatMemberDate(
-      data.user.createdAt,
-      i18n.language === 'ru' ? 'ru-RU' : 'en-US',
-    );
+    const date = formatMemberDate(data.user.createdAt, i18n.language === 'ru' ? 'ru-RU' : 'en-US');
     return t('profile.memberSince', { date });
   }, [data?.user.createdAt, i18n.language, t]);
 
@@ -72,7 +69,9 @@ export default function PublicUserProfileScreen() {
           className="mt-6 rounded-full bg-hive-primary px-6 py-3"
           onPress={handleBack}
         >
-          <Text className="font-inter text-base font-bold text-hive-on-accent">{t('userProfile.back')}</Text>
+          <Text className="font-inter text-base font-bold text-hive-on-accent">
+            {t('userProfile.back')}
+          </Text>
         </Pressable>
       </ScreenBackground>
     );
@@ -101,7 +100,9 @@ export default function PublicUserProfileScreen() {
             className="mt-6 rounded-full bg-hive-primary px-6 py-3"
             onPress={handleBack}
           >
-            <Text className="font-inter text-base font-bold text-hive-on-accent">{t('userProfile.back')}</Text>
+            <Text className="font-inter text-base font-bold text-hive-on-accent">
+              {t('userProfile.back')}
+            </Text>
           </Pressable>
         </View>
       ) : (
@@ -118,7 +119,11 @@ export default function PublicUserProfileScreen() {
           ) : (
             <>
               <View className="px-5">
-                <ProfileHeaderCard stats={data.stats ?? EMPTY_STATS} subtitle={subtitle} user={data.user} />
+                <ProfileHeaderCard
+                  stats={data.stats ?? EMPTY_STATS}
+                  subtitle={subtitle}
+                  user={data.user}
+                />
               </View>
 
               <View className="px-5">

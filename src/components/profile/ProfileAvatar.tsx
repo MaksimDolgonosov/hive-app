@@ -216,7 +216,7 @@ export function ProfileAvatar({
             elevation: 3,
           }}
         >
-          <Camera color="#2C1810" size={Math.round(badgeSize * 0.5)} strokeWidth={2.4} />
+          <Camera color={theme.accent} size={Math.round(badgeSize * 0.5)} strokeWidth={2.4} />
         </View>
       </View>
     </Pressable>

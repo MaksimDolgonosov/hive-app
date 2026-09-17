@@ -19,10 +19,7 @@ function clampZoom(value: number): number {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value));
 }
 
-export function useCameraZoom(
-  cameraRef: RefObject<CameraView | null>,
-  facing: 'front' | 'back',
-) {
+export function useCameraZoom(cameraRef: RefObject<CameraView | null>, facing: 'front' | 'back') {
   const [zoom, setZoomState] = useState(MIN_ZOOM);
   const [activePreset, setActivePreset] = useState<ZoomPreset>(1);
   const [selectedLens, setSelectedLens] = useState<string | undefined>();

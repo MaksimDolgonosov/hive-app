@@ -15,12 +15,7 @@ type ZoomPresetsProps = {
   onSelect: (preset: ZoomPreset) => void;
 };
 
-export function ZoomPresets({
-  activePreset,
-  availableLenses,
-  facing,
-  onSelect,
-}: ZoomPresetsProps) {
+export function ZoomPresets({ activePreset, availableLenses, facing, onSelect }: ZoomPresetsProps) {
   return (
     <View style={styles.row}>
       {ZOOM_PRESETS.map((preset) => {

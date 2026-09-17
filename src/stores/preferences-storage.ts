@@ -6,9 +6,13 @@ import type { AppIconId } from '@/src/utils/app-icon';
 const PUBLISH_BUZZ_STORAGE_KEY = '@hive/publishBuzzEnabled';
 const COLOR_SCHEME_STORAGE_KEY = '@hive/colorScheme';
 const APP_ICON_STORAGE_KEY = '@hive/appIcon';
+const ECHO_LAYER_STORAGE_KEY = '@hive/echoLayerEnabled';
+const FIRST_STING_STORAGE_KEY = '@hive/hasPublishedFirstSting';
+const PUSH_EXPLAIN_STORAGE_KEY = '@hive/pushExplainDismissed';
+const INSTAGRAM_LINKS_ALLOWED_KEY = '@hive/instagramLinksAllowed';
 
-export async function loadPublishBuzzEnabled(): Promise<boolean | null> {
-  const value = await AsyncStorage.getItem(PUBLISH_BUZZ_STORAGE_KEY);
+async function loadBoolean(key: string): Promise<boolean | null> {
+  const value = await AsyncStorage.getItem(key);
   if (value === null) {
     return null;
   }
@@ -16,8 +20,51 @@ export async function loadPublishBuzzEnabled(): Promise<boolean | null> {
   return value === 'true';
 }
 
-export async function savePublishBuzzEnabled(enabled: boolean): Promise<void> {
-  await AsyncStorage.setItem(PUBLISH_BUZZ_STORAGE_KEY, enabled ? 'true' : 'false');
+async function saveBoolean(key: string, value: boolean): Promise<void> {
+  await AsyncStorage.setItem(key, value ? 'true' : 'false');
+}
+
+export function loadPublishBuzzEnabled(): Promise<boolean | null> {
+  return loadBoolean(PUBLISH_BUZZ_STORAGE_KEY);
+}
+
+export function savePublishBuzzEnabled(enabled: boolean): Promise<void> {
+  return saveBoolean(PUBLISH_BUZZ_STORAGE_KEY, enabled);
+}
+
+/** Локальный тумблер отображения слоя эха (§G2) — не путать с серверным `allowEcho`. */
+export function loadEchoLayerEnabled(): Promise<boolean | null> {
+  return loadBoolean(ECHO_LAYER_STORAGE_KEY);
+}
+
+export function saveEchoLayerEnabled(enabled: boolean): Promise<void> {
+  return saveBoolean(ECHO_LAYER_STORAGE_KEY, enabled);
+}
+
+/** UX-подсказка для экрана первого снимка (§G6), а не состояние аккаунта. */
+export function loadHasPublishedFirstSting(): Promise<boolean | null> {
+  return loadBoolean(FIRST_STING_STORAGE_KEY);
+}
+
+export function saveHasPublishedFirstSting(value: boolean): Promise<void> {
+  return saveBoolean(FIRST_STING_STORAGE_KEY, value);
+}
+
+export function loadPushExplainDismissed(): Promise<boolean | null> {
+  return loadBoolean(PUSH_EXPLAIN_STORAGE_KEY);
+}
+
+export function savePushExplainDismissed(value: boolean): Promise<void> {
+  return saveBoolean(PUSH_EXPLAIN_STORAGE_KEY, value);
+}
+
+/** Показывать Instagram в профиле. Пересчитывается по геолокации при входе. */
+export function loadInstagramLinksAllowed(): Promise<boolean | null> {
+  return loadBoolean(INSTAGRAM_LINKS_ALLOWED_KEY);
+}
+
+export function saveInstagramLinksAllowed(value: boolean): Promise<void> {
+  return saveBoolean(INSTAGRAM_LINKS_ALLOWED_KEY, value);
 }
 
 export async function loadColorScheme(): Promise<AppColorScheme | null> {

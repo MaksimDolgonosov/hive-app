@@ -13,9 +13,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/src/components/auth/AuthButton';
+import { SocialLinkIcon } from '@/src/components/profile/SocialLinkIcon';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { SOCIAL_LINK_META } from '@/src/constants/social-links';
 import { useUpdateProfile } from '@/src/hooks/useUpdateProfile';
+import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import {
   PROFILE_BIO_MAX_LENGTH,
   PROFILE_SOCIAL_LINK_MAX_LENGTH,
@@ -24,7 +26,7 @@ import {
   type User,
   type UserSocialLinks,
 } from '@/src/types';
-import { normalizeUserSocialLinks } from '@/src/utils/social-links';
+import { editableSocialLinkKeys, normalizeUserSocialLinks } from '@/src/utils/social-links';
 import { showApiErrorToast } from '@/src/utils/show-toast';
 
 type ProfileEditModalProps = {
@@ -54,6 +56,8 @@ export function ProfileEditModal({ visible, user, onClose }: ProfileEditModalPro
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const updateProfile = useUpdateProfile();
+  const instagramLinksAllowed = usePreferencesStore((state) => state.instagramLinksAllowed);
+  const visibleSocialKeys = editableSocialLinkKeys(instagramLinksAllowed);
 
   const [bio, setBio] = useState(user.bio ?? '');
   const [socialDrafts, setSocialDrafts] = useState<SocialLinkDrafts>(() =>
@@ -79,9 +83,15 @@ export function ProfileEditModal({ visible, user, onClose }: ProfileEditModalPro
     }
 
     try {
+      const socialLinks = draftsToSocialLinks(socialDrafts);
+
+      if (!instagramLinksAllowed) {
+        socialLinks.instagram = user.socialLinks?.instagram ?? null;
+      }
+
       await updateProfile.mutateAsync({
         bio: bio.trim() || null,
-        socialLinks: draftsToSocialLinks(socialDrafts),
+        socialLinks,
       });
       onClose();
     } catch (error) {
@@ -150,14 +160,13 @@ export function ProfileEditModal({ visible, user, onClose }: ProfileEditModalPro
                   {t('profile.socialHint')}
                 </Text>
 
-                {SOCIAL_LINK_KEYS.map((key) => {
+                {visibleSocialKeys.map((key) => {
                   const meta = SOCIAL_LINK_META[key];
-                  const Icon = meta.icon;
 
                   return (
                     <View key={key} className="gap-1.5">
                       <View className="flex-row items-center gap-2">
-                        <Icon color={meta.color} size={16} />
+                        <SocialLinkIcon socialKey={key} />
                         <Text className="font-inter text-[13px] font-semibold text-hive-foreground">
                           {t(meta.labelKey)}
                         </Text>

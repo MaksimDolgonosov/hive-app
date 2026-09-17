@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { AccountTypeBadge } from '@/src/components/feed/AccountTypeBadge';
 import { SkeletonBlock } from '@/src/components/ui/SkeletonBlock';
 import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 import type { Sting } from '@/src/types';
+import { hasAccountTypeBadge } from '@/src/utils/account-type';
 
 const COLUMN_COUNT = 3;
 const COLUMN_GAP = 5;
@@ -42,13 +44,7 @@ function HivePhotoSkeleton() {
   );
 }
 
-function HivePhotoCell({
-  sting,
-  onPress,
-}: {
-  sting: Sting;
-  onPress: (stingId: string) => void;
-}) {
+function HivePhotoCell({ sting, onPress }: { sting: Sting; onPress: (stingId: string) => void }) {
   const { t } = useTranslation();
   const theme = useHiveTheme();
   const uri = sting.thumbnailUrl || sting.imageUrl;
@@ -81,6 +77,11 @@ function HivePhotoCell({
           style={[styles.skeletonFill, { backgroundColor: theme.surface2 }]}
         />
       )}
+      {hasAccountTypeBadge(sting.authorAccountType) ? (
+        <View className="absolute bottom-1 left-1">
+          <AccountTypeBadge accountType={sting.authorAccountType} />
+        </View>
+      ) : null}
     </Pressable>
   );
 }

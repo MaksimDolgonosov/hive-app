@@ -43,7 +43,12 @@ export function HiveSeedMarker({ hive, imageUri, onPress }: HiveSeedMarkerProps)
           />
         ) : null
       ) : (
-        <Marker coordinate={coordinate} anchor={{ x: 0.5, y: 0.5 }} onPress={onPress}>
+        <Marker
+          coordinate={coordinate}
+          anchor={{ x: 0.5, y: 0.5 }}
+          tracksViewChanges={false}
+          onPress={onPress}
+        >
           <View
             collapsable={false}
             style={[styles.markerRoot, { width: metrics.markerSize, height: metrics.markerSize }]}

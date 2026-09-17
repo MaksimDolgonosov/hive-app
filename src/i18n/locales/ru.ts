@@ -315,6 +315,8 @@ export const ru: TranslationSchema = {
     echoToast: 'Здесь было {{count}} моментов за неделю',
     echoToggleLabel: 'Показывать эхо',
     echoToggleHint: 'Приглушённые точки там, где моменты уже истекли',
+    emptyStateToggleLabel: 'Плашка «Здесь ещё никто не был»',
+    emptyStateToggleHint: 'Показывать приглашение сделать фото, когда рядом пусто',
     allowEchoLabel: 'Участвовать в эхе',
     allowEchoHint: 'После истечения ваши фото оставляют анонимный след на карте',
     firstCaptureTitle: 'Начни со своего кадра',

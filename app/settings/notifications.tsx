@@ -32,41 +32,35 @@ export default function NotificationSettingsScreen() {
           label={t('push.reactions')}
           hint={t('push.reactionsHint')}
           value={notifications.settings.reactions}
-          onToggle={() => notifications.update({ reactions: !notifications.settings.reactions })}
+          onToggle={(next) => notifications.update({ reactions: next })}
         />
         <SettingsToggleRow
           icon={Radio}
           label={t('push.nearbyActivity')}
           hint={t('push.nearbyActivityHint')}
           value={notifications.settings.nearbyActivity}
-          onToggle={() =>
-            notifications.update({ nearbyActivity: !notifications.settings.nearbyActivity })
-          }
+          onToggle={(next) => notifications.update({ nearbyActivity: next })}
         />
         <SettingsToggleRow
           icon={Bell}
           label={t('push.campaigns')}
           hint={t('push.campaignsHint')}
           value={notifications.settings.campaigns}
-          onToggle={() => notifications.update({ campaigns: !notifications.settings.campaigns })}
+          onToggle={(next) => notifications.update({ campaigns: next })}
         />
         <SettingsToggleRow
           icon={Bell}
           label={t('push.expiringSting')}
           hint={t('push.expiringStingHint')}
           value={notifications.settings.expiringSting}
-          onToggle={() =>
-            notifications.update({ expiringSting: !notifications.settings.expiringSting })
-          }
+          onToggle={(next) => notifications.update({ expiringSting: next })}
         />
         <SettingsToggleRow
           icon={Bell}
           label={t('push.inviteAccepted')}
           hint={t('push.inviteAcceptedHint')}
           value={notifications.settings.inviteAccepted}
-          onToggle={() =>
-            notifications.update({ inviteAccepted: !notifications.settings.inviteAccepted })
-          }
+          onToggle={(next) => notifications.update({ inviteAccepted: next })}
           showDivider={false}
         />
       </ScrollView>

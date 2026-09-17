@@ -312,6 +312,8 @@ export const en: TranslationSchema = {
     echoToast: '{{count}} moments happened here this week',
     echoToggleLabel: 'Show echo',
     echoToggleHint: 'Dimmed dots where moments have already expired',
+    emptyStateToggleLabel: '“No one has been here yet” banner',
+    emptyStateToggleHint: 'Show a prompt to take a photo when the area is empty',
     allowEchoLabel: 'Take part in echo',
     allowEchoHint: 'After expiring, your photos leave an anonymous trace on the map',
     firstCaptureTitle: 'Start with your own shot',

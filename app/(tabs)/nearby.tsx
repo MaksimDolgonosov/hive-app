@@ -20,6 +20,7 @@ import { useZoneStatus } from '@/src/hooks/useZoneStatus';
 import { useAuthStore } from '@/src/stores/authStore';
 import { useLocationStore } from '@/src/stores/locationStore';
 import { useMapStore } from '@/src/stores/mapStore';
+import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import type { Hive, Sting } from '@/src/types';
 import { trackEvent } from '@/src/utils/analytics-queue';
 import { getApiErrorCode } from '@/src/utils/api-error';
@@ -31,6 +32,8 @@ import { showApiErrorToast } from '@/src/utils/show-toast';
 type FeedItem =
   | { key: string; type: 'sting'; sting: Sting; distanceM: number }
   | { key: string; type: 'hive'; hive: Hive; distanceM: number };
+
+const SHOW_EXPANDED_RADIUS_BANNER = false;
 
 function buildFeedItems(
   stings: Sting[],
@@ -65,6 +68,7 @@ export default function NearbyScreen() {
   const { coords, status: locationStatus, requestPermission } = useLocation();
   const lastKnownCoords = useLocationStore((state) => state.lastKnownCoords);
   const mapRegion = useMapStore((state) => state.region);
+  const emptyStateBannerEnabled = usePreferencesStore((state) => state.emptyStateBannerEnabled);
 
   const bounds = useMemo(() => {
     if (mapRegion) {
@@ -109,7 +113,8 @@ export default function NearbyScreen() {
   }, [data, effectiveCoords]);
 
   const isFeedEmpty = Boolean(data) && !isFetching && !isError && feedItems.length === 0;
-  const nearestQuery = useNearestSting(zoneCoords, isFeedEmpty);
+  const showEmptyState = isFeedEmpty && emptyStateBannerEnabled;
+  const nearestQuery = useNearestSting(zoneCoords, showEmptyState);
 
   function openSting(stingId: string) {
     router.push(`/(modals)/sting/${stingId}` as Href);
@@ -209,7 +214,7 @@ export default function NearbyScreen() {
         </View>
       </View>
 
-      {data?.expanded && data.appliedRadiusM ? (
+      {SHOW_EXPANDED_RADIUS_BANNER && data?.expanded && data.appliedRadiusM ? (
         <View className="mx-5 mb-3 rounded-hive-md bg-hive-surface px-4 py-2.5">
           <Text className="text-center font-inter text-xs font-semibold text-hive-muted">
             {t('growth.expandedRadius', { distance: formatDistance(data.appliedRadiusM) })}
@@ -273,8 +278,8 @@ export default function NearbyScreen() {
                 </Text>
               </Pressable>
             </View>
-          ) : (
-            <View className="flex-1 items-center justify-center px-4 py-8">
+          ) : showEmptyState ? (
+            <View className="w-full">
               <MapEmptyState
                 isFirstEver={Boolean(zoneQuery.data?.isFirstEver)}
                 nearestDistanceM={nearestQuery.data?.distanceM ?? null}
@@ -284,7 +289,7 @@ export default function NearbyScreen() {
                 onNearest={() => handleEmptyCta('nearest')}
               />
             </View>
-          )
+          ) : null
         }
       />
 

@@ -32,21 +32,21 @@ export default function SharingSettingsScreen() {
           label={t('growth.echoToggleLabel')}
           hint={t('growth.echoToggleHint')}
           value={echoLayerEnabled}
-          onToggle={() => void setEchoLayerEnabled(!echoLayerEnabled)}
+          onToggle={(next) => void setEchoLayerEnabled(next)}
         />
         <SettingsToggleRow
           icon={Ghost}
           label={t('growth.allowEchoLabel')}
           hint={t('growth.allowEchoHint')}
           value={privacy.settings.allowEcho}
-          onToggle={() => privacy.update({ allowEcho: !privacy.settings.allowEcho })}
+          onToggle={(next) => privacy.update({ allowEcho: next })}
         />
         <SettingsToggleRow
           icon={Share2}
           label={t('share.allowSharingLabel')}
           hint={t('share.allowSharingHint')}
           value={privacy.settings.allowSharing}
-          onToggle={() => privacy.update({ allowSharing: !privacy.settings.allowSharing })}
+          onToggle={(next) => privacy.update({ allowSharing: next })}
           showDivider={false}
         />
       </ScrollView>

@@ -1,5 +1,5 @@
 import { router, type Href } from 'expo-router';
-import { Bell, Share2 } from 'lucide-react-native';
+import { Bell, Camera, Share2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,15 +10,21 @@ import { PrivacyPolicyLink } from '@/src/components/profile/PrivacyPolicyLink';
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
 import { ProfileMenuRow } from '@/src/components/profile/ProfileMenuRow';
 import { PublishBuzzSetting } from '@/src/components/profile/PublishBuzzSetting';
+import { SettingsToggleRow } from '@/src/components/profile/SettingsToggleRow';
 import { SplashPreviewLink } from '@/src/components/profile/SplashPreviewLink';
 import { AppIconSelect } from '@/src/components/ui/AppIconSelect';
 import { LanguageSelect } from '@/src/components/ui/LanguageSelect';
 import { ThemeSelect } from '@/src/components/ui/ThemeSelect';
+import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import { goBackOrReplace } from '@/src/utils/auth-navigation';
 
 export default function ProfileSettingsScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const emptyStateBannerEnabled = usePreferencesStore((state) => state.emptyStateBannerEnabled);
+  const setEmptyStateBannerEnabled = usePreferencesStore(
+    (state) => state.setEmptyStateBannerEnabled,
+  );
 
   return (
     <ProfileCollectionLayout
@@ -40,6 +46,13 @@ export default function ProfileSettingsScreen() {
         <SplashPreviewLink onPress={() => router.push('/(modals)/splash' as Href)} />
         <OnboardingPreviewLink onPress={() => router.push('/(onboarding)/welcome' as Href)} />
         <PublishBuzzSetting />
+        <SettingsToggleRow
+          icon={Camera}
+          label={t('growth.emptyStateToggleLabel')}
+          hint={t('growth.emptyStateToggleHint')}
+          value={emptyStateBannerEnabled}
+          onToggle={(next) => void setEmptyStateBannerEnabled(next)}
+        />
         <ProfileMenuRow
           icon={Bell}
           label={t('push.settingsTitle')}

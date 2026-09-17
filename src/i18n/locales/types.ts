@@ -299,6 +299,8 @@ export type TranslationSchema = {
     echoToast: string;
     echoToggleLabel: string;
     echoToggleHint: string;
+    emptyStateToggleLabel: string;
+    emptyStateToggleHint: string;
     allowEchoLabel: string;
     allowEchoHint: string;
     firstCaptureTitle: string;

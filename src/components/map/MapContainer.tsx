@@ -62,6 +62,7 @@ const REGION_DEBOUNCE_MS = 300;
 const PUBLISH_FOCUS_DELTA = 0.008;
 const MAX_ECHO_MARKERS = 300;
 const FILTER_CHIPS_HEIGHT = 40;
+const SHOW_EXPANDED_RADIUS_BANNER = false;
 
 function resolveStartupRegion(): MapRegion | null {
   const pendingSaved = useMapStore.getState().pendingSavedRegion;
@@ -131,6 +132,7 @@ export function MapContainer() {
   const pendingCampaignId = useMapStore((state) => state.pendingCampaignId);
   const setPendingCampaignId = useMapStore((state) => state.setPendingCampaignId);
   const echoLayerEnabled = usePreferencesStore((state) => state.echoLayerEnabled);
+  const emptyStateBannerEnabled = usePreferencesStore((state) => state.emptyStateBannerEnabled);
   const user = useAuthStore((state) => state.user);
 
   const savedPlaces = useSavedMapPlacesStore((state) => state.places);
@@ -215,6 +217,7 @@ export function MapContainer() {
     filtered.stings.length === 0 &&
     activeHives.length === 0 &&
     seedHives.length === 0;
+  const showEmptyState = isEmpty && emptyStateBannerEnabled;
 
   const hasUnfilteredContent = (data?.stings.length ?? 0) > 0 || (data?.hives.length ?? 0) > 0;
   const filterEmpty =
@@ -225,7 +228,7 @@ export function MapContainer() {
     activeHives.length === 0 &&
     seedHives.length === 0;
 
-  const nearestQuery = useNearestSting(zoneCoords, isEmpty);
+  const nearestQuery = useNearestSting(zoneCoords, showEmptyState);
   const nearestSting = nearestQuery.data?.stings[0] ?? null;
   const nearestDistanceM = nearestQuery.data?.distanceM ?? null;
 
@@ -281,7 +284,7 @@ export function MapContainer() {
   }, [data, debouncedBounds, isOverview, zoneQuery.data?.id]);
 
   useEffect(() => {
-    if (!isEmpty) {
+    if (!showEmptyState) {
       emptyShownRef.current = false;
       return;
     }
@@ -292,7 +295,7 @@ export function MapContainer() {
 
     emptyShownRef.current = true;
     trackEvent('map_empty_shown', { zoneId: zoneQuery.data?.id });
-  }, [isEmpty, zoneQuery.data?.id]);
+  }, [showEmptyState, zoneQuery.data?.id]);
 
   useEffect(() => {
     if (!pendingCampaignId || !activeCampaign) {
@@ -600,7 +603,7 @@ export function MapContainer() {
 
   const chipsTop = insets.top + 12;
   const bannerTop = chipsTop + FILTER_CHIPS_HEIGHT + 10;
-  const hasTopBanner = Boolean(activeCampaign) || Boolean(data?.expanded) || isEmpty || filterEmpty;
+  const hasTopBanner = Boolean(activeCampaign) || showEmptyState || filterEmpty;
   const bookmarkTop = hasTopBanner ? bannerTop + 88 : bannerTop;
 
   return (
@@ -739,7 +742,7 @@ export function MapContainer() {
             />
           ) : null}
 
-          {data?.expanded && data.appliedRadiusM ? (
+          {SHOW_EXPANDED_RADIUS_BANNER && data?.expanded && data.appliedRadiusM ? (
             <View
               pointerEvents="none"
               className="rounded-hive-md bg-hive-surface/95 px-4 py-2.5 shadow-sm"
@@ -750,7 +753,7 @@ export function MapContainer() {
             </View>
           ) : null}
 
-          {isEmpty ? (
+          {showEmptyState ? (
             <MapEmptyState
               isFirstEver={Boolean(zoneQuery.data?.isFirstEver)}
               nearestDistanceM={nearestDistanceM}

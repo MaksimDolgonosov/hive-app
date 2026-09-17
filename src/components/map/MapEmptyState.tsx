@@ -1,6 +1,9 @@
+import { Camera } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 
+import { useHiveTheme } from '@/src/hooks/useHiveTheme';
+import { formatDistance } from '@/src/utils/geo';
 import { formatTtl } from '@/src/utils/ttl';
 
 type MapEmptyStateProps = {
@@ -17,65 +20,60 @@ export function MapEmptyState({
   ttlSec,
   nearestDistanceM,
   onCapture,
-  onNearest,
   onInvite,
+  onNearest,
 }: MapEmptyStateProps) {
   const { t } = useTranslation();
+  const theme = useHiveTheme();
 
   return (
     <View
       pointerEvents="box-none"
-      className="rounded-hive-md bg-hive-surface/95 px-4 py-3 shadow-sm"
+      className="rounded-hive-md border border-hive-stroke bg-hive-surface/95 px-3 py-2.5 shadow-sm"
     >
-      <Text className="text-center font-display text-[15px] font-bold text-hive-foreground">
-        {isFirstEver ? t('growth.emptyFirstTitle') : t('growth.emptyQuietTitle')}
-      </Text>
-      <Text className="mt-1 text-center font-inter text-xs text-hive-muted">
-        {ttlSec != null
-          ? t('growth.emptyTtl', { ttl: formatTtl(ttlSec) })
-          : t('growth.emptyTtlPending')}
-      </Text>
+      <View className="flex-row items-center gap-3">
+        <View className="min-w-0 flex-1">
+          <Text
+            numberOfLines={1}
+            className="font-display text-[15px] font-bold text-hive-foreground"
+          >
+            {isFirstEver ? t('growth.emptyFirstTitle') : t('growth.emptyQuietTitle')}
+          </Text>
+          <Text numberOfLines={1} className="mt-0.5 font-inter text-xs text-hive-muted">
+            {ttlSec != null
+              ? t('growth.emptyTtl', { ttl: formatTtl(ttlSec) })
+              : t('growth.emptyTtlPending')}
+          </Text>
+        </View>
 
-      <Pressable
-        accessibilityRole="button"
-        className="mt-3 h-11 items-center justify-center rounded-full bg-hive-primary"
-        onPress={onCapture}
-      >
-        <Text className="font-inter text-sm font-bold text-hive-on-accent">
-          {t('growth.ctaCapture')}
-        </Text>
-      </Pressable>
-
-      {nearestDistanceM != null ? (
         <Pressable
           accessibilityRole="button"
-          className="mt-2 h-11 items-center justify-center rounded-full border border-hive-stroke bg-hive-surface"
-          onPress={onNearest}
+          accessibilityLabel={t('growth.ctaCapture')}
+          className="h-9 flex-row items-center gap-1.5 rounded-full bg-hive-primary px-3"
+          onPress={onCapture}
         >
-          <Text className="font-inter text-sm font-semibold text-hive-foreground">
-            {t('growth.ctaNearest', { distance: formatDistanceLabel(nearestDistanceM) })}
+          <Camera color={theme.textOnAccent} size={14} strokeWidth={2.5} />
+          <Text className="font-inter text-xs font-bold text-hive-on-accent">
+            {t('growth.firstCaptureAction')}
           </Text>
         </Pressable>
-      ) : null}
+      </View>
 
-      <Pressable
-        accessibilityRole="button"
-        className="mt-2 h-11 items-center justify-center rounded-full border border-hive-stroke bg-hive-surface"
-        onPress={onInvite}
-      >
-        <Text className="font-inter text-sm font-semibold text-hive-foreground">
-          {t('growth.ctaInvite')}
-        </Text>
-      </Pressable>
+      <View className="mt-1.5 flex-row flex-wrap items-center justify-center gap-x-4 gap-y-1">
+        {nearestDistanceM != null ? (
+          <Pressable accessibilityRole="button" className="py-0.5" onPress={onNearest}>
+            <Text className="font-inter text-xs font-semibold text-hive-primary">
+              {t('growth.ctaNearest', { distance: formatDistance(nearestDistanceM) })}
+            </Text>
+          </Pressable>
+        ) : null}
+
+        <Pressable accessibilityRole="button" className="py-0.5" onPress={onInvite}>
+          <Text className="font-inter text-xs font-semibold text-hive-muted">
+            {t('growth.ctaInvite')}
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
-}
-
-function formatDistanceLabel(meters: number): string {
-  if (meters < 1000) {
-    return `${Math.round(meters)} м`;
-  }
-
-  const km = meters / 1000;
-  return km < 10 ? `${km.toFixed(1)} км` : `${Math.round(km)} км`;
 }

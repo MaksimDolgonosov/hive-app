@@ -7,6 +7,7 @@ const PUBLISH_BUZZ_STORAGE_KEY = '@hive/publishBuzzEnabled';
 const COLOR_SCHEME_STORAGE_KEY = '@hive/colorScheme';
 const APP_ICON_STORAGE_KEY = '@hive/appIcon';
 const ECHO_LAYER_STORAGE_KEY = '@hive/echoLayerEnabled';
+const EMPTY_STATE_BANNER_STORAGE_KEY = '@hive/emptyStateBannerEnabled';
 const FIRST_STING_STORAGE_KEY = '@hive/hasPublishedFirstSting';
 const PUSH_EXPLAIN_STORAGE_KEY = '@hive/pushExplainDismissed';
 const INSTAGRAM_LINKS_ALLOWED_KEY = '@hive/instagramLinksAllowed';
@@ -39,6 +40,15 @@ export function loadEchoLayerEnabled(): Promise<boolean | null> {
 
 export function saveEchoLayerEnabled(enabled: boolean): Promise<void> {
   return saveBoolean(ECHO_LAYER_STORAGE_KEY, enabled);
+}
+
+/** Локальный тумблер плашки пустой зоны («Здесь ещё никто не был»). */
+export function loadEmptyStateBannerEnabled(): Promise<boolean | null> {
+  return loadBoolean(EMPTY_STATE_BANNER_STORAGE_KEY);
+}
+
+export function saveEmptyStateBannerEnabled(enabled: boolean): Promise<void> {
+  return saveBoolean(EMPTY_STATE_BANNER_STORAGE_KEY, enabled);
 }
 
 /** UX-подсказка для экрана первого снимка (§G6), а не состояние аккаунта. */

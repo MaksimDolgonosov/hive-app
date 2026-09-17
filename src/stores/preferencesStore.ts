@@ -14,6 +14,7 @@ import {
   loadAppIcon,
   loadColorScheme,
   loadEchoLayerEnabled,
+  loadEmptyStateBannerEnabled,
   loadHasPublishedFirstSting,
   loadInstagramLinksAllowed,
   loadPublishBuzzEnabled,
@@ -21,6 +22,7 @@ import {
   saveAppIcon,
   saveColorScheme,
   saveEchoLayerEnabled,
+  saveEmptyStateBannerEnabled,
   saveHasPublishedFirstSting,
   saveInstagramLinksAllowed,
   savePublishBuzzEnabled,
@@ -37,6 +39,8 @@ interface PreferencesState {
   publishBuzzEnabled: boolean;
   /** Показывать слой эха на карте (§G2). Локальная настройка отображения. */
   echoLayerEnabled: boolean;
+  /** Показывать плашку пустой зоны («Здесь ещё никто не был»). */
+  emptyStateBannerEnabled: boolean;
   /** Пользователь уже публиковал — экран первого снимка больше не нужен (§G6). */
   hasPublishedFirstSting: boolean;
   /** Экран-объяснение пушей уже показывали (§G10). */
@@ -51,6 +55,7 @@ interface PreferencesState {
   hydrate: () => Promise<void>;
   setPublishBuzzEnabled: (enabled: boolean) => Promise<void>;
   setEchoLayerEnabled: (enabled: boolean) => Promise<void>;
+  setEmptyStateBannerEnabled: (enabled: boolean) => Promise<void>;
   setHasPublishedFirstSting: (value: boolean) => Promise<void>;
   setPushExplainDismissed: (value: boolean) => Promise<void>;
   setPendingPushExplain: (value: boolean) => void;
@@ -62,6 +67,7 @@ interface PreferencesState {
 export const usePreferencesStore = create<PreferencesState>((set, get) => ({
   publishBuzzEnabled: true,
   echoLayerEnabled: true,
+  emptyStateBannerEnabled: true,
   hasPublishedFirstSting: true,
   pushExplainDismissed: false,
   pendingPushExplain: false,
@@ -80,6 +86,7 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       storedScheme,
       storedIcon,
       storedEcho,
+      storedEmptyStateBanner,
       storedFirstSting,
       storedPushExplain,
       storedInstagramLinksAllowed,
@@ -88,6 +95,7 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       loadColorScheme(),
       loadAppIcon(),
       loadEchoLayerEnabled(),
+      loadEmptyStateBannerEnabled(),
       loadHasPublishedFirstSting(),
       loadPushExplainDismissed(),
       loadInstagramLinksAllowed(),
@@ -110,6 +118,7 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
     set({
       publishBuzzEnabled: storedBuzz ?? true,
       echoLayerEnabled: storedEcho ?? true,
+      emptyStateBannerEnabled: storedEmptyStateBanner ?? true,
       hasPublishedFirstSting: storedFirstSting ?? false,
       pushExplainDismissed: storedPushExplain ?? false,
       instagramLinksAllowed: storedInstagramLinksAllowed ?? true,
@@ -127,6 +136,11 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
   setEchoLayerEnabled: async (enabled) => {
     set({ echoLayerEnabled: enabled });
     await saveEchoLayerEnabled(enabled);
+  },
+
+  setEmptyStateBannerEnabled: async (enabled) => {
+    set({ emptyStateBannerEnabled: enabled });
+    await saveEmptyStateBannerEnabled(enabled);
   },
 
   setHasPublishedFirstSting: async (value) => {

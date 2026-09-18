@@ -1,18 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/src/components/auth/AuthButton';
+import { useKeyboardOverlap } from '@/src/hooks/useKeyboardOverlap';
 import { SAVED_MAP_PLACE_NAME_MAX_LENGTH } from '@/src/types';
+
+const SHEET_GAP = 16;
+const KEYBOARD_GAP = 12;
 
 type SaveMapPlaceModalProps = {
   visible: boolean;
@@ -31,6 +35,8 @@ export function SaveMapPlaceModal({
 }: SaveMapPlaceModalProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const keyboardOverlap = useKeyboardOverlap(visible);
   const [name, setName] = useState(initialName);
 
   useEffect(() => {
@@ -44,74 +50,82 @@ export function SaveMapPlaceModal({
   }
 
   const canSave = name.trim().length > 0 && !saving;
+  const sheetPaddingBottom =
+    keyboardOverlap > 0 ? keyboardOverlap + KEYBOARD_GAP : insets.bottom + SHEET_GAP;
 
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        className="flex-1 justify-end"
-      >
+      <View className="flex-1 justify-end">
         <Pressable accessibilityRole="button" className="flex-1 bg-black/35" onPress={onClose} />
 
         <View
           className="rounded-t-[24px] bg-hive-bg px-5 pt-4"
-          style={{ paddingBottom: insets.bottom + 16 }}
+          style={{
+            maxHeight: windowHeight - SHEET_GAP,
+            paddingBottom: sheetPaddingBottom,
+          }}
         >
-          <View className="mb-4 h-1 w-10 self-center rounded-full bg-hive-primary/30" />
+          <ScrollView
+            bounces={false}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View className="mb-4 h-1 w-10 self-center rounded-full bg-hive-primary/30" />
 
-          <Text className="font-inter text-xl font-bold text-hive-foreground">
-            {t('map.savePlaceTitle')}
-          </Text>
-          <Text className="mt-2 font-inter text-sm leading-5 text-hive-muted">
-            {t('map.savePlaceDescription')}
-          </Text>
+            <Text className="font-inter text-xl font-bold text-hive-foreground">
+              {t('map.savePlaceTitle')}
+            </Text>
+            <Text className="mt-2 font-inter text-sm leading-5 text-hive-muted">
+              {t('map.savePlaceDescription')}
+            </Text>
 
-          <Text className="mb-2 mt-5 font-inter text-sm font-semibold text-hive-foreground">
-            {t('map.savePlaceNameLabel')}
-          </Text>
-          <TextInput
-            autoCapitalize="sentences"
-            autoCorrect={false}
-            className="rounded-hive-md border border-hive-stroke bg-hive-input-bg px-4 py-3 font-inter text-base text-hive-foreground"
-            maxLength={SAVED_MAP_PLACE_NAME_MAX_LENGTH}
-            placeholder={t('map.savePlaceNamePlaceholder')}
-            placeholderTextColor="#9C9287"
-            returnKeyType="done"
-            value={name}
-            onChangeText={setName}
-            onSubmitEditing={() => {
-              if (canSave) {
-                handleSave();
-              }
-            }}
-          />
-          <Text className="mt-1 text-right font-inter text-xs text-hive-muted">
-            {t('map.savePlaceNameCounter', {
-              count: name.length,
-              max: SAVED_MAP_PLACE_NAME_MAX_LENGTH,
-            })}
-          </Text>
-
-          <View className="mt-5 gap-3">
-            <AuthButton
-              disabled={!canSave}
-              loading={saving}
-              title={t('map.savePlaceConfirm')}
-              onPress={handleSave}
+            <Text className="mb-2 mt-5 font-inter text-sm font-semibold text-hive-foreground">
+              {t('map.savePlaceNameLabel')}
+            </Text>
+            <TextInput
+              autoCapitalize="sentences"
+              autoCorrect={false}
+              className="rounded-hive-md border border-hive-stroke bg-hive-input-bg px-4 py-3 font-inter text-base text-hive-foreground"
+              maxLength={SAVED_MAP_PLACE_NAME_MAX_LENGTH}
+              placeholder={t('map.savePlaceNamePlaceholder')}
+              placeholderTextColor="#9C9287"
+              returnKeyType="done"
+              value={name}
+              onChangeText={setName}
+              onSubmitEditing={() => {
+                if (canSave) {
+                  handleSave();
+                }
+              }}
             />
-            <Pressable
-              accessibilityRole="button"
-              className="items-center py-2"
-              disabled={saving}
-              onPress={onClose}
-            >
-              <Text className="font-inter text-base font-semibold text-hive-muted">
-                {t('map.savePlaceCancel')}
-              </Text>
-            </Pressable>
-          </View>
+            <Text className="mt-1 text-right font-inter text-xs text-hive-muted">
+              {t('map.savePlaceNameCounter', {
+                count: name.length,
+                max: SAVED_MAP_PLACE_NAME_MAX_LENGTH,
+              })}
+            </Text>
+
+            <View className="mt-5 gap-3">
+              <AuthButton
+                disabled={!canSave}
+                loading={saving}
+                title={t('map.savePlaceConfirm')}
+                onPress={handleSave}
+              />
+              <Pressable
+                accessibilityRole="button"
+                className="items-center py-2"
+                disabled={saving}
+                onPress={onClose}
+              >
+                <Text className="font-inter text-base font-semibold text-hive-muted">
+                  {t('map.savePlaceCancel')}
+                </Text>
+              </Pressable>
+            </View>
+          </ScrollView>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 }

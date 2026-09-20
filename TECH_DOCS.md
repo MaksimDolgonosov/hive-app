@@ -566,3 +566,5 @@ Query params: cursor?: string, limit?: number (default 20, max 50)
 
 Улей активен (`stage: hive`), когда `activationCount >= HIVE_ACTIVATION_THRESHOLD` при капе `HIVE_AUTHOR_WEIGHT_CAP` на автора. Соло-стопка — `seed`, в `hives[]` по умолчанию не попадает.
 
+Места заведений (кафе/бары), верификация партнёра, обложка из галереи: контракт ещё не в этом файле — источник истины **`PLACE_PARTNER_TZ.md`** (§G14, §G15), пока реализация не перенесена в OpenAPI.
+

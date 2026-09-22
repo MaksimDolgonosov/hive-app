@@ -1,9 +1,10 @@
-# Hive — ТЗ: места заведений и верификация партнёров
+# Hive — ТЗ: места заведений и самопубликация партнёров
 
-Версия: 0.1  
+Версия: 0.3  
+Публикация места — самообслуживание заведения. Нет ИНН, нет адреса из геокодера, нет approve админа и нет SMS-кода до пина. Ответственность за имя, адрес, телефон и фото на заведении. Центр по-прежнему только on-site камера.  
 Стек: backend Node.js + Express + MongoDB + Socket.io (`hive-backend-nodejs`); frontend Expo SDK 54 (`RN_FRONTEND_TZ.md`)  
 Смежные документы: `BACKEND_GROWTH_TZ.md` (§G11, §G13), `RN_GROWTH_TZ.md` (§G11, §G13), `TECH_DOCS.md`, `openapi.yaml`  
-Коды механик: **G14** (верификация партнёра), **G15** (места / Place). Нумерация продолжает ряд G1–G13.
+Коды механик: **G14** (самопубликация партнёра), **G15** (места / Place). Нумерация продолжает ряд G1–G13.
 
 Этот документ — **источник истины** по контрактам и правилам мест. Пока реализация не внесена в `openapi.yaml` / `TECH_DOCS.md`, расхождения решаются в пользу этого файла.
 
@@ -14,7 +15,7 @@
 1. [Зачем это продукту](#1-зачем-это-продукту)
 2. [Инварианты — что нельзя ломать](#2-инварианты--что-нельзя-ломать)
 3. [Сущности и роли](#3-сущности-и-роли)
-4. [G14 — Верификация партнёра](#g14--верификация-партнёра)
+4. [G14 — Самопубликация партнёра](#g14--самопубликация-партнёра)
 5. [G15 — Места заведений](#g15--места-заведений)
 6. [Фото места из галереи](#6-фото-места-из-галереи)
 7. [Связь места с ульем и картой](#7-связь-места-с-ульем-и-картой)
@@ -41,7 +42,7 @@
 - когда гости снимают на точке, обычный улей зажигается **поверх** места и наследует его лицо;
 - сидинг и витрина не рисуют плотность и не подделывают улей.
 
-Галерея разрешена **только** для медиа места. Это осознанное исключение из правила «на карту — только камера»: доверие к таким фото держится не на EXIF съёмки, а на верификации партнёра (§G14).
+Галерея разрешена **только** для медиа места. Это осознанное исключение из правила «на карту — только камера». Hive **не** проверяет юрлицо, **не** сверяет адрес с геокодером и **не** одобряет заявку до публикации. Имя, текст адреса и фото — на совести заведения. Единственный якорь до пина: человек физически снял точку камерой приложения (§4.3, I6). Чужое или фейковое место снимается после жалобы (§10), а не очередью ревью.
 
 ---
 
@@ -55,7 +56,7 @@
 | I4 | Медиа места **никогда** не становятся `Sting` | Нет `expiresAt`, нет эха (§G2), нет `share/stings/{id}` |
 | I5 | Фейковые «живые» аккаунты запрещены (§G11) | Партнёр не маскируется под обычного пользователя; бейдж обязателен |
 | I6 | Координаты места нельзя задать «с дивана» | Центр Place фиксируется on-site камерой на заявленном адресе, не GPS заявки и не пин, который партнёр подвинул на карте |
-| I7 | Неверифицированный пользователь не публикует витрину | Галерея места доступна только после `accountType=partner` (или `official`) и `Place.status`, допускающего медиа |
+| I7 | Гость без самопубликации не выкладывает витрину | Галерея места доступна только после самопубликации (`accountType=partner`) или `official`, и `Place.status`, допускающего медиа. «Партнёр» здесь значит «заведение само опубликовало точку», не «Hive проверил ИНН» |
 
 Нарушение I1–I4 превращает карту в каталог заведений с нарисованной жизнью. Это хуже пустой карты.
 
@@ -67,42 +68,32 @@
 
 | Роль | Кто | Что может |
 | --- | --- | --- |
-| Заявитель | `personal`, подал заявку | Черновик заявки, загрузка документов, телефон, on-site. Место на карту не публикует |
-| Партнёр | `accountType=partner` после approve | Создаёт и ведёт места, грузит обложку/галерею из галереи или камеры, публикует живые жала как сейчас (§G11) |
+| Заявитель | `personal`, заполняет форму | Черновик заявки и on-site. Место на карту не публикует, пока сам не отправит форму |
+| Партнёр | `accountType=partner` сразу после своей отправки | Ведёт места, грузит обложку/галерею из галереи или камеры, публикует живые жала как сейчас (§G11). Юрлицо Hive не проверяет |
 | Official | команда Hive | Создаёт место через admin без заявки; те же ограничения I1–I4 |
 | Гость | любой авторизованный | Видит место, снимает жало в радиусе (камера), открывает карточку |
-| Админ | роль `admin` | Ревью заявок, approve/reject, suspend места, ручной `account-type` как сейчас |
+| Админ | роль `admin` | Не одобряет заявку заранее. Suspend места, снятие медиа по жалобе, ручной `account-type` как сейчас |
 | Сотрудник заведения | — | **Вне скоупа.** Одно место — один owner-аккаунт |
 
-`accountType` не расширяется новыми значениями. Промежуточные состояния живут в `PartnerApplication.status`, не в типе аккаунта. Неодобренный заявитель остаётся `personal`.
+`accountType` не расширяется новыми значениями. Пока форма не отправлена, заявитель остаётся `personal`. Отдельного статуса «ждёт админа» нет.
 
-Существующий `POST /admin/users/{id}/account-type` остаётся **аварийным переключателем** (уже выданные партнёры, Hive-аккаунты). Обычный путь — заявка §G14. Админ, выставивший `partner` вручную, всё равно не сможет показать место на карте без on-site привязки координат (I6).
+Существующий `POST /admin/users/{id}/account-type` остаётся **аварийным переключателем** (уже выданные партнёры, Hive-аккаунты). Обычный путь — самопубликация §G14. Админ, выставивший `partner` вручную, всё равно не сможет показать место на карте без on-site привязки координат (I6).
 
 ### 3.2 Модели
 
 ```ts
 type UUID = string;
 
-type LegalType = 'ip' | 'ooo' | 'self_employed' | 'other';
 type PlaceCategory = 'cafe' | 'bar' | 'restaurant' | 'other';
-type ApplicationStatus =
-  | 'draft'
-  | 'submitted'
-  | 'needs_info'
-  | 'approved'
-  | 'rejected';
+type ApplicationStatus = 'draft' | 'published';
 
 interface PartnerApplication {
   id: UUID;
   userId: UUID;
-  legalType: LegalType;
-  legalName: string;          // как в документах
-  inn: string | null;         // 10 или 12 цифр; null только для legalType=other
-  brandName: string;          // вывеска / как зовут гости
+  brandName: string;          // вывеска / как зовут гости; заявитель отвечает за правдивость
   category: PlaceCategory;
   address: PlaceAddress;
-  phone: string;              // E.164, телефон заведения
-  phoneVerified: boolean;
+  phone: string | null;       // E.164, необязательный контакт. Код по SMS не отправляется
   contactEmail: string;
   listingUrls: {
     instagram: string | null;
@@ -110,32 +101,21 @@ interface PartnerApplication {
     ymaps: string | null;     // Яндекс.Карты
     twogis: string | null;
   };
-  documents: ApplicationDocument[];
   onsite: OnsiteVerification | null;
   status: ApplicationStatus;
-  rejectCode: ApplicationRejectCode | null;
-  reviewerNote: string | null; // виден заявителю при needs_info / rejected
-  placeId: UUID | null;        // заполняется при approve, когда место создано
+  placeId: UUID | null;        // заполняется при самопубликации, когда место создано
   createdAt: string;
   updatedAt: string;
-  submittedAt: string | null;
-  reviewedAt: string | null;
+  publishedAt: string | null;
 }
 
 interface PlaceAddress {
-  formatted: string;
-  city: string;
-  country: string;            // MVP: только RU
-  lat: number;                // геокод адреса, не GPS телефона заявителя
-  lng: number;
-  source: 'geocoder' | 'manual_admin';
-}
-
-interface ApplicationDocument {
-  id: UUID;
-  kind: 'signage' | 'inn_cert' | 'lease' | 'menu' | 'other';
-  imageUrl: string;           // private bucket, не CDN карты
-  createdAt: string;
+  formatted: string;          // свободный текст заявителя, не подсказка геокодера
+  city: string | null;
+  country: string | null;     // любая страна; RU не требуется
+  lat: number | null;         // null до on-site; после — копия on-site, не геокод
+  lng: number | null;
+  source: 'declared' | 'onsite' | 'manual_admin';
 }
 
 interface OnsiteVerification {
@@ -150,7 +130,7 @@ interface OnsiteVerification {
 type PlaceStatus = 'draft' | 'live' | 'paused' | 'suspended';
 type MediaKind = 'cover' | 'gallery';
 type MediaSource = 'library' | 'camera';
-type MediaModeration = 'pending' | 'approved' | 'rejected';
+type MediaModeration = 'approved' | 'rejected';
 
 interface Place {
   id: UUID;
@@ -160,6 +140,7 @@ interface Place {
   category: PlaceCategory;
   description: string | null; // до PROFILE_BIO_MAX_LENGTH (280)
   address: PlaceAddress;
+  phone: string | null;       // контакт с заявки. В публичный PlaceSummary не входит
   center: { lat: number; lng: number }; // копия onsite-координат, read-only для партнёра
   radiusM: number;            // конфиг, не поле формы. Старт 60
   cover: PlaceMedia | null;
@@ -169,7 +150,7 @@ interface Place {
   hiveStage: HiveStage | null;
   activeGuestStingsCount: number; // только personal-авторы, не истёкшие
   status: PlaceStatus;
-  verifiedAt: string | null;
+  verifiedAt: string | null;  // null: Hive юрлицо не проверял. Момент самопубликации — publishedAt заявки
   createdAt: string;
   updatedAt: string;
 }
@@ -211,13 +192,12 @@ interface PlaceSummary {
 | --- | --- | --- |
 | `PLACE_RADIUS_M` | 60 | Радиус привязки жал и показа «внутри места» |
 | `PLACE_RADIUS_MIN_M` / `MAX_M` | 30 / 100 | Если админ поправит радиус под летнюю веранду |
-| `PLACE_CLAIM_RADIUS_M` | 75 | Допуск on-site относительно геокода адреса |
+| `PLACE_CLAIM_RADIUS_M` | 75 | Насколько админ может сдвинуть центр без нового on-site. К геокоду адреса не привязано: геокода нет |
 | `PLACE_ONSITE_ACCURACY_MAX_M` | 50 | Как у наград §G5: грубый GPS не принимается |
 | `PLACE_GALLERY_MAX` | 12 | Обложка не входит в лимит |
 | `PLACE_MEDIA_MAX_BYTES` | 15 × 1024 × 1024 | До клиентского ресайза |
 | `PLACE_MAX_PER_PARTNER` | 3 | Каждое место — своя заявка и свой on-site |
 | `PLACE_OVERLAP_MIN_M` | 40 | Минимальная дистанция центров двух live-мест |
-| `PARTNER_DOCUMENTS_MIN` | 1 | Минимум один документ; для `ip`/`ooo` рекомендуется `inn_cert` или `signage` |
 
 `Hive` DTO дополняется опциональными полями (старые клиенты игнорируют):
 
@@ -233,36 +213,32 @@ interface Hive {
 
 ---
 
-## G14 — Верификация партнёра
+## G14 — Самопубликация партнёра
 
 ### Задача
 
-Галерея места обходит анти-спуфинг съёмки. Значит, доверие переносится на проверку: **кто** подаёт, **какое** заведение, **контролирует ли** он точку по заявленному адресу. Без этого шага украденные фото чужого бара окажутся на карте Hive.
+Галерея места обходит анти-спуфинг съёмки. Hive не переносит доверие на ИНН, геокодер или человека в ревью: **заведение само заявляет имя, адрес и фото и само за них отвечает**. Украденная витрина снимается жалобой и suspend (§10), а не предварительным approve.
 
-Три независимых слоя. Approve только если все три закрыты (для `legalType=other` слой «кто» закрывается ручным ревью вместо ИНН).
+До пина остаётся один автоматический барьер — человек был в точке:
 
-| Слой | Вопрос | Как закрывается на MVP |
+| Барьер | Вопрос | Как закрывается |
 | --- | --- | --- |
-| Идентичность | Кто заявитель и какое юрлицо | Форма + ИНН с контрольной суммой + документ |
-| Существование точки | Есть ли заведение по адресу | Адрес через геокодер + ссылка 2ГИС/Яндекс + фото вывески в документах |
-| Контроль точки | Это его точка, он там был | Телефон заведения + **on-site камера** (обязательно) + ревью админа |
+| Явка | Координаты не с дивана | **On-site камера** (обязательно, I6) |
+| Сосед | В этой точке уже есть чужое место | `PLACE_OVERLAP` по центрам, без ревьюера |
 
-Автоподтверждение по ЕГРЮЛ/ЕГРИП, претензия листинга Google/Yandex, выезд амбассадора — **не** входят в MVP (см. §16). Первый поток партнёров маленький, человек в ревью дешевле ложной верификации.
+ИНН, свидетельство, подсказки геокодера, ограничение страны `RU`, SMS-код и решение админа до публикации **не** входят в путь. Автоподтверждение по ЕГРЮЛ/ЕГРИП — тоже не входит (см. §16).
 
 ### 4.1 Пользовательский сценарий
 
 ```
 профиль → «Для заведений» → заявка
-  → документы (камера или галерея)
-  → OTP на телефон заведения
-  → on-site: прийти на адрес, снять фасад/вывеску камерой приложения
-  → отправка
-  → ожидание ревью
-  → approved → accountType=partner, создаётся Place в draft
-  → обложка из галереи → модерация обложки → Place live
+  → имя, категория, адрес текстом, email; телефон по желанию
+  → on-site: прийти на свою точку, снять фасад/вывеску камерой приложения
+  → отправка → сразу accountType=partner, Place в draft
+  → обложка из галереи или камеры → Place live сразу, без очереди модерации
 ```
 
-Онбординг обычного пользователя не меняется. Вход в заявку — из профиля, только для `personal` без активной заявки (или с `needs_info` / `rejected`, которую можно править).
+Онбординг обычного пользователя не меняется. Вход в заявку — из профиля, для `personal` без незакрытого `draft`. Отдельного экрана «на проверке / отказано» нет: отправка сама создаёт место.
 
 `partner` не видит форму заявки повторно, пока не начнёт заявку на **следующее** место (лимит `PLACE_MAX_PER_PARTNER`).
 
@@ -270,114 +246,65 @@ interface Hive {
 
 | Поле | Правила |
 | --- | --- |
-| `legalType` | Обязательно |
-| `legalName` | 2–120 символов |
-| `inn` | Обязателен для `ip`/`ooo`/`self_employed`. Цифры: 12 (ИП/самозанятый) или 10 (ООО). Сервер считает контрольную сумму ИНН; невалидный → `VALIDATION_ERROR`. Для `other` — `null`, заявка всегда ручная |
-| `brandName` | 2–80, это имя места на карте |
+| `brandName` | 2–80, это имя места на карте. Заявитель подтверждает, что это его заведение |
 | `category` | `cafe` / `bar` / `restaurant` / `other` |
-| `address` | Выбор из подсказок геокодера (клиент не шлёт произвольные lat/lng «с пальца»). Сервер перепроверяет геокодом; расхождение > 150 м с подсказкой → ошибка |
-| `phone` | E.164, не личный обязательно, но должен быть доступен заявителю для OTP |
+| `address.formatted` | Свободный текст, 4–200 символов. Клиент не предлагает подсказки геокодера и не шлёт lat/lng адреса. Сервер адрес не геокодирует |
+| `address.city` / `country` | Необязательны. Страна любая |
+| `phone` | Необязателен. E.164, если заполнен. SMS с кодом нет, владение номером не проверяется |
 | `contactEmail` | Может отличаться от email аккаунта |
-| `listingUrls` | Хотя бы одна из `ymaps` / `twogis` / `instagram` / `website` |
+| `listingUrls` | Необязательны. Ссылки не сверяются с адресом |
 
-Страна адреса на MVP — только `RU`. Иначе `PLACE_COUNTRY_UNSUPPORTED`.
+Юрлица, ИНН и документов нет. Копирайт под формой: «Вы публикуете место от своего имени. Hive не проверяет документы заведения».
 
-Геокодер: тот же стек, что карта (Яндекс, раз проект уже мигрирует — `YANDEX_MAPKIT_MIGRATION.md`). Конкретный провайдер фиксируется в backend-реализации один раз. Фоллбек админа: `source: 'manual_admin'`.
+`source` адреса до on-site — `declared` (`lat`/`lng` = null). После on-site — `onsite`, координаты копируются из кадра. `manual_admin` — только если админ поправил центр уже созданного места.
 
-### 4.3 Документы заявки
+### 4.3 On-site — обязательный якорь координат (I6)
 
-Это KYC, не витрина. Источник — камера **или** галерея (скан свидетельства ИНН лежит в «Файлах»/галерее — запрещать бессмысленно).
+Заявитель физически приходит на свою точку и снимает **фасад или вывеску** камерой приложения. Это не жало и не обложка места (обложку потом можно взять из галереи). Текст адреса с камерой не сверяется: геокода нет, сравнивать не с чем.
 
-- multipart, jpeg/heic → jpeg, те же лимиты размера, что у аватара;
-- хранение: **private bucket**, не публичный CDN жал;
-- `GET` документа — только owner и admin, с краткоживущим signed URL;
-- минимум `PARTNER_DOCUMENTS_MIN`; для `ip`/`ooo` ревьюер вправе вернуть `needs_info`, если нет ни `inn_cert`, ни `signage`.
-
-Паспорт не требуем на MVP (152-ФЗ, избыточно для витрины кафе). ИНН + вывеска + on-site.
-
-### 4.4 Телефон заведения
-
-Цель — отсечь претензию чужого бара по фото из интернета: у заявителя должен быть доступ к номеру, который висит на двери / в 2ГИС.
-
-```
-POST /partner/applications/{id}/phone/send     → OTP на SMS (purpose=partner_phone)
-POST /partner/applications/{id}/phone/verify   { code }
-```
-
-Переиспользовать инфраструктуру OTP (`BACKEND_EMAIL_AUTH_TZ.md`): TTL 10 мин, 5 попыток, cooldown 60 с, rate limit по номеру и userId. Канал — SMS, не email.
-
-Если SMS-провайдер на стенде не настроен → `503 PARTNER_PHONE_OTP_NOT_CONFIGURED`. Тогда админ при ревью обязан явно подтвердить звонок (`phoneVerified` выставляет ревьюер). **Нельзя** auto-approve заявку с `phoneVerified=false`.
-
-Личный номер аккаунта и номер заведения могут совпадать (маленький бар) — это нормально.
-
-Смена телефона после `phoneVerified` сбрасывает флаг и требует новый OTP.
-
-### 4.5 On-site — обязательный якорь координат (I6)
-
-Заявитель физически приходит по адресу заявки и снимает **фасад или вывеску** камерой приложения. Это не жало и не обложка места (обложку потом можно взять из галереи).
-
-Проверки сервера — те же, что у `POST /stings`, плюс привязка к адресу:
+Проверки сервера — те же, что у `POST /stings`:
 
 - файл с камеры, не library (клиент шлёт `source` только как UX; сервер смотрит на отсутствие типичных gallery-маркеров и, главное, на свежий `capturedAt` ±2 мин и GPS);
 - `accuracy ≤ PLACE_ONSITE_ACCURACY_MAX_M`;
-- haversine(`lat/lng`, `address.lat/lng`) ≤ `PLACE_CLAIM_RADIUS_M`;
-- повтор on-site перезаписывает предыдущий, пока заявка не `approved`.
+- повтор on-site перезаписывает предыдущий, пока заявка в `draft`.
 
 Ошибки:
 
 | code | Когда |
 | --- | --- |
-| `ONSITE_TOO_FAR` | дальше `PLACE_CLAIM_RADIUS_M` |
 | `ONSITE_LOW_ACCURACY` | GPS хуже порога |
 | `ONSITE_VALIDATION_FAILED` | анти-спуфинг как у жала |
-| `ONSITE_NOT_READY` | нет адреса в заявке |
 
-Код на бумажке / QR на экране **не** требуем на MVP: допуск по GPS+свежая камера+ревью вывески достаточны. Слабое место — сотрудник соседнего заведения в радиусе 75 м; лечится ревью фото вывески и ссылкой на 2ГИС.
+Код на бумажке / QR на экране **не** требуем. Слабое место — человек снимает чужую дверь. Это закрывает жалоба `wrong_location` / `not_a_place` (§10), не предварительный просмотр вывески.
 
-После approve координаты `Place.center` = on-site, не геокод. Геокод мог поставить точку в центр здания или на дорогу; вход бара — там, где стоял партнёр. Админ может поправить центр в пределах `PLACE_CLAIM_RADIUS_M` без нового on-site. Партнёр — нет.
+После отправки координаты `Place.center` = on-site. Админ может поправить центр в пределах `PLACE_CLAIM_RADIUS_M` без нового on-site. Партнёр — нет.
 
-### 4.6 Ревью админа
+### 4.4 Самопубликация
 
-UI админки на MVP нет (как у кампаний §G7): `GET` списка + `POST` решения, вызов из скрипта/Insomnia.
+Отдельного `POST /admin/partner-applications/{id}/review` нет. Место создаёт `POST /partner/applications/{id}/submit`.
 
-Чеклист ревьюера (зафиксировать в `reviewerNote` при reject/needs_info):
-
-1. ИНН валиден, юрлицо не выглядит брошенным на глаз (ручная проверка egrul.nalog.ru — вне автоматики).
-2. `brandName` и вывеска на документе/on-site совпадают с листингом 2ГИС/Яндекс.
-3. Адрес листинга ≈ адрес заявки.
-4. On-site фото — действительно эта вывеска, не сток и не сосед.
-5. Нет live-места ближе `PLACE_OVERLAP_MIN_M`.
-6. Телефон `phoneVerified`.
-
-```
-POST /admin/partner-applications/{id}/review
-{ "decision": "approve" | "reject" | "needs_info", "note": "…" }
-```
-
-Побочные эффекты `approve` (атомарно):
+`submit` атомарно, если форма валидна, on-site принят и нет overlap:
 
 1. `users.accountType = partner` (если ещё не partner).
-2. `PartnerApplication.status = approved`, `placeId` созданного места.
-3. Создаётся `Place` в `draft`: имя = `brandName`, центр = on-site, адрес с заявки, `verifiedAt = now`.
+2. `PartnerApplication.status = published`, `publishedAt = now`, `placeId` созданного места.
+3. Создаётся `Place` в `draft`: имя = `brandName`, центр = on-site, адрес и телефон с заявки (`source=onsite`), `verifiedAt = null`.
 4. Награды §G5 не выдаются.
 
-`reject` — аккаунт остаётся `personal`; повторная заявка разрешена после 7 суток (`PARTNER_REAPPLY_COOLDOWN_DAYS`). Коды отказа: `inn_mismatch`, `place_not_found`, `onsite_mismatch`, `overlap`, `spam`, `other`.
+Неполная форма → `422 APPLICATION_INCOMPLETE`, место не создаётся, аккаунт остаётся `personal`.
 
-`needs_info` — заявка снова редактируема, on-site и OTP не сбрасываются, если адрес и телефон не менялись. Смена адреса сбрасывает on-site. Смена телефона — OTP.
+Снять партнёрку по злоупотреблению: `POST /admin/users/{id}/account-type { personal }` + `suspended` всем live-местам. Не удалять медиа сразу — см. §11. Это реакция на жалобу, не шаг онбординга.
 
-Снять партнёрку: `POST /admin/users/{id}/account-type { personal }` + `suspended` всем live-местам. Не удалять медиа сразу — см. §11.
+### 4.5 Конфликт претензий
 
-### 4.7 Конфликт претензий
+Индекс уникальности live-мест: гео. Одна сеть — несколько мест, если центры дальше `PLACE_OVERLAP_MIN_M`.
 
-Индекс уникальности live-мест: гео, не ИНН. Одна сеть — несколько мест.
+Если центр новой заявки ближе `PLACE_OVERLAP_MIN_M` к уже `live`/`draft` чужому месту → `409 PLACE_OVERLAP`, `submit` не проходит. Спор «это наше заведение» — ручной тикет, перевод `ownerId` админом (`POST /admin/places/{id}/transfer`) — в MVP достаточно эндпоинта, UI нет.
 
-Если новая заявка: центр ближе `PLACE_OVERLAP_MIN_M` к уже `live`/`draft` чужому месту → `409 PLACE_OVERLAP`. Ревьюер не аппрувит «второй Бар X» в той же точке. Спор «это наше заведение» — ручной тикет, перевод `ownerId` админом (`POST /admin/places/{id}/transfer`) — в MVP достаточно эндпоинта, UI нет.
+Две заявки на одну точку: первая успешная `submit` побеждает; вторая — `overlap`.
 
-Две заявки на одну точку: первая approved побеждает; вторая — `overlap`.
+### 4.6 DoD §G14
 
-### 4.8 DoD §G14
-
-Заявитель не может получить `partner` и draft-место без: валидной формы, `phoneVerified`, принятого on-site в радиусе адреса, решения админа. On-site из галереи отвергается. Координаты места после approve равны on-site, не точке, откуда заполняли анкету.
+Заявитель получает `partner` и draft-место без ИНН, без геокодера, без SMS-кода и без решения админа. Нужны валидная форма и on-site с камеры. On-site из галереи отвергается. Координаты места равны on-site, не точке, откуда заполняли анкету. `verifiedAt` остаётся `null`.
 
 ---
 
@@ -390,7 +317,7 @@ POST /admin/partner-applications/{id}/review
 ### 5.1 Жизненный цикл Place
 
 ```
-draft  --(cover approved)-->  live
+draft  --(cover uploaded)-->  live
 live   --(owner pause)-->     paused
 paused --(owner resume)-->    live
 *      --(admin)-->           suspended
@@ -403,7 +330,7 @@ paused --(owner resume)-->    live
 | `paused` | нет | «временно скрыто» для чужих, owner видит | да |
 | `suspended` | нет | 404/`PLACE_SUSPENDED` | read-only |
 
-Переход в `live` **только** если: owner `partner`|`official`, заявка approved (или official), есть `cover` с `moderation=approved`, статус не `suspended`. Без обложки пин не публикуем — иначе серый маркер без лица, это не «фото заведения».
+Переход в `live` **только** если: owner `partner`|`official`, есть обложка, статус не `suspended`. Обложка публикуется сразу, очередь модерации не ждёт. Без обложки пин не публикуем — иначе серый маркер без лица, это не «фото заведения».
 
 Пауза — хозяин уехал в отпуск / ремонт. Suspend — нарушение. Resume из `suspended` только админ.
 
@@ -411,9 +338,9 @@ paused --(owner resume)-->    live
 
 ### 5.2 Что партнёр редактирует сам
 
-Можно: `name`, `description`, `category`, `socialLinks`, обложка, галерея, пауза.
+Можно: `name`, `description`, `category`, `socialLinks`, текст `address.formatted` (город и страна тоже), `phone`, обложка, галерея, пауза.
 
-Нельзя: `center`, `address`, `radiusM`, `ownerId`, `status=suspended`. Смена адреса = новая заявка (точка переехала) или тикет админу.
+Нельзя: `center`, `radiusM`, `ownerId`, `status=suspended`. Правка текста адреса центр не двигает. Точка переехала — новая заявка с новым on-site или тикет админу.
 
 Лимит мест: `PLACE_MAX_PER_PARTNER`. Создание второго места — новая заявка §G14 с новым on-site, не кнопка «клонировать».
 
@@ -421,11 +348,11 @@ paused --(owner resume)-->    live
 
 Экран `app/(modals)/place/[id].tsx`:
 
-1. Обложка (approved).
-2. Имя, категория, бейдж «Партнёр».
+1. Обложка.
+2. Имя, категория, бейдж «Заведение». Бейдж значит «опубликовано заведением», не «проверено Hive».
 3. Адрес, дистанция от пользователя если есть GPS.
 4. Кнопка «Снять здесь» → камера; если пользователь вне `radiusM` — предупреждение «жало привяжется к месту, только если снять на точке» (сервер всё равно решит по GPS публикации).
-5. Галерея места (только `moderation=approved`), горизонтальный ряд.
+5. Галерея места, горизонтальный ряд.
 6. Живые гостевые фото — те же данные, что улей, если `hiveId != null`; иначе пустое состояние «Пока тихо — стань первым» + CTA камеры. Не подставлять галерею места в этот ряд.
 7. Ссылка «Открыть улей», если `hiveStage === 'hive'`.
 8. Пожаловаться.
@@ -448,34 +375,25 @@ paused --(owner resume)-->    live
 | --- | --- | --- | --- |
 | Обложка места | да | да | нет |
 | Галерея места (до 12) | да | да | нет |
-| Документы заявки | да | да | нет |
+| Документы заявки | — | — | нет. Документы не собираем |
 | On-site верификация | **нет** | только камера | нет |
 | Живые жала партнёра и гостей | **нет** | только камера | да |
 
-Клиент для обложки/галереи: action sheet как у аватара (`pickAvatarImage`) — «Снять» / «Выбрать из галереи». Мультивыбор галереи: `allowsMultipleSelection`, не больше оставшихся слотов. Ресайз — тот же пайплайн, что `prepareStingPhotoForUpload` (короткая сторона ≤ 1920, jpeg 0.82). EXIF GPS **не затирать** до отправки: серверу нужен для модерации. Ориентацию по-прежнему запекать.
+Клиент для обложки/галереи: action sheet как у аватара (`pickAvatarImage`) — «Снять» / «Выбрать из галереи». Мультивыбор галереи: `allowsMultipleSelection`, не больше оставшихся слотов. Ресайз — тот же пайплайн, что `prepareStingPhotoForUpload` (короткая сторона ≤ 1920, jpeg 0.82). EXIF GPS можно сохранить, на публикацию он не влияет. Ориентацию по-прежнему запекать.
 
 Разрешение Photo Library запрашивать в момент выбора, не заранее. Usage string (Info.plist / Play): отдельный от аватара смысл — «чтобы загрузить фото заведения». Для обычных пользователей формулировка аватара не должна обещать загрузку мест.
 
 ### 6.2 Почему галерея безопасна только здесь
 
-Доверие = §G14, а не метаданные кадра. Сток, чужой интерьер, рендер с сайта — остаются рисками и закрываются модерацией + жалобами (§10), не запретом галереи. Запрет галереи для витрины убьёт партнёров: нормальные кадры зала сняты на другой телефон / фотографом год назад.
+Доверие к кадру = заявление заведения (§G14) и жалоба после публикации (§10). Сток, чужой интерьер, рендер с сайта остаются риском и лежат на совести загрузившего. Запрет галереи для витрины убьёт партнёров: нормальные кадры зала сняты на другой телефон / фотографом год назад.
 
-### 6.3 Модерация медиа
+### 6.3 Публикация медиа
 
-Каждый `PlaceMedia` стартует в `pending` и **не отдаётся** в публичных `GET /places`, `places[]` nearby и OG, пока `approved`. Owner в редакторе видит pending с подписью «На проверке».
+Каждый `PlaceMedia` сразу получает `moderation=approved` и отдаётся в публичных `GET /places`, `places[]` и OG. Очереди «на проверке» нет. Первые кадры не ждут человека. EXIF не решает, показывать ли фото.
 
-Авто-правила сервера (без ML на MVP):
+Технический порог: `image/jpeg` после конвертации, short side ≥ 800, иначе `MEDIA_TOO_SMALL`.
 
-| Сигнал | Действие |
-| --- | --- |
-| EXIF GPS есть и расстояние до `Place.center` ≤ `PLACE_RADIUS_M` × 3 | можно auto-approve, **кроме** первых 3 медиа партнёра |
-| EXIF GPS есть и расстояние > 500 м | не reject, флаг `exif_far` ревьюеру |
-| EXIF нет | pending, ручное |
-| Первые 3 медиа каждого места | всегда ручные |
-| Партнёр 14 суток с live-местом без accepted-жалоб | следующие медиа с «близким» EXIF — auto-approve |
-| `image/jpeg` после конвертации, short side ≥ 800 | иначе `MEDIA_TOO_SMALL` |
-
-Ревьюер (admin): `POST /admin/place-media/{id}/review { decision, rejectCode? }`. Reject виден owner с i18n по `rejectCode`. Cover reject не переводит live→draft сам, но если approved-cover больше нет — место автоматически `paused` с причиной `cover_missing` (пин без лица не держим).
+Админ снимает кадр только после жалобы: `POST /admin/place-media/{id}/review { decision: "reject", rejectCode? }`. Reject виден owner с i18n по `rejectCode`. Если у live-места не осталось обложки — место автоматически `paused` с причиной `cover_missing`.
 
 Порядок галереи: `PATCH` массива id. Cover — отдельный слот, не «первый в галерее»: смена обложки не должна перетасовывать витрину.
 
@@ -483,7 +401,7 @@ paused --(owner resume)-->    live
 
 ### 6.4 Водяные знаки, люди, сток
 
-Отдельного детекта лиц нет (вне скоупа). Копирайт в редакторе: «Загружайте фото своего заведения. Не чужие снимки и не скриншоты». Жалоба `stolen` / `not_this_place` — очередь админу. Повторные rejects → suspend места и отзыв `partner` на усмотрение админа.
+Отдельного детекта лиц нет (вне скоупа). Копирайт в редакторе: «Загружайте фото своего заведения. Не чужие снимки и не скриншоты. За фото отвечаете вы». Жалоба `stolen` / `not_this_place` снимает кадр или место после решения по жалобе (§10). Повторные снятия → suspend места и отзыв `partner` на усмотрение админа.
 
 ---
 
@@ -514,7 +432,7 @@ paused --(owner resume)-->    live
 {
   "stings": [],
   "hives": [],
-  "places": [ /* PlaceSummary, только live, cover approved */ ],
+  "places": [ /* PlaceSummary, только live, обложка есть */ ],
   "echoes": [],
   "appliedBounds": {}
 }
@@ -538,7 +456,7 @@ paused --(owner resume)-->    live
 
 ### 7.4 Карточка улья
 
-`HiveDetailContent`: если `place` есть — шапка с обложкой, именем, бейджем партнёра, вход в `place/[id]`. Список жал не смешивать с галереей места.
+`HiveDetailContent`: если `place` есть — шапка с обложкой, именем, бейджем «Заведение», вход в `place/[id]`. Список жал не смешивать с галереей места.
 
 Копирайт соты на месте: «Снимись в {name} — появится улей» (`place.seedCta`).
 
@@ -558,30 +476,25 @@ paused --(owner resume)-->    live
 
 | Метод | Путь | Назначение |
 | --- | --- | --- |
-| POST | `/partner/applications` | Создать `draft` (1 активный draft+submitted+needs_info на пользователя) |
+| POST | `/partner/applications` | Создать `draft` (1 активный `draft` на пользователя) |
 | GET | `/partner/applications/me` | Текущая/последние заявки пользователя |
-| PATCH | `/partner/applications/{id}` | Поля формы, пока `draft` или `needs_info` |
-| POST | `/partner/applications/{id}/documents` | multipart `photo` + `kind` |
-| DELETE | `/partner/applications/{id}/documents/{docId}` | Пока не submitted/approved |
-| POST | `/partner/applications/{id}/phone/send` | SMS OTP |
-| POST | `/partner/applications/{id}/phone/verify` | `{ code }` → `phoneVerified=true` |
+| PATCH | `/partner/applications/{id}` | Поля формы, пока `draft` |
 | POST | `/partner/applications/{id}/onsite` | multipart как sting: `photo`, `lat`, `lng`, `accuracy`, `capturedAt`; только камера |
-| POST | `/partner/applications/{id}/submit` | Валидация слоёв; → `submitted` |
+| POST | `/partner/applications/{id}/submit` | Валидация формы и on-site; сразу `published` + Place `draft` |
 
-`submit` без on-site / без телефона / без адреса / без min документов → `422 APPLICATION_INCOMPLETE`, `details.missing: string[]`.
+`submit` без on-site / без `brandName` / без текста адреса / без категории / без email → `422 APPLICATION_INCOMPLETE`, `details.missing: string[]`. ИНН, документы, геокод и телефон в `missing` не входят. Эндпоинтов SMS нет.
 
-### 8.2 Admin заявок и мест
+### 8.2 Admin мест
+
+Очереди заявок нет. Админ реагирует на уже опубликованное место.
 
 | Метод | Путь | Назначение |
 | --- | --- | --- |
-| GET | `/admin/partner-applications?status&cursor` | Очередь ревью |
-| GET | `/admin/partner-applications/{id}` | Детали + signed URLs документов и on-site |
-| POST | `/admin/partner-applications/{id}/review` | approve / reject / needs_info |
 | POST | `/admin/places/{id}/suspend` | `{ reason }` |
 | POST | `/admin/places/{id}/unsuspend` | вернуть в `paused` (owner сам включит live) |
 | POST | `/admin/places/{id}/transfer` | `{ newOwnerId }` — оба должны быть partner |
-| POST | `/admin/place-media/{id}/review` | approve / reject медиа |
-| POST | `/admin/places` | Создать место для `official` без заявки (`center` обязателен) |
+| POST | `/admin/place-media/{id}/review` | только `reject` уже опубликованного медиа по жалобе |
+| POST | `/admin/places` | Создать место для `official` без заявки (`center` обязателен, on-site командой) |
 
 `POST /admin/users/{id}/account-type` не меняется.
 
@@ -590,12 +503,12 @@ paused --(owner resume)-->    live
 | Метод | Путь | Auth | Назначение |
 | --- | --- | --- | --- |
 | GET | `/places/nearby` | Bearer | Можно не делать отдельным, если `places[]` в `/stings/nearby` |
-| GET | `/places/{id}` | Bearer | Публичная карточка; owner видит pending-медиа |
+| GET | `/places/{id}` | Bearer | Публичная карточка; скрытых pending-медиа нет |
 | GET | `/places/{id}/stings` | Bearer | Активные жала с `placeId`, cursor; `includePartner` default false |
 | GET | `/places/me` | Bearer | Места owner |
-| PATCH | `/places/{id}` | owner | name, description, category, socialLinks |
+| PATCH | `/places/{id}` | owner | name, description, category, socialLinks, phone. Текст адреса можно поправить, центр нет |
 | POST | `/places/{id}/pause` | owner | live→paused |
-| POST | `/places/{id}/resume` | owner | paused→live, если cover approved |
+| POST | `/places/{id}/resume` | owner | paused→live, если обложка есть |
 | POST | `/places/{id}/media` | owner | multipart `photo` + `kind=cover\|gallery` + `source=library\|camera` |
 | PATCH | `/places/{id}/media/order` | owner | `{ galleryIds: UUID[] }` |
 | DELETE | `/places/{id}/media/{mediaId}` | owner | см. правило cover |
@@ -608,7 +521,7 @@ paused --(owner resume)-->    live
 
 ### 8.4 Коды ошибок (новые)
 
-`APPLICATION_INCOMPLETE`, `APPLICATION_NOT_EDITABLE`, `PARTNER_REAPPLY_COOLDOWN`, `PARTNER_PHONE_OTP_NOT_CONFIGURED`, `OTP_*` существующие, `ONSITE_TOO_FAR`, `ONSITE_LOW_ACCURACY`, `ONSITE_VALIDATION_FAILED`, `ONSITE_NOT_READY`, `PLACE_COUNTRY_UNSUPPORTED`, `PLACE_OVERLAP`, `PLACE_LIMIT`, `PLACE_NOT_LIVE`, `PLACE_SUSPENDED`, `PLACE_RESUME_NEEDS_COVER`, `MEDIA_LIMIT`, `MEDIA_TOO_SMALL`, `MEDIA_NOT_OWNER`, `COVER_REQUIRED`, `NOT_PARTNER`.
+`APPLICATION_INCOMPLETE`, `APPLICATION_NOT_EDITABLE`, `ONSITE_LOW_ACCURACY`, `ONSITE_VALIDATION_FAILED`, `PLACE_OVERLAP`, `PLACE_LIMIT`, `PLACE_NOT_LIVE`, `PLACE_SUSPENDED`, `PLACE_RESUME_NEEDS_COVER`, `MEDIA_LIMIT`, `MEDIA_TOO_SMALL`, `MEDIA_NOT_OWNER`, `COVER_REQUIRED`, `NOT_PARTNER`.
 
 ### 8.5 Rate limits
 
@@ -616,8 +529,6 @@ paused --(owner resume)-->    live
 | --- | --- |
 | Создание заявок | 3 / сутки / user |
 | Submit | 10 / сутки |
-| Documents upload | 20 / сутки |
-| Phone send | как OTP resend |
 | On-site | 10 / сутки |
 | Place media | 20 / сутки / user |
 | Pause/resume | 10 / сутки |
@@ -628,7 +539,7 @@ paused --(owner resume)-->    live
 Новые события не обязательны для MVP: карточка места не realtime-критична. Достаточно:
 
 - существующий `hive:updated` с `placeId` / `place`;
-- инвалидация `['places', id]` и nearby при approve обложки — через обычный refetch при фокусе.
+- инвалидация `['places', id]` и nearby при загрузке обложки — через обычный refetch при фокусе.
 
 Опционально позже: `place:updated`. Не блокирует MVP.
 
@@ -642,13 +553,10 @@ Expo SDK 54: камера и ImagePicker — по [документации ве
 
 | Путь | Кто | Содержание |
 | --- | --- | --- |
-| `app/(modals)/partner/apply.tsx` | personal | Форма заявки, шаги |
-| `app/(modals)/partner/documents.tsx` | заявитель | Список документов, add/delete |
-| `app/(modals)/partner/phone.tsx` | заявитель | OTP, переиспользовать `OtpInput` |
-| `app/(modals)/partner/onsite.tsx` | заявитель | Объяснение «придите на адрес», камера, нельзя открыть library |
-| `app/(modals)/partner/status.tsx` | заявитель | submitted / needs_info / rejected |
-| `app/(modals)/partner/place/edit.tsx` | partner | Имя, описание, ссылки, пауза, QR |
-| `app/(modals)/partner/place/media.tsx` | partner | Обложка + галерея, статусы модерации |
+| `app/(modals)/partner/apply.tsx` | personal | Форма: имя, категория, адрес текстом, email, телефон по желанию |
+| `app/(modals)/partner/onsite.tsx` | заявитель | Объяснение «снимите свою точку», камера, нельзя открыть library |
+| `app/(modals)/partner/place/edit.tsx` | partner | Имя, описание, ссылки, пауза, QR. Открывается сразу после submit |
+| `app/(modals)/partner/place/media.tsx` | partner | Обложка + галерея, публикуются сразу |
 | `app/(modals)/place/[id].tsx` | все | Публичная карточка |
 | Профиль | все | Пункт «Для заведений» / «Мои места» по состоянию |
 
@@ -674,11 +582,11 @@ Expo SDK 54: камера и ImagePicker — по [документации ве
 
 - On-site и жала: camera + location, как сейчас.
 - Медиа места: photo library **опционально**. Отказ library не блокирует камеру для обложки.
-- App Store: обновить цель Photo Library в privacy nutrition и `privacy-policy.*` — библиотека больше не «только аватар», а «аватар и, для подтверждённых заведений, фото места». Это обязательный сопутствующий артефакт релиза G15, не «потом».
+- App Store: обновить цель Photo Library в privacy nutrition и `privacy-policy.*` — библиотека больше не «только аватар», а «аватар и, для заведений, фото места». Это обязательный сопутствующий артефакт релиза G15, не «потом».
 
 ### 9.5 DoD frontend
 
-Партнёр после approve загружает обложку из галереи; до `approved` медиа карта пустая для чужих; гость не может открыть picker галереи в камере жала; on-site flow не создаёт sting; branded улей не дублирует пин места.
+После submit партнёр сразу в редакторе места и загружает обложку из галереи; обложка видна на карте без очереди модерации; гость не может открыть picker галереи в камере жала; on-site flow не создаёт sting; branded улей не дублирует пин места. Экрана ожидания ревью нет.
 
 ---
 
@@ -690,7 +598,7 @@ Expo SDK 54: камера и ImagePicker — по [документации ве
 POST /places/{id}/reports { "reason": "not_a_place" | "wrong_location" | "stolen_photos" | "spam" | "other", "comment"? }
 ```
 
-После 3 accepted (админом) жалоб за 30 дней — авто-`paused` + очередь на suspend. Порог — конфиг `PLACE_REPORT_PAUSE_THRESHOLD`.
+После 3 принятых админом жалоб за 30 дней — авто-`paused` + очередь на suspend. Порог — конфиг `PLACE_REPORT_PAUSE_THRESHOLD`. Это единственный вход админа в уже живое место.
 
 Жалоба на конкретное медиа: `POST /places/{id}/media/{mediaId}/reports`.
 
@@ -700,19 +608,19 @@ POST /places/{id}/reports { "reason": "not_a_place" | "wrong_location" | "stolen
 - OCR вывески vs `brandName`.
 - Верификация через Госуслуги / ЭЦП.
 
-Первый год это очередь человека. Автоматика только: ИНН checksum, гео on-site, overlap, EXIF-флаг, rate limit, порог жалоб.
+Первый год жалобы разбирает человек уже после публикации. Автоматика до пина только: анти-спуфинг on-site, overlap, rate limit. После пина — порог жалоб.
 
 ### 10.3 Злоупотребления и ответы
 
 | Атака | Защита |
 | --- | --- |
-| Украл фото интерьера известного бара, заявка с дивана | On-site GPS обязателен; ревью вывески; телефон заведения |
-| On-site у соседней двери в 50 м | Ревью фото vs 2ГИС; overlap; жалоба `wrong_location` |
+| Украл фото интерьера известного бара, заявка с дивана | On-site GPS обязателен: без кадра с точки submit не проходит. Фото витрины при этом на совести заведения; чужой интерьер снимает жалоба `stolen_photos` |
+| On-site у соседней двери | Overlap 40 м; жалоба `wrong_location`; suspend |
 | Галерея людей без согласия | Жалоба + reject `people_sensitive`; TOS |
-| Партнёр льёт 12 стоков, место «живое» | Витрина не улей и не плотность; тихий пин без гостей |
+| Партнёр льёт 12 стоков, место «живое» | Витрина не улей и не плотность; тихий пин без гостей; жалоба |
 | Подделка живой карты жалами из галереи | I1, без исключений для partner |
 | Накрутка улья сотрудниками | §G13 кап автора; несколько аккаунтов — уже риск продукта, не решаем здесь; репорт |
-| Заявка на Красную площадь | Ревью + overlap с чем угодно в центре; country RU не спасает — человек |
+| Заявка на чужую известную точку | Overlap, если место уже есть. Если нет — пин встанет, пока не придёт жалоба. Это принятый риск самопубликации |
 
 ---
 
@@ -720,27 +628,27 @@ POST /places/{id}/reports { "reason": "not_a_place" | "wrong_location" | "stolen
 
 | Данные | Где | Срок |
 | --- | --- | --- |
-| Документы заявки, on-site proof | private object storage | reject: 90 дней; approve: пока партнёрство + 3 года |
+| On-site proof | private object storage | пока партнёрство + 3 года; после снятия партнёрки — 90 дней |
 | Обложка/галерея | public CDN как жала, но другой prefix `places/` | пока место не hard-delete |
-| ИНН, телефон, юр. имя | Mongo, доступ admin/owner | как заявка |
-| EXIF GPS медиа | поля модерации, не отдавать в публичный DTO | пока медиа живо |
+| Телефон заведения, email контакта | Mongo, доступ admin/owner | как заявка. SMS не отправляется |
+| EXIF GPS медиа | не отдавать в публичный DTO | пока медиа живо |
 
-Публичный `Place` / `PlaceSummary` **не** содержит ИНН, legalName, телефон, документы, on-site фото, `exifGps`.
+Публичный `Place` / `PlaceSummary` **не** содержит телефон, on-site фото, `exifGps`. ИНН и документов в системе нет.
 
 Удаление аккаунта owner (`DELETE /auth/me`): места → `suspended`, медиа снять с CDN в том же джобе, что жала; заявки анонимизировать по правилам текущей политики. Не оставлять витрину «сирот» на карте.
 
 Обновить `legal/privacy-policy.ru.md`, `en.md`, `legal/privacy-policy.ts`:
 
-- библиотека: аватар **и** фото заведения подтверждённого партнёра;
-- отдельная категория: данные заявки партнёра (ИНН, документы, телефон точки);
-- цель: верификация и карточка места;
+- библиотека: аватар **и** фото заведения;
+- отдельная категория: телефон точки и on-site кадр (не публичная витрина);
+- цель: карточка места и привязка координат;
 - не смешивать с «моментами карты».
 
 ---
 
 ## 12. Аналитика и метрики
 
-События клиента (в батч §G12, без точных координат и ИНН):
+События клиента (в батч §G12, без точных координат):
 
 `partner_apply_started`, `partner_onsite_succeeded`, `partner_application_submitted`, `place_cover_uploaded`, `place_gallery_uploaded` (`props.source: library|camera`), `place_went_live`, `place_card_opened`, `place_deeplink_opened`, `place_report_submitted`, `place_seed_cta_tap`.
 
@@ -763,13 +671,13 @@ POST /places/{id}/reports { "reason": "not_a_place" | "wrong_location" | "stolen
 | Шаг | Что | Зависимости | DoD |
 | --- | --- | --- | --- |
 | **B0** | Модели Application/Place/PlaceMedia, private+public storage prefixes, конфиг констант | — | Индексы: ownerId, 2dsphere center, status+expires не нужен |
-| **B1** | CRUD заявки, документы, ИНН checksum, геокод адреса, overlap | B0 | Нельзя submit пустую |
-| **B2** | Phone OTP purpose=`partner_phone` | B1, OTP-инфра | verify ставит флаг |
-| **B3** | On-site multipart + анти-спуфинг + radius | B1 | Галерейный файл не проходит; далеко от адреса — `ONSITE_TOO_FAR` |
-| **B4** | Admin review, атомарный approve → partner + Place draft | B2, B3 | Без on-site approve невозможен |
-| **B5** | Media upload library/camera, модерация, live только с approved cover | B4 | Публичный GET без pending |
+| **B1** | CRUD заявки: имя, категория, текст адреса, необязательный телефон без OTP, overlap по on-site центру | B0 | Нельзя submit пустую. Геокода, ИНН и SMS нет |
+| **B2** | Снят | — | SMS-кода нет, шаг не реализовывать |
+| **B3** | On-site multipart + анти-спуфинг. Центр = GPS кадра, сверки с адресом нет | B1 | Галерейный файл не проходит |
+| **B4** | `submit` сам ставит `partner` и создаёт Place `draft` | B3 | Без on-site место не создаётся. Admin review и OTP нет |
+| **B5** | Media upload library/camera, сразу `approved`, live при наличии обложки | B4 | Публичный GET отдаёт обложку сразу |
 | **B6** | `placeId` на sting/hive, `places[]` в nearby, share HTML | B5 | Нет двойного рендера в контракте (поле hive.place) |
-| **B7** | Reports, auto-pause, suspend/transfer, DELETE account cascade | B5 | Soft-hide |
+| **B7** | Reports, auto-pause, suspend/transfer, снятие медиа, DELETE account cascade | B5 | Soft-hide |
 | **B8** | OpenAPI + TECH_DOCS §3.4 Places / §3.5 Partner | B6 | Контракт совпал с этим файлом |
 
 ### Frontend
@@ -777,27 +685,26 @@ POST /places/{id}/reports { "reason": "not_a_place" | "wrong_location" | "stolen
 | Шаг | Что | Зависимости | DoD |
 | --- | --- | --- | --- |
 | **F0** | Типы, api-модули, i18n, пункт в профиле | B1 контракт | Сборка |
-| **F1** | Мастер заявки + документы + OTP | B1–B2 | Сценарий до submit без on-site показывает incomplete |
+| **F1** | Мастер заявки | B1 | Сценарий до submit без on-site показывает incomplete. Экрана кода нет |
 | **F2** | On-site камера отдельно от sting-preview | B3 | Не создаёт жало |
-| **F3** | Статус заявки, needs_info, rejected | B4 | Копирайт по rejectCode |
-| **F4** | Редактор места, picker галереи/камеры, очередь загрузки | B5 | Library не открывается у non-partner |
+| **F3** | После submit сразу редактор места | B4 | Нет экрана submitted / rejected |
+| **F4** | Редактор места, picker галереи/камеры, очередь загрузки | B5 | Library не открывается у non-partner; кадр виден без «на проверке» |
 | **F5** | Публичная карточка, диплинк, QR share | B6 | Гостевой ряд ≠ галерея |
 | **F6** | Маркеры мест + branded hive/seed, фильтры | B6 | Нет дубля пин+улей; «Ульи» без тихих мест |
 | **F7** | Жалоба, пауза, privacy-policy строки | B7 | Чеклист §15 |
-| **F8** | Аналитика событий §12 | F5–F6 | Нет ИНН/GPS в props |
+| **F8** | Аналитика событий §12 | F5–F6 | Нет GPS в props |
 
-Admin UI нет. Ревью — существующий канал вызова `/admin/*`.
+Admin UI для заявок нет: заявку админ не одобряет. Suspend и снятие медиа — существующий канал вызова `/admin/*`.
 
-Параллелить можно F0–F1 с B1–B2; F4 не начинать до B5 (иначе галерея упрётся в 404).
+Параллелить можно F0–F1 с B1; F4 не начинать до B5 (иначе галерея упрётся в 404).
 
 ---
 
 ## 14. Риски
 
 - **Галерея как дыра в I1.** Любой экран, где ImagePicker стоит рядом с публикацией жала, размоет границу. On-site и place-media — отдельные модули, `POST /stings` не имеет поля `source=library`.
-- **Ревью как бутылка.** Без админ-UI очередь в Insomnia не масштабируется. Для первых десятков мест приемлемо; следующий шаг после P0 — простая таблица, не полноценный кабинет.
-- **SMS.** Пока провайдера нет, все заявки идут через звонок ревьюера. Нельзя «пропустить телефон».
-- **Геокодер vs вход.** Адрес «ул. Тверская, 1» ставит точку не у двери. On-site как источник `center` это снимает; допуск 75 м должен покрыть кассу у входа.
+- **Чужая витрина до жалобы.** Раз approve и SMS нет, сток и чужой бар могут постоять на карте, пока кто-то не пожалуется. Это принятый обмен: быстрее публикация, позже снятие. Suspend и порог жалоб (§10) — единственный ответ.
+- **Текст адреса врёт, пин нет.** «ул. Тверская, 1» в поле и GPS у другой двери расходятся, и сервер это не ловит. Центр всё равно on-site. Жалоба `wrong_location`, если текст и точка разъехались нарочно.
 - **Сети и фудкорты.** Несколько точек в одной галерее ТЦ ближе 40 м — конфликт. Админ снижает `PLACE_OVERLAP_MIN_M` точечно или правит радиусы, не партнёр.
 - **Ложный улей у бара.** Сотрудники снимают с личных аккаунтов. Это уже §G13, не баг мест; в карточке места гостевой ряд честный, если `includePartner=false`.
 - **App Review.** Расширение Photo Library без правки privacy nutrition — риск реджекта. Делать вместе с F7.
@@ -808,11 +715,11 @@ Admin UI нет. Ревью — существующий канал вызова
 ## 15. Приёмочный чек-лист
 
 - [ ] `personal` не открывает загрузку медиа места и не видит «выбрать из галереи» в камере жала
-- [ ] Заявка не submit без документов, OTP телефона и on-site
-- [ ] On-site дальше 75 м от геокода — `ONSITE_TOO_FAR`; файл из library on-site не принимается
-- [ ] Approve без on-site невозможен; после approve `accountType=partner`, Place `draft`, center = GPS on-site
-- [ ] Обложка из галереи грузится, в публичном GET и на карте появляется только после `media.approved`
-- [ ] Place без approved cover не `live` и не попадает в `places[]`
+- [ ] Заявка не submit без текста адреса и on-site. ИНН, документы и SMS-код не запрашиваются. Пустой телефон submit не блокирует
+- [ ] On-site из library не принимается. Расстояние до текста адреса не проверяется
+- [ ] `submit` без админа ставит `accountType=partner`, Place `draft`, `verifiedAt=null`, center = GPS on-site
+- [ ] Обложка из галереи сразу в публичном GET и на карте, без очереди модерации
+- [ ] Place без обложки не `live` и не попадает в `places[]`
 - [ ] 13-й кадр галереи — `MEDIA_LIMIT`
 - [ ] Гостевое жало в радиусе получает `placeId`; жало партнёра не увеличивает `activeGuestStingsCount`
 - [ ] Три фото партнёра в точке места — сота/не улей по §G13, пин места branded seed, плотность без сидинга не растёт
@@ -823,7 +730,7 @@ Admin UI нет. Ревью — существующий канал вызова
 - [ ] Suspend админа — 404 чужим, owner read-only
 - [ ] Overlap второй заявки в 20 м — `PLACE_OVERLAP`
 - [ ] Диплинк/QR открывает карточку; OG содержит обложку и имя
-- [ ] Жалоба работает; документы заявки не отдаются публично
+- [ ] Жалоба работает; on-site кадр не отдаётся публично
 - [ ] `DELETE /auth/me` owner убирает место с карты
 - [ ] Privacy policy и store disclosures упоминают галерею для мест
 - [ ] `npm run lint` / `npx tsc --noEmit` после клиентской реализации; OpenAPI синхронизирован
@@ -836,14 +743,13 @@ Admin UI нет. Ревью — существующий канал вызова
 - Self-serve кампании и «час улья» партнёром (остаётся admin §G7)
 - Чип фильтра «Места», поиск заведений, категории на карте как в 2ГИС
 - Меню, столы, бронь, оплата, отзывы-звёзды
-- Авто-верификация ЕГРЮЛ, Госуслуги, претензия Google/Yandex Business
+- Авто-верификация ЕГРЮЛ, Госуслуги, претензия Google/Yandex Business, сбор ИНН
 - Импорт фото из Instagram / сайта (это уже не галерея устройства)
 - Видео и живые сторис места
-- Места вне RU
-- Смена адреса места партнёром без новой заявки
+- Смена центра места партнёром без нового on-site
 - Показ медиа места в эхе, overview страны, ленте «Рядом» как карточек жала
 - Ослабление I1 для партнёрских жал («пусть зальют вечер из галереи на карту»)
-- Админ-UI (эндпоинты есть, интерфейс — отдельная задача)
+- Админ-UI suspend (эндпоинты есть, интерфейс — отдельная задача)
 - Награды за «первое место в зоне» и монетизация партнёров (подписка, промопин)
 
 Монетизация и меню имеют смысл только после того, как live-место + гостевой улей работают честно.

@@ -1,6 +1,10 @@
 import { Stack } from 'expo-router';
 
+import { useHiveTheme } from '@/src/hooks/useHiveTheme';
+
 export default function SettingsLayout() {
+  const theme = useHiveTheme();
+
   return (
     <Stack
       screenOptions={{
@@ -10,6 +14,7 @@ export default function SettingsLayout() {
         gestureEnabled: true,
         fullScreenGestureEnabled: true,
         gestureDirection: 'horizontal',
+        contentStyle: { backgroundColor: theme.bg },
       }}
     />
   );

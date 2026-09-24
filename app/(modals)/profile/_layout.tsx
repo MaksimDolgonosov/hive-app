@@ -1,5 +1,17 @@
 import { Stack } from 'expo-router';
 
+import { useHiveTheme } from '@/src/hooks/useHiveTheme';
+
 export default function ProfileCollectionsLayout() {
-  return <Stack screenOptions={{ headerShown: false, presentation: 'card' }} />;
+  const theme = useHiveTheme();
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        presentation: 'card',
+        contentStyle: { backgroundColor: theme.bg },
+      }}
+    />
+  );
 }

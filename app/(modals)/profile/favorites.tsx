@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { NearbyCard } from '@/src/components/feed/NearbyCard';
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
@@ -13,7 +12,6 @@ import { haversineDistance } from '@/src/utils/geo';
 
 export default function FavoritesScreen() {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
   const { coords } = useLocation();
 
   const {
@@ -42,7 +40,7 @@ export default function FavoritesScreen() {
     router.push(`/(modals)/sting/${stingId}` as Href);
   }
 
-  const listBottomInset = insets.bottom + 24;
+  const listBottomInset = 24;
 
   return (
     <ProfileCollectionLayout title={t('profile.menuFavorites')} onBack={handleBack}>

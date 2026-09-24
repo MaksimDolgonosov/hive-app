@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
 import { ProfileHiveCard } from '@/src/components/profile/ProfileHiveCard';
@@ -15,7 +14,6 @@ import { openHive } from '@/src/utils/open-hive';
 
 export default function MyHivesScreen() {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
   const { coords } = useLocation();
 
   const {
@@ -48,7 +46,7 @@ export default function MyHivesScreen() {
     return haversineDistance({ lat: coords.latitude, lng: coords.longitude }, hive.center);
   }
 
-  const listBottomInset = insets.bottom + 24;
+  const listBottomInset = 24;
 
   return (
     <ProfileCollectionLayout title={t('profile.menuHives')} onBack={handleBack}>

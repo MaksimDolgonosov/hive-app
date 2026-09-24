@@ -24,8 +24,8 @@ export function ModalHeader({ title, backLabel }: ModalHeaderProps) {
 
   return (
     <View
-      className="flex-row items-center gap-3 border-b border-hive-stroke px-4 pb-3"
-      style={{ paddingTop: insets.top + 8 }}
+      className="flex-row items-center gap-3 border-b px-4 pb-3"
+      style={{ paddingTop: insets.top + 8, borderBottomColor: theme.stroke }}
     >
       <Pressable
         accessibilityLabel={backLabel}

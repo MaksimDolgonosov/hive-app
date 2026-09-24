@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
 import {
@@ -14,7 +13,6 @@ import { useMyStings } from '@/src/hooks/useProfileCollections';
 
 export default function MyPhotosScreen() {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
   const {
     data,
     isLoading,
@@ -41,7 +39,7 @@ export default function MyPhotosScreen() {
     router.push(`/(modals)/sting/${stingId}` as Href);
   }
 
-  const listBottomInset = insets.bottom + 24;
+  const listBottomInset = 24;
 
   return (
     <ProfileCollectionLayout title={t('profile.menuPhotos')} onBack={handleBack}>

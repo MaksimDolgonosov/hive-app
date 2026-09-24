@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
@@ -11,7 +10,6 @@ import { getAwardCopy } from '@/src/utils/awards';
 
 export default function AwardsScreen() {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
   const {
     data,
     isLoading,
@@ -77,7 +75,7 @@ export default function AwardsScreen() {
         <ScrollView
           contentContainerStyle={{
             paddingHorizontal: 20,
-            paddingBottom: insets.bottom + 24,
+            paddingBottom: 24,
             gap: 12,
           }}
           onScroll={({ nativeEvent }) => {

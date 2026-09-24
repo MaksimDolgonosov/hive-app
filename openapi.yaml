@@ -1064,6 +1064,20 @@ paths:
       responses:
         '200':
           description: Обновлённое место
+    delete:
+      tags: [places]
+      security: [{ bearerAuth: [] }]
+      summary: Удалить черновик места. Live и paused только скрываются через pause
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Черновик удалён
+        '422':
+          description: PLACE_NOT_DRAFT
 
   /places/{id}/stings:
     get:

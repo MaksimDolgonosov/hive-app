@@ -1,7 +1,6 @@
 import { Bell, Radio } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ScrollView } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
 import { SettingsToggleRow } from '@/src/components/profile/SettingsToggleRow';
@@ -10,7 +9,6 @@ import { goBackOrReplace } from '@/src/utils/auth-navigation';
 
 export default function NotificationSettingsScreen() {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
   const notifications = useNotificationSettings();
 
   return (
@@ -22,7 +20,7 @@ export default function NotificationSettingsScreen() {
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 8,
-          paddingBottom: insets.bottom + 32,
+          paddingBottom: 32,
         }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}

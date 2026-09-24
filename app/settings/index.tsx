@@ -2,7 +2,6 @@ import { router, type Href } from 'expo-router';
 import { Bell, Camera, Share2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ScrollView } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DeleteAccountSetting } from '@/src/components/profile/DeleteAccountSetting';
 import { OnboardingPreviewLink } from '@/src/components/profile/OnboardingPreviewLink';
@@ -20,7 +19,6 @@ import { goBackOrReplace } from '@/src/utils/auth-navigation';
 
 export default function ProfileSettingsScreen() {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
   const emptyStateBannerEnabled = usePreferencesStore((state) => state.emptyStateBannerEnabled);
   const setEmptyStateBannerEnabled = usePreferencesStore(
     (state) => state.setEmptyStateBannerEnabled,
@@ -35,7 +33,7 @@ export default function ProfileSettingsScreen() {
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 8,
-          paddingBottom: insets.bottom + 32,
+          paddingBottom: 32,
         }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}

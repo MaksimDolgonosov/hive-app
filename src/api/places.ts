@@ -45,6 +45,10 @@ export async function resumePlace(id: string): Promise<Place> {
   return data.place;
 }
 
+export async function deletePlace(id: string): Promise<void> {
+  await apiClient.delete(`/places/${id}`);
+}
+
 export async function uploadPlaceMedia(input: {
   placeId: string;
   photoUri: string;

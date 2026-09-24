@@ -37,8 +37,9 @@ export type HivePalette = {
 };
 
 const SHARED = {
-  accent: '#FFB800',
-  accentSoft: 'rgba(255, 184, 0, 0.15)',
+  //accent: '#FFB800',
+  accent: '#B99A55',
+  accentSoft: 'rgba(185, 154, 85, 0.18)',
   signal: '#C6F24E',
   signalSoft: 'rgba(198, 242, 78, 0.12)',
   textOnAccent: '#0B0A08',

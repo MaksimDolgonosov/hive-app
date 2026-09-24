@@ -528,7 +528,6 @@ export type AnalyticsEventName =
   | 'partner_onsite_succeeded'
   | 'partner_application_submitted'
   | 'place_cover_uploaded'
-  | 'place_gallery_uploaded'
   | 'place_went_live'
   | 'place_card_opened'
   | 'place_deeplink_opened'

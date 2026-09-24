@@ -1,8 +1,18 @@
 import { Stack } from 'expo-router';
 
+import { useHiveTheme } from '@/src/hooks/useHiveTheme';
+
 export default function ModalsLayout() {
+  const theme = useHiveTheme();
+
   return (
-    <Stack screenOptions={{ headerShown: false, presentation: 'fullScreenModal' }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        presentation: 'fullScreenModal',
+        contentStyle: { backgroundColor: theme.bg },
+      }}
+    >
       <Stack.Screen name="camera" />
       <Stack.Screen name="splash" />
       <Stack.Screen name="privacy-policy" options={{ presentation: 'card' }} />
@@ -21,7 +31,6 @@ export default function ModalsLayout() {
       <Stack.Screen name="partner/onsite" options={{ presentation: 'card' }} />
       <Stack.Screen name="partner/places" options={{ presentation: 'card' }} />
       <Stack.Screen name="partner/place/edit" options={{ presentation: 'card' }} />
-      <Stack.Screen name="partner/place/media" options={{ presentation: 'card' }} />
     </Stack>
   );
 }

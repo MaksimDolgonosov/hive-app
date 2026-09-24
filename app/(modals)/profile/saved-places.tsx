@@ -2,7 +2,6 @@ import { Bookmark, MapPin, Trash2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Alert, FlatList, Pressable, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
 import { useMapStore } from '@/src/stores/mapStore';
@@ -17,7 +16,6 @@ function formatCoordinate(value: number, locale: string): string {
 
 export default function SavedPlacesScreen() {
   const { t, i18n } = useTranslation();
-  const insets = useSafeAreaInsets();
   const places = useSavedMapPlacesStore((state) => state.places);
   const removePlace = useSavedMapPlacesStore((state) => state.removePlace);
   const requestSavedRegionFocus = useMapStore((state) => state.requestSavedRegionFocus);
@@ -58,7 +56,7 @@ export default function SavedPlacesScreen() {
     );
   }
 
-  const listBottomInset = insets.bottom + 24;
+  const listBottomInset = 24;
 
   return (
     <ProfileCollectionLayout title={t('profile.menuSavedPlaces')} onBack={handleBack}>

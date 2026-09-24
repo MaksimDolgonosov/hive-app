@@ -2,7 +2,6 @@ import { router, type Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Share, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/src/components/auth/AuthButton';
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
@@ -15,7 +14,6 @@ import { showApiErrorToast } from '@/src/utils/show-toast';
 
 export default function InvitesScreen() {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
   const { data, isLoading, isError, refetch } = useMyInvites();
   const createInvite = useCreateInvite();
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
@@ -97,7 +95,7 @@ export default function InvitesScreen() {
           </Pressable>
         </View>
       ) : (
-        <View className="flex-1 px-5" style={{ paddingBottom: insets.bottom + 24 }}>
+        <View className="flex-1 px-5" style={{ paddingBottom: 24 }}>
           <Text className="mt-4 font-inter text-sm text-hive-muted">{t('invite.subtitle')}</Text>
 
           {activeInvite ? (

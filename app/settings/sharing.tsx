@@ -1,7 +1,6 @@
 import { Ghost, Share2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ScrollView } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
 import { SettingsToggleRow } from '@/src/components/profile/SettingsToggleRow';
@@ -11,7 +10,6 @@ import { goBackOrReplace } from '@/src/utils/auth-navigation';
 
 export default function SharingSettingsScreen() {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
   const echoLayerEnabled = usePreferencesStore((state) => state.echoLayerEnabled);
   const setEchoLayerEnabled = usePreferencesStore((state) => state.setEchoLayerEnabled);
   const privacy = usePrivacySettings();
@@ -22,7 +20,7 @@ export default function SharingSettingsScreen() {
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 8,
-          paddingBottom: insets.bottom + 32,
+          paddingBottom: 32,
         }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}

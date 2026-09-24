@@ -26,6 +26,22 @@ export function upsertStingInNearbyQueries(queryClient: QueryClient, sting: Stin
   });
 }
 
+export function removePlaceFromNearbyQueries(queryClient: QueryClient, placeId: string): void {
+  queryClient.setQueriesData<StingsNearbyResponse>({ queryKey: ['stings'] }, (cached) => {
+    if (!cached) {
+      return cached;
+    }
+
+    return {
+      ...cached,
+      places: cached.places?.filter((place) => place.id !== placeId),
+      hives: cached.hives.map((hive) =>
+        hive.placeId === placeId ? { ...hive, placeId: null, place: null } : hive,
+      ),
+    };
+  });
+}
+
 export function removeStingFromNearbyQueries(queryClient: QueryClient, stingId: string): void {
   queryClient.setQueriesData<StingsNearbyResponse>({ queryKey: ['stings'] }, (cached) => {
     if (!cached) {

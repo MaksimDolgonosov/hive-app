@@ -139,6 +139,8 @@ export interface Sting {
   shareUrl?: string | null;
   /** Поставил ли текущий пользователь like (есть в GET /stings/:id и POST /reactions). */
   hasLiked?: boolean;
+  /** Место, в радиусе которого снято жало (§G15). */
+  placeId?: UUID | null;
 }
 
 /** Стадия кластера (§G13): «сота» (соло) или полноценный улей. */
@@ -149,6 +151,105 @@ export interface HiveContributor {
   userId: UUID;
   username: string;
   avatarUrl: string | null;
+}
+
+export type PlaceCategory = 'cafe' | 'bar' | 'restaurant' | 'other';
+export type PlaceStatus = 'draft' | 'live' | 'paused' | 'suspended';
+export type PlacePauseReason = 'owner' | 'cover_missing' | 'reports' | null;
+export type PlaceMediaKind = 'cover' | 'gallery';
+export type PlaceMediaSource = 'library' | 'camera';
+export type PlaceReportReason = 'not_a_place' | 'wrong_location' | 'stolen_photos' | 'spam' | 'other';
+
+export interface PlaceMedia {
+  id: UUID;
+  placeId: UUID;
+  kind: PlaceMediaKind;
+  source: PlaceMediaSource;
+  imageUrl: string;
+  thumbnailUrl: string;
+  width: number;
+  height: number;
+  sortOrder: number;
+  moderation: 'approved' | 'rejected';
+  rejectCode: 'quality' | 'not_this_place' | 'people_sensitive' | 'stolen' | 'other' | null;
+  createdAt: string;
+}
+
+/** Публичный пин места. В выдаче карты только `live`. */
+export interface PlaceSummary {
+  id: UUID;
+  name: string;
+  category: PlaceCategory;
+  center: GeoPoint;
+  radiusM: number;
+  coverThumbnailUrl: string | null;
+  hiveId: UUID | null;
+  hiveStage: HiveStage | null;
+  activeGuestStingsCount: number;
+  status: 'live';
+}
+
+export interface Place {
+  id: UUID;
+  ownerId: UUID;
+  name: string;
+  category: PlaceCategory;
+  description: string | null;
+  address: {
+    formatted: string;
+    city: string | null;
+    country: string | null;
+  };
+  center: GeoPoint;
+  radiusM: number;
+  cover: PlaceMedia | null;
+  gallery: PlaceMedia[];
+  socialLinks: UserSocialLinks;
+  hiveId: UUID | null;
+  hiveStage: HiveStage | null;
+  activeGuestStingsCount: number;
+  status: PlaceStatus;
+  pauseReason: PlacePauseReason;
+  verifiedAt: string | null;
+  phone: string | null;
+  hidden: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PartnerApplication {
+  id: UUID;
+  userId: UUID;
+  brandName: string;
+  category: PlaceCategory;
+  address: {
+    formatted: string;
+    city: string | null;
+    country: string | null;
+    lat: number | null;
+    lng: number | null;
+    source: 'declared' | 'onsite' | 'manual_admin';
+  };
+  phone: string | null;
+  contactEmail: string;
+  listingUrls: {
+    instagram: string | null;
+    website: string | null;
+    ymaps: string | null;
+    twogis: string | null;
+  };
+  onsite: {
+    verifiedAt: string;
+    lat: number;
+    lng: number;
+    accuracyM: number;
+    distanceToAddressM: number;
+  } | null;
+  status: 'draft' | 'published';
+  placeId: UUID | null;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string | null;
 }
 
 export interface Hive {
@@ -166,6 +267,9 @@ export interface Hive {
   topContributors?: HiveContributor[];
   createdAt: string;
   updatedAt: string;
+  /** Привязка к месту заведения (§G15). Старые клиенты поле игнорируют. */
+  placeId?: UUID | null;
+  place?: PlaceSummary | null;
 }
 
 export interface MapRegion {
@@ -212,6 +316,8 @@ export interface StingEchoCell {
 export interface StingsNearbyResponse {
   stings: Sting[];
   hives: Hive[];
+  /** Live-места с обложкой (§G15). По умолчанию сервер их отдаёт. */
+  places?: PlaceSummary[];
   /** Приходит только при `includeEchoes=true` (§G2). */
   echoes?: StingEchoCell[];
   /** Область, которую сервер фактически применил (§G3). */
@@ -417,7 +523,17 @@ export type AnalyticsEventName =
   | 'push_opened'
   | 'campaign_banner_shown'
   | 'waitlist_submitted'
-  | 'seed_marker_tap';
+  | 'seed_marker_tap'
+  | 'partner_apply_started'
+  | 'partner_onsite_succeeded'
+  | 'partner_application_submitted'
+  | 'place_cover_uploaded'
+  | 'place_gallery_uploaded'
+  | 'place_went_live'
+  | 'place_card_opened'
+  | 'place_deeplink_opened'
+  | 'place_report_submitted'
+  | 'place_seed_cta_tap';
 
 /**
  * Событие аналитики. В `props` запрещены персональные данные: email, точные

@@ -9,6 +9,7 @@ import {
   LogOut,
   Settings,
   SlidersHorizontal,
+  Store,
   UserPlus,
 } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
@@ -186,6 +187,11 @@ export default function ProfileScreen() {
             icon={Heart}
             label={t('profile.menuFavorites')}
             onPress={() => router.push('/(modals)/profile/favorites' as Href)}
+          />
+          <ProfileMenuRow
+            icon={Store}
+            label={t('partner.menuApply')}
+            onPress={() => router.push('/(modals)/partner/places' as Href)}
           />
           <ProfileMenuRow
             icon={Settings}

@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { router, type Href } from 'expo-router';
 import { Camera, Clock } from 'lucide-react-native';
 import { useMemo } from 'react';
@@ -13,6 +14,7 @@ import { useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { useLocationStore } from '@/src/stores/locationStore';
 import { haversineDistance } from '@/src/utils/geo';
 import { isSeedHive } from '@/src/utils/hive';
+import { trackEvent } from '@/src/utils/analytics-queue';
 
 type HiveDetailContentProps = {
   hiveId: string;
@@ -87,6 +89,9 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
   }
 
   function openCamera() {
+    if (isSeed && data?.hive.place) {
+      trackEvent('place_seed_cta_tap');
+    }
     router.push('/(modals)/camera' as Href);
   }
 
@@ -107,11 +112,38 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
         showsVerticalScrollIndicator={false}
       >
         {data ? (
-          <View className="flex-row items-center gap-2" style={{ marginTop: 15 }}>
+          <View className="gap-3" style={{ marginTop: 15 }}>
+            {data.hive.place ? (
+              <Pressable
+                accessibilityRole="button"
+                className="overflow-hidden rounded-2xl bg-hive-surface"
+                onPress={() => router.push(`/(modals)/place/${data.hive.place!.id}` as Href)}
+              >
+                {data.hive.place.coverThumbnailUrl ? (
+                  <Image
+                    source={{ uri: data.hive.place.coverThumbnailUrl }}
+                    style={{ width: '100%', height: 140 }}
+                  />
+                ) : null}
+                <View className="gap-1 px-3 py-3">
+                  <Text className="font-display text-lg font-bold text-hive-foreground">
+                    {data.hive.place.name}
+                  </Text>
+                  <Text className="font-inter text-xs font-semibold text-hive-primary">{t('place.badge')}</Text>
+                  {isSeed ? (
+                    <Text className="font-inter text-[13px] text-hive-muted">
+                      {t('place.seedCta', { name: data.hive.place.name })}
+                    </Text>
+                  ) : null}
+                </View>
+              </Pressable>
+            ) : null}
+            <View className="flex-row items-center gap-2">
             <Text className="font-inter text-[13px] font-semibold text-hive-primary">
               {t('hive.photoCount', { count: photoCount })}
             </Text>
             <HiveContributorAvatars ringColor={theme.bg} stings={stingsNewestFirst} />
+            </View>
           </View>
         ) : null}
 

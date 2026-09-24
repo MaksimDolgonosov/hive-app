@@ -139,6 +139,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
               host: 'hive.app',
               pathPrefix: '/i',
             },
+            {
+              scheme: 'https',
+              host: 'hive.app',
+              pathPrefix: '/p',
+            },
           ],
           category: ['BROWSABLE', 'DEFAULT'],
         },
@@ -165,7 +170,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       [
         'expo-image-picker',
         {
-          photosPermission: 'Hive использует галерею для выбора фото профиля.',
+          photosPermission:
+            'Hive использует галерею, чтобы выбрать фото профиля и, для заведений, фото места.',
           cameraPermission: 'Hive использует камеру для фото профиля.',
         },
       ],

@@ -34,6 +34,10 @@ export function redirectSystemPath({
       return '/(auth)/register';
     }
 
+    if (parsed.kind === 'place') {
+      return `/(modals)/place/${parsed.id}?source=deeplink`;
+    }
+
     return path;
   } catch {
     return path;

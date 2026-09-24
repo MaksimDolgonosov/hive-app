@@ -55,7 +55,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
           },
           {
             type: 'paragraph',
-            text: 'Данные профиля: фото профиля (камера или галерея); текст «о себе»; публичные ссылки на соцсети, которые вы указываете сами (Instagram, Telegram, TikTok, YouTube, сайт).',
+            text: 'Данные профиля: фото профиля (камера или галерея); текст «о себе»; публичные ссылки на соцсети, которые вы указываете сами (Instagram, Telegram, TikTok, YouTube, сайт). Если вы публикуете место заведения: название, текст адреса, контактный email, необязательный телефон точки и кадр фасада, снятый камерой приложения на месте. Этот кадр не показывается в ленте. Обложка и галерея места — публичная карточка заведения, а не момент на карте.',
           },
           {
             type: 'paragraph',
@@ -83,7 +83,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
             items: [
               'Контакты, календарь, SMS и микрофон (запись звука при съёмке отключена).',
               'Фоновую геолокацию, когда Приложение закрыто.',
-              'Фото из галереи для публикации на карте: моменты снимаются только встроенной камерой. Галерея используется лишь для фото профиля, если вы сами это выберете.',
+              'Фото из галереи для публикации на карте: моменты снимаются только встроенной камерой. Галерея используется для фото профиля и, если вы публикуете заведение, для фото места.',
               'Платежные данные: встроенных покупок и оплаты в Приложении нет.',
               'Данные детей: Приложение не предназначено для лиц младше 13 лет.',
             ],
@@ -149,8 +149,8 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
             type: 'list',
             items: [
               'Геолокация (при использовании): карта, лента «Рядом» и публикация фото с координатами.',
-              'Камера: съёмка моментов для карты и (по желанию) фото профиля.',
-              'Галерея / фотобиблиотека: только выбор фото профиля.',
+              'Камера: съёмка моментов для карты, проверка адреса заведения и (по желанию) фото профиля.',
+              'Галерея / фотобиблиотека: выбор фото профиля и, для заведений, фото места.',
             ],
           },
           {
@@ -330,7 +330,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
           },
           {
             type: 'paragraph',
-            text: 'Profile data: profile photo (camera or photo library); bio text; public social links you choose to add (Instagram, Telegram, TikTok, YouTube, website).',
+            text: 'Profile data: profile photo (camera or photo library); bio text; public social links you choose to add (Instagram, Telegram, TikTok, YouTube, website). If you publish a venue: its name, address text, contact email, optional venue phone, and a facade photo taken with the in-app camera on site. That frame is not a map moment. Cover and gallery photos are the public venue card, not map moments.',
           },
           {
             type: 'paragraph',
@@ -358,7 +358,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
             items: [
               'Contacts, calendar, SMS, or microphone (audio recording during capture is disabled).',
               'Background location while the App is closed.',
-              'Photo library items for the map: moments are captured only with the in-app camera. The library is used only for a profile photo if you choose that option.',
+              'Photo library items for the map: moments are captured only with the in-app camera. The library is used for a profile photo and, if you publish a venue, for venue photos.',
               'Payment data: the App has no in-app purchases or payments.',
               'Children’s data: the App is not directed at children under 13.',
             ],
@@ -424,8 +424,8 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
             type: 'list',
             items: [
               'Location (When In Use): map, Nearby feed, and publishing a photo with coordinates.',
-              'Camera: capturing moments for the map and, if you choose, a profile photo.',
-              'Photo library: choosing a profile photo only.',
+              'Camera: capturing moments for the map, checking a venue address on site, and, if you choose, a profile photo.',
+              'Photo library: choosing a profile photo and, for venues, place photos.',
             ],
           },
           {

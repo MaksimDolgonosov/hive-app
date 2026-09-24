@@ -11,6 +11,8 @@ export function useDeleteSting(stingId: string) {
     onSuccess: () => {
       removeStingFromNearbyQueries(queryClient, stingId);
       void queryClient.invalidateQueries({ queryKey: ['stings'], refetchType: 'all' });
+      void queryClient.invalidateQueries({ queryKey: ['places'] });
+      void queryClient.invalidateQueries({ queryKey: ['place'] });
       void queryClient.invalidateQueries({ queryKey: ['profile', 'overview'] });
       void queryClient.invalidateQueries({ queryKey: ['profile', 'my-stings'] });
       void queryClient.invalidateQueries({ queryKey: ['profile', 'my-hives'] });

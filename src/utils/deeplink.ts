@@ -1,12 +1,14 @@
 import type { Href } from 'expo-router';
 
 const STING_PATH = /^\/?sting\/([^/?#]+)/i;
+const PLACE_PATH = /^\/?(?:place|p)\/([^/?#]+)/i;
 const CAMPAIGN_PATH = /^\/?campaign\/([^/?#]+)/i;
 const INVITE_PATH = /^\/?i\/([^/?#]+)/i;
 const TABS_PATH = /^\/?(\(tabs\))?\/?$/i;
 
 export type ParsedDeeplink =
   | { kind: 'sting'; id: string }
+  | { kind: 'place'; id: string }
   | { kind: 'campaign'; id: string }
   | { kind: 'invite'; code: string }
   | { kind: 'tabs' }
@@ -43,6 +45,11 @@ export function parseDeeplink(raw: string | null | undefined): ParsedDeeplink {
     return { kind: 'sting', id: sting[1] };
   }
 
+  const place = path.match(PLACE_PATH);
+  if (place?.[1]) {
+    return { kind: 'place', id: place[1] };
+  }
+
   const campaign = path.match(CAMPAIGN_PATH);
   if (campaign?.[1]) {
     return { kind: 'campaign', id: campaign[1] };
@@ -64,6 +71,8 @@ export function hrefForDeeplink(parsed: ParsedDeeplink): Href {
   switch (parsed.kind) {
     case 'sting':
       return `/(modals)/sting/${parsed.id}` as Href;
+    case 'place':
+      return `/(modals)/place/${parsed.id}?source=deeplink` as Href;
     case 'campaign':
       return '/(tabs)' as Href;
     case 'invite':

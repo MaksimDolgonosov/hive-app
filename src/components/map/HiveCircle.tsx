@@ -33,6 +33,17 @@ function useCircleFillOpacity(activeStingsCount: number): number {
 export function HiveCircle({ hive, imageUri, onPress }: HiveCircleProps) {
   const metrics = getHiveMarkerVisualMetrics(hive.activeStingsCount);
   const circleFillOpacity = useCircleFillOpacity(hive.activeStingsCount);
+  const coverUrl = hive.place?.coverThumbnailUrl;
+  const [tracksViewChanges, setTracksViewChanges] = useState(Platform.OS !== 'android' || Boolean(coverUrl));
+
+  useEffect(() => {
+    if (!coverUrl) {
+      return;
+    }
+    setTracksViewChanges(true);
+    const timer = setTimeout(() => setTracksViewChanges(false), 800);
+    return () => clearTimeout(timer);
+  }, [coverUrl]);
 
   const coordinate = {
     latitude: hive.center.lat,
@@ -48,7 +59,7 @@ export function HiveCircle({ hive, imageUri, onPress }: HiveCircleProps) {
         strokeColor="rgba(255, 184, 0, 0.35)"
         strokeWidth={1}
       />
-      {Platform.OS === 'android' ? (
+      {Platform.OS === 'android' && !coverUrl ? (
         imageUri ? (
           <Marker
             coordinate={coordinate}
@@ -62,7 +73,7 @@ export function HiveCircle({ hive, imageUri, onPress }: HiveCircleProps) {
         <Marker
           coordinate={coordinate}
           anchor={{ x: 0.5, y: 0.5 }}
-          tracksViewChanges
+          tracksViewChanges={tracksViewChanges}
           onPress={onPress}
         >
           <View
@@ -75,7 +86,7 @@ export function HiveCircle({ hive, imageUri, onPress }: HiveCircleProps) {
               },
             ]}
           >
-            <HiveMarkerFace count={hive.activeStingsCount} />
+            <HiveMarkerFace count={hive.activeStingsCount} coverUrl={coverUrl} />
           </View>
         </Marker>
       )}

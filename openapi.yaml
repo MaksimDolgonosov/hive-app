@@ -21,6 +21,10 @@ tags:
     description: Публикация и просмотр жал
   - name: hives
     description: Просмотр ульев (кластеров жал)
+  - name: places
+    description: Карточки заведений
+  - name: partner
+    description: Самопубликация партнёра
   - name: zones
     description: Гео-зоны плотности и TTL
   - name: map
@@ -517,6 +521,9 @@ paths:
           name: includeSeeds
           schema: { type: boolean, default: false }
         - in: query
+          name: includePlaces
+          schema: { type: boolean, default: true }
+        - in: query
           name: minResults
           schema: { type: integer, minimum: 0, maximum: 50, default: 0 }
         - in: query
@@ -538,6 +545,10 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Hive'
+                  places:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PlaceSummary'
                   echoes:
                     type: array
                     items:
@@ -1006,6 +1017,234 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /places/me:
+    get:
+      tags: [places]
+      security: [{ bearerAuth: [] }]
+      summary: Места текущего владельца
+      responses:
+        '200':
+          description: Список мест владельца, включая draft и paused
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  places:
+                    type: array
+                    items: { $ref: '#/components/schemas/Place' }
+
+  /places/{id}:
+    get:
+      tags: [places]
+      security: [{ bearerAuth: [] }]
+      summary: Карточка места
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Публичная карточка или полный объект для владельца
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Place' }
+        '404':
+          description: Нет места или PLACE_SUSPENDED для чужого suspended
+    patch:
+      tags: [places]
+      security: [{ bearerAuth: [] }]
+      summary: Правка текста карточки. Центр не двигается
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Обновлённое место
+
+  /places/{id}/stings:
+    get:
+      tags: [places]
+      security: [{ bearerAuth: [] }]
+      summary: Гостевые жала в радиусе места
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: query
+          name: includePartner
+          schema: { type: boolean, default: false }
+      responses:
+        '200':
+          description: Активные жала
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stings:
+                    type: array
+                    items: { $ref: '#/components/schemas/Sting' }
+
+  /places/{id}/media:
+    post:
+      tags: [places]
+      security: [{ bearerAuth: [] }]
+      summary: Обложка или кадр галереи. Сразу approved. Обложка из draft делает место live
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [photo, role]
+              properties:
+                photo: { type: string, format: binary }
+                role: { type: string, enum: [cover, gallery] }
+      responses:
+        '201':
+          description: Медиа принято
+        '422':
+          description: MEDIA_TOO_SMALL или MEDIA_LIMIT
+
+  /places/{id}/pause:
+    post:
+      tags: [places]
+      security: [{ bearerAuth: [] }]
+      summary: Скрыть live-место
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Место paused
+
+  /places/{id}/resume:
+    post:
+      tags: [places]
+      security: [{ bearerAuth: [] }]
+      summary: Вернуть место. Нужна обложка
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Место live
+        '422':
+          description: PLACE_RESUME_NEEDS_COVER
+
+  /places/{id}/reports:
+    post:
+      tags: [places]
+      security: [{ bearerAuth: [] }]
+      summary: Жалоба на место
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '201':
+          description: Жалоба принята
+
+  /partner/applications:
+    post:
+      tags: [partner]
+      security: [{ bearerAuth: [] }]
+      summary: Черновик заявки. Повторный вызов возвращает уже открытый draft
+      responses:
+        '200':
+          description: Уже существующий draft
+        '201':
+          description: Новый draft
+
+  /partner/applications/me:
+    get:
+      tags: [partner]
+      security: [{ bearerAuth: [] }]
+      summary: Заявки текущего пользователя
+      responses:
+        '200':
+          description: Список заявок
+
+  /partner/applications/{id}/onsite:
+    post:
+      tags: [partner]
+      security: [{ bearerAuth: [] }]
+      summary: Кадр фасада с камеры. Не создаёт жало
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [photo, lat, lng, accuracy, capturedAt]
+              properties:
+                photo: { type: string, format: binary }
+                lat: { type: number }
+                lng: { type: number }
+                accuracy: { type: number }
+                capturedAt: { type: string, format: date-time }
+      responses:
+        '200':
+          description: On-site принят
+        '422':
+          description: ONSITE_LOW_ACCURACY, ONSITE_VALIDATION_FAILED или GALLERY_SOURCE
+
+  /partner/applications/{id}/submit:
+    post:
+      tags: [partner]
+      security: [{ bearerAuth: [] }]
+      summary: Публикует заявку и создаёт Place в draft
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: accountType=partner, место в draft
+        '409':
+          description: PLACE_OVERLAP
+        '422':
+          description: APPLICATION_INCOMPLETE
+
+  /share/places/{id}:
+    servers:
+      - url: https://api.sting-app.example.com
+        description: Корень без префикса /api/v1
+    get:
+      tags: [places]
+      summary: OG-страница live-места с обложкой
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: HTML
+        '404':
+          description: Место не live или без обложки
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1323,6 +1562,9 @@ components:
         hiveId:
           type: string
           nullable: true
+        placeId:
+          type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -1369,6 +1611,13 @@ components:
         stage:
           type: string
           enum: [seed, hive]
+        placeId:
+          type: string
+          nullable: true
+        place:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/PlaceSummary'
         topContributors:
           type: array
           items:
@@ -1393,6 +1642,51 @@ components:
         - stage
         - createdAt
         - updatedAt
+
+    PlaceSummary:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        category: { type: string, enum: [cafe, bar, restaurant, other] }
+        coverThumbnailUrl: { type: string, nullable: true }
+        center: { $ref: '#/components/schemas/GeoPoint' }
+        radiusM: { type: number }
+        hiveId: { type: string, nullable: true }
+        hiveStage: { type: string, nullable: true, enum: [seed, hive] }
+      required: [id, name, category, center, radiusM]
+
+    Place:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        category: { type: string, enum: [cafe, bar, restaurant, other] }
+        status: { type: string, enum: [draft, live, paused, suspended] }
+        address:
+          type: object
+          properties:
+            formatted: { type: string }
+            city: { type: string, nullable: true }
+            country: { type: string, nullable: true }
+        center: { $ref: '#/components/schemas/GeoPoint' }
+        radiusM: { type: number }
+        coverUrl: { type: string, nullable: true }
+        gallery:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              url: { type: string }
+              thumbnailUrl: { type: string }
+        hiveId: { type: string, nullable: true }
+        hiveStage: { type: string, nullable: true, enum: [seed, hive] }
+        activeGuestStingsCount: { type: integer }
+        verifiedAt: { type: string, nullable: true }
+        hidden: { type: boolean }
+      required: [id, name, category, status, center, radiusM]
 
     ErrorResponse:
       type: object

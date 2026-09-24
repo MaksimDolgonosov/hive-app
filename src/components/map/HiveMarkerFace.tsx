@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useId, useMemo } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
@@ -7,7 +7,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { ClipPath, Defs, Image as SvgImage, Path } from 'react-native-svg';
 
 import { HiveTheme } from '@/src/theme/tokens';
 import { getRoundedHexagonPath } from '@/src/utils/hive-hexagon';
@@ -16,21 +16,25 @@ import { getHiveMarkerVisualMetrics } from '@/src/utils/hive-marker-visual';
 export type HiveMarkerVariant = 'hive' | 'seed';
 
 /** Приглушённая заливка соты — визуально отделяет «ещё не улей» от улья (§G13). */
-const SEED_FILL = '#B99A55';
+export const SEED_FILL = '#B99A55';
 
 type HiveMarkerFaceProps = {
   count: number;
   animate?: boolean;
   variant?: HiveMarkerVariant;
+  coverUrl?: string | null;
 };
 
 function HiveHexagonMark({
   count,
   variant = 'hive',
+  coverUrl,
 }: {
   count: number;
   variant?: HiveMarkerVariant;
+  coverUrl?: string | null;
 }) {
+  const clipId = useId().replace(/:/g, '');
   const metrics = getHiveMarkerVisualMetrics(count);
   const path = useMemo(
     () => getRoundedHexagonPath(metrics.markerSize, metrics.cornerRadius, metrics.strokeWidth / 2),
@@ -48,13 +52,38 @@ function HiveHexagonMark({
       ]}
     >
       <Svg height={metrics.markerSize} width={metrics.markerSize} style={StyleSheet.absoluteFill}>
-        <Path
-          d={path}
-          fill={variant === 'seed' ? SEED_FILL : HiveTheme.accent}
-          stroke="rgba(255, 255, 255, 0.25)"
-          strokeLinejoin="round"
-          strokeWidth={metrics.strokeWidth}
-        />
+        {coverUrl ? (
+          <>
+            <Defs>
+              <ClipPath id={clipId}>
+                <Path d={path} />
+              </ClipPath>
+            </Defs>
+            <SvgImage
+              clipPath={`url(#${clipId})`}
+              height={metrics.markerSize}
+              href={{ uri: coverUrl }}
+              preserveAspectRatio="xMidYMid slice"
+              width={metrics.markerSize}
+            />
+            {variant === 'seed' ? <Path d={path} fill="rgba(40, 28, 8, 0.38)" /> : null}
+            <Path
+              d={path}
+              fill="none"
+              stroke="rgba(255, 255, 255, 0.45)"
+              strokeLinejoin="round"
+              strokeWidth={metrics.strokeWidth}
+            />
+          </>
+        ) : (
+          <Path
+            d={path}
+            fill={variant === 'seed' ? SEED_FILL : HiveTheme.accent}
+            stroke="rgba(255, 255, 255, 0.25)"
+            strokeLinejoin="round"
+            strokeWidth={metrics.strokeWidth}
+          />
+        )}
       </Svg>
       <Text
         allowFontScaling={false}
@@ -71,7 +100,7 @@ function HiveHexagonMark({
   );
 }
 
-export function HiveMarkerFace({ count, animate = true, variant = 'hive' }: HiveMarkerFaceProps) {
+export function HiveMarkerFace({ count, animate = true, variant = 'hive', coverUrl }: HiveMarkerFaceProps) {
   const metrics = getHiveMarkerVisualMetrics(count);
   const pulse = useSharedValue(1);
   // Сота не пульсирует: пульсация — признак живого улья (§G13).
@@ -108,7 +137,7 @@ export function HiveMarkerFace({ count, animate = true, variant = 'hive' }: Hive
         },
       ]}
     >
-      <HiveHexagonMark count={count} variant={variant} />
+      <HiveHexagonMark count={count} coverUrl={coverUrl} variant={variant} />
     </Animated.View>
   );
 }
@@ -116,11 +145,13 @@ export function HiveMarkerFace({ count, animate = true, variant = 'hive' }: Hive
 export function HiveMarkerFaceStatic({
   count,
   variant = 'hive',
+  coverUrl,
 }: {
   count: number;
   variant?: HiveMarkerVariant;
+  coverUrl?: string | null;
 }) {
-  return <HiveHexagonMark count={count} variant={variant} />;
+  return <HiveHexagonMark count={count} coverUrl={coverUrl} variant={variant} />;
 }
 
 const styles = StyleSheet.create({

@@ -16,7 +16,7 @@ Account data: email address; username; password (sent over an encrypted connecti
 
 Third-party sign-in data: if you sign in with Google, we receive an ID token and the related account data Google provides to create or open your Hive account (typically email, name, and account verification). If you use Sign in with Apple, we receive only what you allow Apple to share (your email may be hidden via Hide My Email). We do not ask Google or Apple for your contacts, calendar, or other account data beyond what is needed to sign you in.
 
-Profile data: profile photo (camera or photo library); bio text; public social links you choose to add (Instagram, Telegram, TikTok, YouTube, website).
+Profile data: profile photo (camera or photo library); bio text; public social links you choose to add (Instagram, Telegram, TikTok, YouTube, website). If you publish a venue: its name, address text, contact email, optional venue phone, and a facade photo taken with the in-app camera on site. That frame is not a map moment. Cover and gallery photos are the public venue card, not map moments.
 
 User content: photos taken with the App’s built-in camera; optional photo comments; likes; records of photos you published and hives you joined.
 
@@ -30,7 +30,7 @@ Technical data: IP address, device and OS type, and server request metadata need
 
 - Contacts, calendar, SMS, or microphone (audio recording during capture is disabled).
 - Background location while the App is closed.
-- Photo library items for the map: moments are captured only with the in-app camera. The library is used only for a profile photo if you choose that option.
+- Photo library items for the map: moments are captured only with the in-app camera. The library is used for a profile photo and, if you publish a venue, for venue photos.
 - Payment data: the App has no in-app purchases or payments.
 - Children’s data: the App is not directed at children under 13.
 
@@ -65,8 +65,8 @@ The registration checkbox is not pre-ticked; you must opt in yourself. You can w
 The App asks for permissions only when the related feature is needed, and explains why in the system prompt:
 
 - Location (When In Use): map, Nearby feed, and publishing a photo with coordinates.
-- Camera: capturing moments for the map and, if you choose, a profile photo.
-- Photo library: choosing a profile photo only.
+- Camera: capturing moments for the map, checking a venue address on site, and, if you choose, a profile photo.
+- Photo library: choosing a profile photo and, for venues, place photos.
 
 Denying a permission does not delete your account, but it limits features that need it. You can change permissions later in iOS or Android settings.
 

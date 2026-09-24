@@ -17,6 +17,7 @@ import { MapFilterChips } from '@/src/components/map/MapFilterChips';
 import { MapLocationButton } from '@/src/components/map/MapLocationButton';
 import { MapTypeButton } from '@/src/components/map/MapTypeButton';
 import { OverviewClusterMarker } from '@/src/components/map/OverviewClusterMarker';
+import { PlaceMarker, PlaceMarkerCapture } from '@/src/components/map/PlaceMarker';
 import { SaveMapPlaceModal } from '@/src/components/map/SaveMapPlaceModal';
 import { WaitlistContent } from '@/src/components/growth/WaitlistContent';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
@@ -144,6 +145,7 @@ export function MapContainer() {
   const [debouncedBounds, setDebouncedBounds] = useState<MapBounds | null>(null);
   const [hiveMarkerImages, setHiveMarkerImages] = useState<Record<string, string>>({});
   const [stingMarkerImages, setStingMarkerImages] = useState<Record<string, string>>({});
+  const [placeMarkerImages, setPlaceMarkerImages] = useState<Record<string, string>>({});
   const [initialRegion, setInitialRegion] = useState<MapRegion | null>(resolveStartupRegion);
   const [centerOnUserAtStartup] = useState(shouldCenterOnUserAtStartup);
 
@@ -194,6 +196,16 @@ export function MapContainer() {
     });
   }, []);
 
+  const handlePlaceMarkerCaptured = useCallback((placeId: string, uri: string) => {
+    setPlaceMarkerImages((previous) => {
+      if (previous[placeId] === uri) {
+        return previous;
+      }
+
+      return { ...previous, [placeId]: uri };
+    });
+  }, []);
+
   const { data, isFetching, isError } = useStingsNearby(debouncedBounds, {
     minResults: 10,
     includeEchoes: echoLayerEnabled,
@@ -205,6 +217,11 @@ export function MapContainer() {
   const filtered = useFilteredMapMarkers(data, mapFilter);
   const activeHives = filtered.hives.filter((hive) => isActiveHive(hive));
   const seedHives = mapFilter === 'all' ? filtered.hives.filter((hive) => isSeedHive(hive)) : [];
+  const renderedPlaceIds = new Set(
+    [...activeHives, ...seedHives].map((hive) => hive.placeId).filter((id): id is string => Boolean(id)),
+  );
+  const quietPlaces =
+    mapFilter === 'all' ? filtered.places.filter((place) => !renderedPlaceIds.has(place.id)) : [];
   const echoes =
     echoLayerEnabled && !isOverview ? (data?.echoes ?? []).slice(0, MAX_ECHO_MARKERS) : [];
 
@@ -216,10 +233,12 @@ export function MapContainer() {
     !isError &&
     filtered.stings.length === 0 &&
     activeHives.length === 0 &&
-    seedHives.length === 0;
+    seedHives.length === 0 &&
+    quietPlaces.length === 0;
   const showEmptyState = isEmpty && emptyStateBannerEnabled;
 
-  const hasUnfilteredContent = (data?.stings.length ?? 0) > 0 || (data?.hives.length ?? 0) > 0;
+  const hasUnfilteredContent =
+    (data?.stings.length ?? 0) > 0 || (data?.hives.length ?? 0) > 0 || (data?.places?.length ?? 0) > 0;
   const filterEmpty =
     !isOverview &&
     mapFilter !== 'all' &&
@@ -271,6 +290,13 @@ export function MapContainer() {
       isPointInBounds(echo.center, debouncedBounds),
     );
 
+    const brandedPlaceIds = new Set(
+      [...viewportHives, ...viewportSeeds].map((hive) => hive.placeId).filter((id): id is string => Boolean(id)),
+    );
+    const viewportPlaces = (data.places ?? []).filter(
+      (place) => isPointInBounds(place.center, debouncedBounds) && !brandedPlaceIds.has(place.id),
+    );
+
     trackSessionStartOnce({
       zoneId: zoneQuery.data?.id,
       props: {
@@ -278,6 +304,7 @@ export function MapContainer() {
         hivesInViewport: viewportHives.length,
         seedsInViewport: viewportSeeds.length,
         echoes: viewportEchoes.length,
+        placesInViewport: viewportPlaces.length,
         expanded: Boolean(data.expanded),
       },
     });
@@ -679,6 +706,16 @@ export function MapContainer() {
                 />
               ))
             : null}
+          {!isOverview
+            ? quietPlaces.map((place) => (
+                <PlaceMarker
+                  key={place.id}
+                  imageUri={placeMarkerImages[place.id]}
+                  place={place}
+                  onPress={() => router.push(`/(modals)/place/${place.id}` as Href)}
+                />
+              ))
+            : null}
         </MapView>
       ) : (
         <View className="flex-1 items-center justify-center bg-hive-surface px-8">
@@ -721,6 +758,16 @@ export function MapContainer() {
               key={sting.id}
               sting={sting}
               onCaptured={handleStingMarkerCaptured}
+            />
+          ))}
+        {Platform.OS === 'android' &&
+          !isOverview &&
+          quietPlaces.map((place) => (
+            <PlaceMarkerCapture
+              key={`${place.id}:${place.coverThumbnailUrl ?? ''}`}
+              coverUrl={place.coverThumbnailUrl}
+              placeId={place.id}
+              onCaptured={handlePlaceMarkerCaptured}
             />
           ))}
 

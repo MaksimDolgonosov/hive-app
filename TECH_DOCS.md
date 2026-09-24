@@ -13,6 +13,8 @@
    - [3.1 Auth](#31-auth)
    - [3.2 Stings](#32-stings)
    - [3.3 Hives](#33-hives)
+   - [3.4 Places](#34-places)
+   - [3.5 Partner applications](#35-partner-applications)
 4. [WebSocket](#4-websocket)
 5. [Общие соглашения](#5-общие-соглашения)
 
@@ -340,6 +342,7 @@ Query params:
   swLat, swLng, neLat, neLng   — bounding box видимой карты (обязательные)
   includeEchoes?: boolean      — default false; ячейки эха истёкших жал
   includeSeeds?: boolean       — default false; seed-кластеры в hives[]
+  includePlaces?: boolean      — default true; тихие live-места в places[]
   minResults?: number          — 0..50, расширять bbox пока не наберётся столько жал
   maxRadiusM?: number          — предел расширения, default 50000
 ```
@@ -349,6 +352,7 @@ Query params:
 {
   "stings": Sting[],
   "hives": Hive[],
+  "places": PlaceSummary[],
   "echoes": [{ "cellId": "8911aa...", "center": { "lat": 0, "lng": 0 }, "count": 4, "lastSeenAt": "..." }],
   "appliedBounds": { "swLat": 0, "swLng": 0, "neLat": 0, "neLng": 0 },
   "expanded": false,
@@ -356,7 +360,7 @@ Query params:
 }
 ```
 
-Без новых параметров поведение прежнее: `expanded: false`, `appliedBounds` = запрошенный bbox, `hives` только `stage: 'hive'`. При `includeSeeds=false` жала seed-кластеров приходят в `stings[]` с `hiveId: null`, чтобы старый клиент их не прятал.
+Без новых параметров поведение прежнее: `expanded: false`, `appliedBounds` = запрошенный bbox, `hives` только `stage: 'hive'`. При `includeSeeds=false` жала seed-кластеров приходят в `stings[]` с `hiveId: null`, чтобы старый клиент их не прятал. `includePlaces` по умолчанию `true`: в `places[]` только live-места с обложкой. Старый клиент поле игнорирует. `viewportDensity` места не считает.
 
 #### `GET /stings/nearest`
 `lat`, `lng`, `limit` 1..10. `$geoNear`, max 300 км. `{ stings, distanceM }` (`distanceM` = null, если активных жал нет).
@@ -465,6 +469,47 @@ Query params: cursor?: string, limit?: number (default 20, max 50)
   "nextCursor": "string | null"
 }
 ```
+
+`Sting.placeId` — место, в радиус которого попало гостевое жало. Партнёрское жало место не увеличивает `activeGuestStingsCount`. `Hive.placeId` и `Hive.place` (`PlaceSummary`) — если центр улья внутри live-места. Событие `hive:updated` несёт тот же summary.
+
+---
+
+### 3.4 Places
+
+Публичный DTO не содержит телефон, on-site кадр и EXIF GPS. `verifiedAt` всегда `null`.
+
+```
+GET    /places/me
+GET    /places/:id
+PATCH  /places/:id                         — name, description, category, address text, phone, socialLinks
+POST   /places/:id/pause
+POST   /places/:id/resume                  — без обложки → PLACE_RESUME_NEEDS_COVER
+POST   /places/:id/media                   — multipart photo, role=cover|gallery
+PATCH  /places/:id/media/order
+DELETE /places/:id/media/:mediaId
+GET    /places/:id/stings                  — includePartner default false
+POST   /places/:id/reports
+POST   /places/:id/media/:mediaId/reports
+GET    /share/places/:id                   — live + cover, иначе 404
+```
+
+Обложка из `draft` переводит место в `live`. Галерея до 12, короткая сторона ≥ 800, иначе `MEDIA_TOO_SMALL`. Медиа сразу `moderation=approved`. Центр задаёт on-site и партнёр его не двигает. Чужой центр ближе `PLACE_OVERLAP_MIN_M` (40) → `409 PLACE_OVERLAP`. На владельца не больше 3 мест.
+
+Чужой `paused` отвечает урезанным `{ hidden: true }`. Чужой `suspended` — `404 PLACE_SUSPENDED`. `draft` видит только owner.
+
+### 3.5 Partner applications
+
+```
+POST   /partner/applications
+GET    /partner/applications/me
+PATCH  /partner/applications/:id
+POST   /partner/applications/:id/onsite    — multipart, только камера
+POST   /partner/applications/:id/submit
+```
+
+Одна активная draft-заявка на пользователя: повторный `POST` возвращает её. `submit` создаёт `Place` в `draft`, ставит `accountType=partner` и публикует заявку. ИНН, геокодер, SMS и approve до публикации нет. On-site: accuracy хуже 50 м → `ONSITE_LOW_ACCURACY`; анти-спуфинг как у жала → `ONSITE_VALIDATION_FAILED`; типичный Software-тег галереи → `GALLERY_SOURCE`. Кадр on-site в API не отдаётся.
+
+Админ (UI вне клиента): `POST /admin/places`, `POST /admin/places/:id/suspend|unsuspend|transfer|center`, `POST /admin/place-media/:id/review`, `POST /admin/place-reports/:id/resolve`. Удаление аккаунта прячет места, снимает публичные медиа и анонимизирует заявки; on-site хранится ~90 дней.
 
 ---
 

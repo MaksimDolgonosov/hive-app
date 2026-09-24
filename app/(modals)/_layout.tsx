@@ -16,6 +16,12 @@ export default function ModalsLayout() {
         options={{ presentation: 'card', animation: 'slide_from_right' }}
       />
       <Stack.Screen name="user/[id]" options={{ presentation: 'card' }} />
+      <Stack.Screen name="place/[id]" options={{ presentation: 'card' }} />
+      <Stack.Screen name="partner/apply" options={{ presentation: 'card' }} />
+      <Stack.Screen name="partner/onsite" options={{ presentation: 'card' }} />
+      <Stack.Screen name="partner/places" options={{ presentation: 'card' }} />
+      <Stack.Screen name="partner/place/edit" options={{ presentation: 'card' }} />
+      <Stack.Screen name="partner/place/media" options={{ presentation: 'card' }} />
     </Stack>
   );
 }

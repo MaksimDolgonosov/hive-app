@@ -1,4 +1,5 @@
 import { Platform, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
 import { Circle, Marker } from 'react-native-maps';
 
 import { HiveMarkerFace } from '@/src/components/map/HiveMarkerFace';
@@ -17,6 +18,17 @@ interface HiveSeedMarkerProps {
  */
 export function HiveSeedMarker({ hive, imageUri, onPress }: HiveSeedMarkerProps) {
   const metrics = getHiveMarkerVisualMetrics(hive.activeStingsCount);
+  const coverUrl = hive.place?.coverThumbnailUrl;
+  const [tracksViewChanges, setTracksViewChanges] = useState(Boolean(coverUrl));
+
+  useEffect(() => {
+    if (!coverUrl) {
+      return;
+    }
+    setTracksViewChanges(true);
+    const timer = setTimeout(() => setTracksViewChanges(false), 800);
+    return () => clearTimeout(timer);
+  }, [coverUrl]);
 
   const coordinate = {
     latitude: hive.center.lat,
@@ -32,7 +44,7 @@ export function HiveSeedMarker({ hive, imageUri, onPress }: HiveSeedMarkerProps)
         strokeColor="rgba(185, 154, 85, 0.3)"
         strokeWidth={1}
       />
-      {Platform.OS === 'android' ? (
+      {Platform.OS === 'android' && !coverUrl ? (
         imageUri ? (
           <Marker
             coordinate={coordinate}
@@ -46,14 +58,14 @@ export function HiveSeedMarker({ hive, imageUri, onPress }: HiveSeedMarkerProps)
         <Marker
           coordinate={coordinate}
           anchor={{ x: 0.5, y: 0.5 }}
-          tracksViewChanges={false}
+          tracksViewChanges={tracksViewChanges}
           onPress={onPress}
         >
           <View
             collapsable={false}
             style={[styles.markerRoot, { width: metrics.markerSize, height: metrics.markerSize }]}
           >
-            <HiveMarkerFace animate={false} count={hive.activeStingsCount} variant="seed" />
+            <HiveMarkerFace animate={false} count={hive.activeStingsCount} coverUrl={hive.place?.coverThumbnailUrl} variant="seed" />
           </View>
         </Marker>
       )}

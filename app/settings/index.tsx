@@ -41,8 +41,12 @@ export default function ProfileSettingsScreen() {
         <LanguageSelect />
         <ThemeSelect />
         <AppIconSelect />
-        <SplashPreviewLink onPress={() => router.push('/(modals)/splash' as Href)} />
-        <OnboardingPreviewLink onPress={() => router.push('/(onboarding)/welcome' as Href)} />
+        {__DEV__ ? (
+          <>
+            <SplashPreviewLink onPress={() => router.push('/(modals)/splash' as Href)} />
+            <OnboardingPreviewLink onPress={() => router.push('/(onboarding)/welcome' as Href)} />
+          </>
+        ) : null}
         <PublishBuzzSetting />
         <SettingsToggleRow
           icon={Camera}

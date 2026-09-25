@@ -17,6 +17,7 @@ export type TranslationSchema = {
     label: string;
     dark: string;
     light: string;
+    system: string;
   };
   appIcon: {
     label: string;

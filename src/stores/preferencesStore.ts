@@ -1,7 +1,7 @@
 import { Appearance } from 'react-native';
 import { create } from 'zustand';
 
-import type { AppColorScheme } from '@/src/theme/tokens';
+import type { AppColorScheme, ThemePreference } from '@/src/theme/tokens';
 import {
   applyAppIcon,
   canChangeAppIcon,
@@ -29,10 +29,18 @@ import {
   savePushExplainDismissed,
 } from './preferences-storage';
 
-const DEFAULT_COLOR_SCHEME: AppColorScheme = 'light';
+const DEFAULT_THEME_PREFERENCE: ThemePreference = 'light';
 
-function applyNativeColorScheme(scheme: AppColorScheme) {
-  Appearance.setColorScheme(scheme);
+function resolveColorScheme(preference: ThemePreference): AppColorScheme {
+  if (preference === 'light' || preference === 'dark') {
+    return preference;
+  }
+
+  return Appearance.getColorScheme() === 'dark' ? 'dark' : 'light';
+}
+
+function applyNativeColorScheme(preference: ThemePreference) {
+  Appearance.setColorScheme(preference === 'system' ? null : preference);
 }
 
 interface PreferencesState {
@@ -49,6 +57,8 @@ interface PreferencesState {
   pendingPushExplain: boolean;
   /** Показывать ссылку Instagram. Считается по геолокации при входе в приложение. */
   instagramLinksAllowed: boolean;
+  /** Выбор в настройках. system не подменяет colorScheme — палитра всё равно light или dark. */
+  themePreference: ThemePreference;
   colorScheme: AppColorScheme;
   appIcon: AppIconId;
   isHydrated: boolean;
@@ -60,7 +70,7 @@ interface PreferencesState {
   setPushExplainDismissed: (value: boolean) => Promise<void>;
   setPendingPushExplain: (value: boolean) => void;
   setInstagramLinksAllowed: (allowed: boolean) => Promise<void>;
-  setColorScheme: (scheme: AppColorScheme) => Promise<void>;
+  setColorScheme: (preference: ThemePreference) => Promise<void>;
   setAppIcon: (icon: AppIconId) => Promise<boolean>;
 }
 
@@ -72,7 +82,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
   pushExplainDismissed: false,
   pendingPushExplain: false,
   instagramLinksAllowed: true,
-  colorScheme: DEFAULT_COLOR_SCHEME,
+  themePreference: DEFAULT_THEME_PREFERENCE,
+  colorScheme: resolveColorScheme(DEFAULT_THEME_PREFERENCE),
   appIcon: getPlatformDefaultAppIcon(),
   isHydrated: false,
 
@@ -100,8 +111,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       loadPushExplainDismissed(),
       loadInstagramLinksAllowed(),
     ]);
-    const colorScheme = storedScheme ?? DEFAULT_COLOR_SCHEME;
-    applyNativeColorScheme(colorScheme);
+    const themePreference = storedScheme ?? DEFAULT_THEME_PREFERENCE;
+    applyNativeColorScheme(themePreference);
 
     const nativeIcon = readNativeAppIcon();
     let appIcon = storedIcon ?? nativeIcon ?? getPlatformDefaultAppIcon();
@@ -122,7 +133,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       hasPublishedFirstSting: storedFirstSting ?? false,
       pushExplainDismissed: storedPushExplain ?? false,
       instagramLinksAllowed: storedInstagramLinksAllowed ?? true,
-      colorScheme,
+      themePreference,
+      colorScheme: resolveColorScheme(themePreference),
       appIcon,
       isHydrated: true,
     });
@@ -166,10 +178,10 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
     await saveInstagramLinksAllowed(allowed);
   },
 
-  setColorScheme: async (scheme) => {
-    applyNativeColorScheme(scheme);
-    set({ colorScheme: scheme });
-    await saveColorScheme(scheme);
+  setColorScheme: async (preference) => {
+    applyNativeColorScheme(preference);
+    set({ themePreference: preference, colorScheme: resolveColorScheme(preference) });
+    await saveColorScheme(preference);
   },
 
   setAppIcon: async (icon) => {
@@ -188,3 +200,16 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
 export function isPublishBuzzEnabled(): boolean {
   return usePreferencesStore.getState().publishBuzzEnabled;
 }
+
+Appearance.addChangeListener(({ colorScheme }) => {
+  if (usePreferencesStore.getState().themePreference !== 'system') {
+    return;
+  }
+
+  const next: AppColorScheme = colorScheme === 'dark' ? 'dark' : 'light';
+  if (usePreferencesStore.getState().colorScheme === next) {
+    return;
+  }
+
+  usePreferencesStore.setState({ colorScheme: next });
+});

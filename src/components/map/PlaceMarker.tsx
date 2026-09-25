@@ -80,9 +80,12 @@ export function PlaceMarkerCapture({ placeId, coverUrl, onCaptured }: PlaceMarke
   }, [onCaptured, placeId]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      void capture();
-    }, coverUrl ? 200 : 80);
+    const timer = setTimeout(
+      () => {
+        void capture();
+      },
+      coverUrl ? 200 : 80,
+    );
 
     return () => clearTimeout(timer);
   }, [capture, coverUrl]);

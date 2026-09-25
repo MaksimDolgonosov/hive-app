@@ -19,6 +19,7 @@ export const ru: TranslationSchema = {
     label: 'Тема',
     dark: 'Тёмная',
     light: 'Светлая',
+    system: 'Как на телефоне',
   },
   appIcon: {
     label: 'Иконка приложения',

@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import type { AppColorScheme } from '@/src/theme/tokens';
+import type { ThemePreference } from '@/src/theme/tokens';
 import type { AppIconId } from '@/src/utils/app-icon';
 
 const PUBLISH_BUZZ_STORAGE_KEY = '@hive/publishBuzzEnabled';
@@ -77,16 +77,16 @@ export function saveInstagramLinksAllowed(value: boolean): Promise<void> {
   return saveBoolean(INSTAGRAM_LINKS_ALLOWED_KEY, value);
 }
 
-export async function loadColorScheme(): Promise<AppColorScheme | null> {
+export async function loadColorScheme(): Promise<ThemePreference | null> {
   const value = await AsyncStorage.getItem(COLOR_SCHEME_STORAGE_KEY);
-  if (value === 'light' || value === 'dark') {
+  if (value === 'light' || value === 'dark' || value === 'system') {
     return value;
   }
 
   return null;
 }
 
-export async function saveColorScheme(scheme: AppColorScheme): Promise<void> {
+export async function saveColorScheme(scheme: ThemePreference): Promise<void> {
   await AsyncStorage.setItem(COLOR_SCHEME_STORAGE_KEY, scheme);
 }
 

@@ -32,8 +32,12 @@
 | `app/(tabs)/_layout.tsx` | Таб-бар с тремя вкладками: Карта / Рядом / Профиль |
 | `app/(tabs)/index.tsx` | Экран карты — рендерит `MapContainer`, подписан на `mapStore` и `useStingsNearby` |
 | `app/(tabs)/nearby.tsx` | Лента ближайших жал списком (альтернатива карте для плохого GPS/предпочтений) |
-| `app/(tabs)/profile.tsx` | Профиль, настройки, выход |
-| `app/(modals)/_layout.tsx` | Stack-навигатор с `presentation: 'modal'` для camera/preview/sting-detail |
+| `app/(tabs)/profile.tsx` | Профиль, настройки, выход. Пункт «Для заведений» открывает список мест |
+| `app/(modals)/partner/places.tsx` | Список мест владельца и «Создать место» |
+| `app/(modals)/partner/apply.tsx` | Заявка: название, категория, текущий GPS, email. Телефон и сайт необязательны |
+| `app/(modals)/partner/place/edit.tsx` | Редактор места: обложка, имя, описание, соцсети, пауза, удаление черновика |
+| `app/(modals)/place/[id].tsx` | Публичная карточка места |
+| `app/(modals)/_layout.tsx` | Stack-навигатор с `presentation: 'modal'` для camera/preview/sting-detail и экранов места |
 | `app/(modals)/camera.tsx` | Полноэкранная камера |
 | `app/(modals)/preview.tsx` | Просмотр снятого фото перед публикацией + подтверждение |
 | `app/(modals)/sting/[id].tsx` | Детальный просмотр одного жала по id |
@@ -81,6 +85,7 @@
 | Store | Состояние |
 |---|---|
 | `authStore.ts` | `user`, `accessToken`, `refreshToken`, `status`, `hasCompletedOnboarding`. Персистится в `expo-secure-store` (токены) / AsyncStorage (флаг онбординга) |
+| `preferencesStore.ts` | `themePreference`: `light` \| `dark` \| `system`. По умолчанию `light`. `system` вызывает `Appearance.setColorScheme(null)` и слушает смену темы телефона. В палитры уходит уже разрешённый `light` или `dark` |
 | `mapStore.ts` | `region`, `selectedHiveId`, `selectedStingId` — чисто UI-состояние карты, не серверные данные (те — в React Query кэше) |
 | `cameraStore.ts` | `capturedUri`, `captureCoords`, `captureAccuracy` — временное состояние между `camera.tsx` и `preview.tsx`, очищается после публикации или отмены |
 
@@ -470,21 +475,22 @@ Query params: cursor?: string, limit?: number (default 20, max 50)
 }
 ```
 
-`Sting.placeId` — место, в радиус которого попало гостевое жало. Партнёрское жало место не увеличивает `activeGuestStingsCount`. `Hive.placeId` и `Hive.place` (`PlaceSummary`) — если центр улья внутри live-места. Событие `hive:updated` несёт тот же summary.
+`Sting.placeId` — место, в радиус которого попало гостевое жало. Партнёрское жало место не увеличивает `activeGuestStingsCount`. `Hive.placeId` и `Hive.place` (`PlaceSummary`) — если центр улья внутри live-места. Пауза, пропажа обложки и удаление черновика обнуляют эту связь, иначе сота продолжает показывать обложку скрытого места. Событие `hive:updated` несёт тот же summary.
 
 ---
 
 ### 3.4 Places
 
-Публичный DTO не содержит телефон, on-site кадр и EXIF GPS. `verifiedAt` всегда `null`.
+Публичный DTO не содержит телефон, on-site кадр и EXIF GPS. `verifiedAt` всегда `null`. Продуктовые правила — `PLACE_PARTNER_TZ.md` v0.5.
 
 ```
 GET    /places/me
 GET    /places/:id
-PATCH  /places/:id                         — name, description, category, address text, phone, socialLinks
-POST   /places/:id/pause
+PATCH  /places/:id                         — name, description ≤280, category, phone, socialLinks
+POST   /places/:id/pause                   — live→paused, Hive.placeId обнуляется
 POST   /places/:id/resume                  — без обложки → PLACE_RESUME_NEEDS_COVER
-POST   /places/:id/media                   — multipart photo, role=cover|gallery
+DELETE /places/:id                         — только draft → 204, иначе 422 PLACE_NOT_DRAFT
+POST   /places/:id/media                   — multipart photo, kind=cover|gallery
 PATCH  /places/:id/media/order
 DELETE /places/:id/media/:mediaId
 GET    /places/:id/stings                  — includePartner default false
@@ -493,9 +499,11 @@ POST   /places/:id/media/:mediaId/reports
 GET    /share/places/:id                   — live + cover, иначе 404
 ```
 
-Обложка из `draft` переводит место в `live`. Галерея до 12, короткая сторона ≥ 800, иначе `MEDIA_TOO_SMALL`. Медиа сразу `moderation=approved`. Центр задаёт on-site и партнёр его не двигает. Чужой центр ближе `PLACE_OVERLAP_MIN_M` (40) → `409 PLACE_OVERLAP`. На владельца не больше 3 мест.
+Центр места — GPS устройства в `POST /partner/applications/:id/submit` (`source: declared`). Партнёр его не двигает, текстового адреса нет. Обложка из `draft` переводит место в `live`. Короткая сторона ≥ 800, иначе `MEDIA_TOO_SMALL`. Медиа сразу `moderation=approved`. Клиент грузит и показывает только обложку: редактор места, иконка камеры как у аватара. Сервер ещё принимает `kind=gallery` (лимит 12) и порядок галереи, приложение эти вызовы не делает. Чужой центр ближе `PLACE_OVERLAP_MIN_M` (40) → `409 PLACE_OVERLAP`. В лимит 3 входят `live`, `paused` и `suspended`; черновик не считается.
 
-Чужой `paused` отвечает урезанным `{ hidden: true }`. Чужой `suspended` — `404 PLACE_SUSPENDED`. `draft` видит только owner.
+`socialLinks` — те же ключи, что у профиля: `instagram`, `telegram`, `tiktok`, `youtube`, `website`. Пустая строка стирает ключ, `@username` сервер разворачивает в URL. Карточка рисует непустые ссылки чипами и текст описания.
+
+`live` и `paused` владелец не удаляет. С карты `live` уходит через pause. `DELETE` стирает только черновик вместе с его медиа. Чужой `paused` отвечает урезанным `{ hidden: true }`. Чужой `suspended` — `404 PLACE_SUSPENDED`. `draft` видит только owner. Жалоба в клиенте — лист причин с «Отмена» и обработкой кнопки назад, не системный диалог из пяти кнопок.
 
 ### 3.5 Partner applications
 
@@ -507,7 +515,7 @@ POST   /partner/applications/:id/onsite    — multipart, только каме�
 POST   /partner/applications/:id/submit
 ```
 
-Одна активная draft-заявка на пользователя: повторный `POST` возвращает её. `submit` создаёт `Place` в `draft`, ставит `accountType=partner` и публикует заявку. ИНН, геокодер, SMS и approve до публикации нет. On-site: accuracy хуже 50 м → `ONSITE_LOW_ACCURACY`; анти-спуфинг как у жала → `ONSITE_VALIDATION_FAILED`; типичный Software-тег галереи → `GALLERY_SOURCE`. Кадр on-site в API не отдаётся.
+Одна активная draft-заявка на пользователя: повторный `POST` возвращает её. `submit` принимает `{ lat, lng }`, создаёт `Place` в `draft` с этим центром, ставит `accountType=partner` и публикует заявку. ИНН, геокодер, SMS, текстовый адрес и approve до публикации нет. `POST /onsite` в пути публикации не вызывается. Эндпоинт остаётся: accuracy хуже 50 м → `ONSITE_LOW_ACCURACY`; анти-спуфинг как у жала → `ONSITE_VALIDATION_FAILED`; типичный Software-тег галереи → `GALLERY_SOURCE`. Кадр on-site в API не отдаётся.
 
 Админ (UI вне клиента): `POST /admin/places`, `POST /admin/places/:id/suspend|unsuspend|transfer|center`, `POST /admin/place-media/:id/review`, `POST /admin/place-reports/:id/resolve`. Удаление аккаунта прячет места, снимает публичные медиа и анонимизирует заявки; on-site хранится ~90 дней.
 
@@ -611,5 +619,5 @@ POST   /partner/applications/:id/submit
 
 Улей активен (`stage: hive`), когда `activationCount >= HIVE_ACTIVATION_THRESHOLD` при капе `HIVE_AUTHOR_WEIGHT_CAP` на автора. Соло-стопка — `seed`, в `hives[]` по умолчанию не попадает.
 
-Места заведений (кафе/бары), верификация партнёра, обложка из галереи: контракт ещё не в этом файле — источник истины **`PLACE_PARTNER_TZ.md`** (§G14, §G15), пока реализация не перенесена в OpenAPI.
+Места заведений описаны в §3.4–§3.5 и в `PLACE_PARTNER_TZ.md` v0.5. Клиент показывает одну обложку. Проверка юрлица и approve до публикации нет.
 

@@ -19,6 +19,7 @@ export const en: TranslationSchema = {
     label: 'Theme',
     dark: 'Dark',
     light: 'Light',
+    system: 'Same as phone',
   },
   appIcon: {
     label: 'App icon',

@@ -1,5 +1,8 @@
 export type AppColorScheme = 'dark' | 'light';
 
+/** light/dark фиксируют палитру. system повторяет тему телефона. */
+export type ThemePreference = AppColorScheme | 'system';
+
 export type HivePalette = {
   bg: string;
   surface: string;

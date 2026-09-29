@@ -3,10 +3,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { Hexagon } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, Ellipse, RadialGradient, Stop } from 'react-native-svg';
 
-import { HiveLoader } from '@/src/components/ui/HiveLoader';
 import { ScreenGradient } from '@/src/components/ui/ScreenGradient';
 import { useAppColorScheme, useHiveTheme } from '@/src/hooks/useHiveTheme';
 import { en } from '@/src/i18n/locales/en';
@@ -18,25 +16,18 @@ const ICON_SIZE = 128;
 const ICON_RADIUS = Math.round(ICON_SIZE * 0.223);
 /** Как LogoMark на Screen/Splash в hive-design.pen: ромб ~106×92 внутри 128. */
 const LIGHT_MARK_SIZE = 90;
-const LIGHT_LOADER_COLOR = '#F5A623';
 const LIGHT_GLOW_COLOR = '#FF8C00';
 const DARK_LOGO_BACKING = '#13110C';
 const BRAND_GLOW_WIDTH = 420;
 const BRAND_GLOW_HEIGHT = 360;
 const LOGO_BLOOM_SIZE = 192;
 
-type LoadingScreenProps = {
-  bottomOffset?: number;
-};
-
-export function LoadingScreen({ bottomOffset = 0 }: LoadingScreenProps) {
-  const insets = useSafeAreaInsets();
+export function LoadingScreen() {
   const language = useLocaleStore((state) => state.language);
   const theme = useHiveTheme();
   const colorScheme = useAppColorScheme();
   const isDark = colorScheme === 'dark';
   const tagline = language === 'en' ? en.common.appTagline : ru.common.appTagline;
-  const footerPadding = bottomOffset > 0 ? bottomOffset : Math.max(insets.bottom, 48);
   const glowColor = isDark ? theme.accent : LIGHT_GLOW_COLOR;
 
   return (
@@ -113,13 +104,6 @@ export function LoadingScreen({ bottomOffset = 0 }: LoadingScreenProps) {
             {tagline}
           </Text>
         </View>
-      </View>
-      <View style={[styles.footer, { paddingBottom: footerPadding }]}>
-        <HiveLoader
-          color={isDark ? theme.accent : LIGHT_LOADER_COLOR}
-          size={36}
-          style={{ marginBottom: 16 }}
-        />
       </View>
     </ScreenGradient>
   );
@@ -207,9 +191,5 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontSize: 15,
-  },
-  footer: {
-    alignItems: 'center',
-    paddingHorizontal: 24,
   },
 });

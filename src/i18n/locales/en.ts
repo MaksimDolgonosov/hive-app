@@ -57,6 +57,9 @@ export const en: TranslationSchema = {
     googleNotConfigured: 'Google Sign-In is not configured. Add Client ID to .env',
     googleRequiresDevBuild:
       'Google Sign-In does not work in Expo Go. Build a dev client: eas build --profile development',
+    appleDeveloperNotConnected:
+      'Apple Developer is not connected. Sign in will work after the developer account is paid.',
+    appleLoginFailed: 'Could not sign in with Apple',
     invalidEmail: 'Enter a valid email',
     fillEmail: 'Enter your email',
     back: 'Back',
@@ -590,6 +593,12 @@ export const en: TranslationSchema = {
     GOOGLE_EMAIL_NOT_VERIFIED: 'Google email is not verified',
     GOOGLE_AUTH_NOT_CONFIGURED: 'Google Sign-In is not configured on the server',
     GOOGLE_ACCOUNT_CONFLICT: 'This email is already linked to another Google account',
+    APPLE_AUTH_FAILED: 'Could not verify Apple sign-in',
+    APPLE_EMAIL_NOT_VERIFIED: 'Apple email is not verified',
+    APPLE_EMAIL_UNAVAILABLE:
+      'Apple did not share an email. Remove Hive from Apple ID settings and sign in again',
+    APPLE_ACCOUNT_CONFLICT: 'This email is already linked to another Apple account',
+    APPLE_AUTH_NOT_CONFIGURED: 'Apple Sign-In is not configured on the server',
     ACCOUNT_DISABLED: 'This account is disabled',
     USER_NOT_FOUND: 'Account not found',
     FEATURE_DISABLED: 'This section is not available yet',

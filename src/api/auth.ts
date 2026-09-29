@@ -97,6 +97,17 @@ export async function loginWithGoogle(input: {
   return data;
 }
 
+export async function loginWithApple(input: {
+  identityToken: string;
+  fullName?: string | null;
+  inviteCode?: string;
+}): Promise<AuthSession> {
+  const { data } = await apiClient.post<AuthSession>('/auth/apple', input, {
+    skipAuthRefresh: true,
+  });
+  return data;
+}
+
 export async function refresh(refreshToken: string): Promise<{ tokens: AuthTokens }> {
   const { data } = await apiClient.post<{ tokens: AuthTokens }>(
     '/auth/refresh',

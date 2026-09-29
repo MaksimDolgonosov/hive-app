@@ -57,6 +57,9 @@ export const ru: TranslationSchema = {
     googleNotConfigured: 'Google Sign-In не настроен. Добавьте Client ID в .env',
     googleRequiresDevBuild:
       'Google Sign-In не работает в Expo Go. Соберите dev build: eas build --profile development',
+    appleDeveloperNotConnected:
+      'Apple Developer не подключён. Вход заработает после оплаты аккаунта разработчика.',
+    appleLoginFailed: 'Не удалось войти через Apple',
     invalidEmail: 'Введите корректный email',
     fillEmail: 'Введите email',
     back: 'Назад',
@@ -594,6 +597,12 @@ export const ru: TranslationSchema = {
     GOOGLE_EMAIL_NOT_VERIFIED: 'Email Google не подтверждён',
     GOOGLE_AUTH_NOT_CONFIGURED: 'Google Sign-In не настроен на сервере',
     GOOGLE_ACCOUNT_CONFLICT: 'Этот email уже привязан к другому Google-аккаунту',
+    APPLE_AUTH_FAILED: 'Не удалось проверить вход через Apple',
+    APPLE_EMAIL_NOT_VERIFIED: 'Email Apple не подтверждён',
+    APPLE_EMAIL_UNAVAILABLE:
+      'Apple не передал email. Удалите Hive в настройках Apple ID и войдите снова',
+    APPLE_ACCOUNT_CONFLICT: 'Этот email уже привязан к другому Apple-аккаунту',
+    APPLE_AUTH_NOT_CONFIGURED: 'Apple Sign-In не настроен на сервере',
     ACCOUNT_DISABLED: 'Аккаунт заблокирован',
     USER_NOT_FOUND: 'Аккаунт не найден',
     FEATURE_DISABLED: 'Раздел пока недоступен',

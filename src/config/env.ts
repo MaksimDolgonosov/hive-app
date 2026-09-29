@@ -8,6 +8,7 @@ type AppExtra = {
   googleIosClientId?: string;
   googleAndroidClientId?: string;
   googleMapsApiKey?: string;
+  appleSignInEnabled?: boolean;
 };
 
 export type EnvConfig = AppExtra;
@@ -46,6 +47,8 @@ function getExtra(): EnvConfig {
     extra.googleAndroidClientId ?? process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? '';
 
   const googleMapsApiKey = extra.googleMapsApiKey ?? process.env.GOOGLE_MAPS_API_KEY ?? '';
+  const appleSignInEnabled =
+    extra.appleSignInEnabled === true || process.env.EXPO_PUBLIC_APPLE_SIGN_IN_ENABLED === 'true';
 
   if (__DEV__) {
     console.log('[env]', {
@@ -64,6 +67,7 @@ function getExtra(): EnvConfig {
     googleIosClientId,
     googleAndroidClientId,
     googleMapsApiKey,
+    appleSignInEnabled,
   };
 }
 

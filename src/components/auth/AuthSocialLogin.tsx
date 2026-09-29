@@ -5,6 +5,11 @@ import Svg, { Path } from 'react-native-svg';
 
 import { AuthSocialButton } from '@/src/components/auth/AuthSocialButton';
 import {
+  useAppleSignIn,
+  type AppleSignInErrorKey,
+  type AppleSignInSuccess,
+} from '@/src/hooks/useAppleSignIn';
+import {
   isGoogleSignInConfigured,
   useGoogleSignIn,
   type GoogleSignInErrorKey,
@@ -108,6 +113,62 @@ function ConfiguredGoogleButton({
   );
 }
 
+function AppleSignInButton({
+  disabled,
+  onBeforeAuth,
+  onError,
+}: {
+  disabled: boolean;
+  onBeforeAuth?: () => boolean;
+  onError: (message: string | null) => void;
+}) {
+  const { t } = useTranslation();
+  const loginWithApple = useAuthStore((state) => state.loginWithApple);
+
+  const handleSuccess = useCallback(
+    async ({ identityToken, fullName }: AppleSignInSuccess) => {
+      try {
+        await loginWithApple({ identityToken, fullName });
+      } catch (err) {
+        logApiError('auth.apple', err);
+        onError(getApiErrorMessage(err, 'auth.appleLoginFailed'));
+      }
+    },
+    [loginWithApple, onError],
+  );
+
+  const handleHookError = useCallback(
+    (messageKey: AppleSignInErrorKey) => {
+      onError(t(messageKey));
+    },
+    [onError, t],
+  );
+
+  const { signInWithApple, isPrompting } = useAppleSignIn({
+    onSuccess: handleSuccess,
+    onError: handleHookError,
+  });
+
+  return (
+    <AuthSocialButton
+      accessibilityLabel={t('auth.loginWithApple')}
+      disabled={disabled || isPrompting}
+      label={t('auth.loginWithApple')}
+      loading={isPrompting}
+      variant="row"
+      onPress={() => {
+        if (onBeforeAuth && !onBeforeAuth()) {
+          return;
+        }
+        onError(null);
+        void signInWithApple();
+      }}
+    >
+      <AppleIcon />
+    </AuthSocialButton>
+  );
+}
+
 export function AuthSocialLogin({ disabled = false, onBeforeAuth, onError }: AuthSocialLoginProps) {
   const { t } = useTranslation();
   const googleConfigured = isGoogleSignInConfigured();
@@ -140,15 +201,7 @@ export function AuthSocialLogin({ disabled = false, onBeforeAuth, onError }: Aut
       )}
 
       {Platform.OS === 'ios' ? (
-        <AuthSocialButton
-          accessibilityLabel={t('auth.loginWithApple')}
-          disabled={disabled}
-          label={t('auth.loginWithApple')}
-          variant="row"
-          onPress={() => undefined}
-        >
-          <AppleIcon />
-        </AuthSocialButton>
+        <AppleSignInButton disabled={disabled} onBeforeAuth={onBeforeAuth} onError={onError} />
       ) : null}
     </View>
   );

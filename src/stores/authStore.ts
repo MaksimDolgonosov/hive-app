@@ -60,6 +60,7 @@ interface AuthState {
   register: (input: { email: string; password: string; username: string }) => Promise<void>;
   login: (input: { email: string; password: string }) => Promise<void>;
   loginWithGoogle: (input: { idToken: string }) => Promise<void>;
+  loginWithApple: (input: { identityToken: string; fullName?: string | null }) => Promise<void>;
   verifyOtp: (input: VerifyOtpInput) => Promise<void>;
   resendOtp: (input: { email: string; purpose: OtpPurpose }) => Promise<void>;
   forgotPassword: (input: ForgotPasswordInput) => Promise<void>;
@@ -231,6 +232,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     const inviteCode = await loadPendingInviteCode();
     const { user, tokens } = await authApi.loginWithGoogle({
+      ...input,
+      ...(inviteCode ? { inviteCode } : {}),
+    });
+    await get().setSession(user, tokens);
+    await clearPendingInviteCode();
+  },
+
+  loginWithApple: async (input) => {
+    if (get().refreshToken || get().accessToken) {
+      await get().clearSession();
+    }
+    const inviteCode = await loadPendingInviteCode();
+    const { user, tokens } = await authApi.loginWithApple({
       ...input,
       ...(inviteCode ? { inviteCode } : {}),
     });

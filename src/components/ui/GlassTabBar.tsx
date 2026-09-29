@@ -1,16 +1,14 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { BlurView } from 'expo-blur';
-import type { GlassActiveRenderer } from 'expo-liquid-glass-view';
 import { router, type Href } from 'expo-router';
 import { Camera, Map, Send, User, type LucideIcon } from 'lucide-react-native';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LayoutChangeEvent, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { GlassSurface } from '@/src/components/ui/GlassSurface';
 import { HiveTheme } from '@/src/theme/tokens';
-import { shouldUseLiquidGlass } from '@/src/utils/liquid-glass';
 
 type TabKey = 'map' | 'nearby' | 'camera' | 'profile';
 
@@ -29,7 +27,6 @@ const TABS: TabConfig[] = [
 ];
 
 const GLASS_CORNER_RADIUS = 28;
-const GLASS_TINT = 'rgba(255, 255, 255, 0.58)';
 const INACTIVE_TAB_COLOR = '#8B7355';
 const ACTIVE_TAB_COLOR = '#FFFFFF';
 
@@ -126,72 +123,6 @@ function TabBarContent({
   );
 }
 
-function AndroidGlassSurface({ children }: { children: ReactNode }) {
-  return <View style={[styles.glass, styles.glassAndroid]}>{children}</View>;
-}
-
-function IOSBlurSurface({ children }: { children: ReactNode }) {
-  return (
-    <BlurView intensity={24} tint="light" style={styles.glass}>
-      {children}
-    </BlurView>
-  );
-}
-
-function IOSLiquidGlassSurface({
-  children,
-  onRendererChange,
-}: {
-  children: ReactNode;
-  onRendererChange: (renderer: GlassActiveRenderer) => void;
-}) {
-  const { LiquidGlassView } =
-    require('expo-liquid-glass-view') as typeof import('expo-liquid-glass-view');
-
-  return (
-    <LiquidGlassView
-      cornerRadius={GLASS_CORNER_RADIUS}
-      cornerStyle="continuous"
-      containerStyle={styles.glassContainer}
-      interactive
-      metal={{
-        blurRadius: 10,
-        border: { opacity: 0.35, width: 1 },
-        frost: 0.38,
-        highlight: { angle: 135, intensity: 0.28 },
-        saturation: 1.7,
-      }}
-      style={styles.glassLiquid}
-      tint={GLASS_TINT}
-      variant="regular"
-      onRendererChange={onRendererChange}
-    >
-      {children}
-    </LiquidGlassView>
-  );
-}
-
-function GlassSurface({ children }: { children: ReactNode }) {
-  const [iosRenderer, setIosRenderer] = useState<GlassActiveRenderer | null>(null);
-  const useLiquidGlass = shouldUseLiquidGlass();
-
-  if (Platform.OS === 'android') {
-    return <AndroidGlassSurface>{children}</AndroidGlassSurface>;
-  }
-
-  if (Platform.OS !== 'ios') {
-    return <AndroidGlassSurface>{children}</AndroidGlassSurface>;
-  }
-
-  if (!useLiquidGlass || iosRenderer === 'fallback-blur') {
-    return <IOSBlurSurface>{children}</IOSBlurSurface>;
-  }
-
-  return (
-    <IOSLiquidGlassSurface onRendererChange={setIosRenderer}>{children}</IOSLiquidGlassSurface>
-  );
-}
-
 export function GlassTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
@@ -216,7 +147,12 @@ export function GlassTabBar({ state, navigation }: BottomTabBarProps) {
       style={[styles.wrapper, { paddingBottom: insets.bottom + GLASS_TAB_BAR_BOTTOM_GAP }]}
     >
       <View style={styles.barContainer}>
-        <GlassSurface>
+        <GlassSurface
+          containerStyle={styles.glassContainer}
+          cornerRadius={GLASS_CORNER_RADIUS}
+          interactive
+          style={styles.glassLiquid}
+        >
           <TabBarContent activeTab={activeTab} onPress={handlePress} />
         </GlassSurface>
       </View>
@@ -238,14 +174,6 @@ const styles = StyleSheet.create({
     maxWidth: 358,
     borderRadius: GLASS_CORNER_RADIUS,
   },
-  glass: {
-    height: GLASS_TAB_BAR_HEIGHT,
-    borderRadius: GLASS_CORNER_RADIUS,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
   glassLiquid: {
     height: GLASS_TAB_BAR_HEIGHT,
     width: '100%',
@@ -253,9 +181,6 @@ const styles = StyleSheet.create({
   glassContainer: {
     flex: 1,
     justifyContent: 'center',
-  },
-  glassAndroid: {
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
   },
   tabsRow: {
     flex: 1,

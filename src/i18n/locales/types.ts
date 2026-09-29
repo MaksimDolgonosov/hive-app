@@ -53,6 +53,8 @@ export type TranslationSchema = {
     googleLoginFailed: string;
     googleNotConfigured: string;
     googleRequiresDevBuild: string;
+    appleDeveloperNotConnected: string;
+    appleLoginFailed: string;
     invalidEmail: string;
     fillEmail: string;
     back: string;
@@ -580,6 +582,11 @@ export type TranslationSchema = {
     GOOGLE_EMAIL_NOT_VERIFIED: string;
     GOOGLE_AUTH_NOT_CONFIGURED: string;
     GOOGLE_ACCOUNT_CONFLICT: string;
+    APPLE_AUTH_FAILED: string;
+    APPLE_EMAIL_NOT_VERIFIED: string;
+    APPLE_EMAIL_UNAVAILABLE: string;
+    APPLE_ACCOUNT_CONFLICT: string;
+    APPLE_AUTH_NOT_CONFIGURED: string;
     ACCOUNT_DISABLED: string;
     USER_NOT_FOUND: string;
     FEATURE_DISABLED: string;

@@ -55,6 +55,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     (scheme, index, schemes): scheme is string =>
       Boolean(scheme) && schemes.indexOf(scheme) === index,
   );
+  // Пока аккаунт Apple Developer не оплачен, capability не запрашиваем: EAS иначе падает.
+  const appleSignInEnabled = process.env.EXPO_PUBLIC_APPLE_SIGN_IN_ENABLED === 'true';
 
   if (process.env.NODE_ENV !== 'production') {
     console.log('[app.config] API_URL =', apiUrl);
@@ -94,6 +96,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
+      ...(appleSignInEnabled ? { usesAppleSignIn: true } : {}),
       config: {
         googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
       },
@@ -151,6 +154,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     plugins: [
       'expo-router',
+      ...(appleSignInEnabled ? (['expo-apple-authentication'] as const) : []),
       'expo-secure-store',
       'expo-localization',
       [
@@ -245,6 +249,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       googleIosClientId,
       googleAndroidClientId,
       googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
+      appleSignInEnabled,
     },
   };
 };

@@ -77,9 +77,13 @@ export default function RootLayout() {
 
   const isReady = (fontsLoaded || Boolean(fontError)) && localeReady && preferencesReady;
 
+  function hideNativeSplash() {
+    void SplashScreen.hideAsync();
+  }
+
   useEffect(() => {
     if (isReady) {
-      SplashScreen.hideAsync();
+      hideNativeSplash();
     }
   }, [isReady]);
 
@@ -90,6 +94,7 @@ export default function RootLayout() {
           { flex: 1, backgroundColor: HiveThemes[colorScheme].bg },
           HIVE_NATIVEWIND_VARS[colorScheme],
         ]}
+        onLayout={hideNativeSplash}
       >
         <LoadingScreen />
       </View>

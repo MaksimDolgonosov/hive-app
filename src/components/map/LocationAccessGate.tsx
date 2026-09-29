@@ -22,7 +22,7 @@ export function LocationAccessGate({
   const { t } = useTranslation();
 
   if (status === 'loading' || status === 'idle') {
-    return <LoadingScreen bottomOffset={bottomInset} />;
+    return <LoadingScreen />;
   }
 
   if (status === 'undetermined') {

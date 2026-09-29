@@ -1,7 +1,15 @@
 import i18n from '@/src/i18n';
+import { showInfoToast } from '@/src/stores/toastStore';
 import type { AwardType } from '@/src/types';
 
 type AwardCopy = { title: string; hint: string | null };
+
+/** `null` с сервера означает конец списка; пустую строку курсором не считаем концом. */
+export function nextAwardsPageParam(nextCursor: string | null): string | undefined {
+  return nextCursor ?? undefined;
+}
+
+type AwardAnnouncement = { type: AwardType | string };
 
 /** Неизвестный тип награды не должен ломать рендер — отдаём нейтральный ключ. */
 export function getAwardCopy(type: AwardType | string): AwardCopy {
@@ -17,4 +25,32 @@ export function getAwardCopy(type: AwardType | string): AwardCopy {
     default:
       return { title: i18n.t('awards.unknown'), hint: null };
   }
+}
+
+/** Одна строка тоста на награду: публикация может вернуть несколько сразу (§G5, §G13). */
+export function formatAwardToastMessage(awards: readonly AwardAnnouncement[]): string | null {
+  if (awards.length === 0) {
+    return null;
+  }
+
+  return awards
+    .map((award) => {
+      const copy = getAwardCopy(award.type);
+      return copy.hint ? `${copy.title} — ${copy.hint}` : copy.title;
+    })
+    .join('\n');
+}
+
+/** Поздравление за награды первооткрывателя и зажигания улья (§G5, §G13). */
+export function announceAwards(awards: readonly AwardAnnouncement[]): void {
+  const message = formatAwardToastMessage(awards);
+
+  if (!message) {
+    return;
+  }
+
+  showInfoToast({
+    title: i18n.t('awards.toastTitle'),
+    message,
+  });
 }

@@ -2,14 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import * as stingsApi from '@/src/api/stings';
 import type { PublishStingInput } from '@/src/api/stings';
-import i18n from '@/src/i18n';
 import { useAuthStore } from '@/src/stores/authStore';
 import { useMapStore } from '@/src/stores/mapStore';
 import { usePreferencesStore } from '@/src/stores/preferencesStore';
-import { showInfoToast } from '@/src/stores/toastStore';
-import type { Award, Sting } from '@/src/types';
+import type { Sting } from '@/src/types';
 import { trackEvent } from '@/src/utils/analytics-queue';
-import { getAwardCopy } from '@/src/utils/awards';
+import { announceAwards } from '@/src/utils/awards';
 import { upsertStingInNearbyQueries } from '@/src/utils/stings-query-cache';
 
 function enrichStingWithAuthor(sting: Sting): Sting {
@@ -23,20 +21,6 @@ function enrichStingWithAuthor(sting: Sting): Sting {
     authorUsername: sting.authorUsername ?? user.username,
     authorAvatarUrl: sting.authorAvatarUrl ?? user.avatarUrl ?? null,
   };
-}
-
-/** Поздравление за награды первооткрывателя и зажигания улья (§G5, §G13). */
-function announceAwards(awards: Award[]): void {
-  if (awards.length === 0) {
-    return;
-  }
-
-  const copy = getAwardCopy(awards[0].type);
-
-  showInfoToast({
-    title: i18n.t('awards.toastTitle'),
-    message: copy.hint ? `${copy.title} — ${copy.hint}` : copy.title,
-  });
 }
 
 export function usePublishSting() {

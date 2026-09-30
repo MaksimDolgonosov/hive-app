@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { usePathname, useRouter, useSegments, type Href } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 
 import { LoadingScreen } from '@/src/components/ui/LoadingScreen';
 import { useProfileOverview } from '@/src/hooks/useProfileOverview';
@@ -13,6 +14,35 @@ import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import { setCurrentRoutePath } from '@/src/utils/current-route';
 import { isGoogleOAuthCallbackPath } from '@/src/utils/google-oauth-path';
 import { getPushPermissionStatus } from '@/src/utils/push-device';
+
+function isStartupDestinationVisible(input: {
+  isHydrated: boolean;
+  status: string;
+  hasCompletedOnboarding: boolean;
+  rootSegment: string | undefined;
+  socialAuthPending: boolean;
+  isOAuthCallback: boolean;
+}): boolean {
+  if (!input.isHydrated || input.status === 'idle') {
+    return false;
+  }
+
+  if (!input.hasCompletedOnboarding) {
+    return input.rootSegment === '(onboarding)';
+  }
+
+  if (input.status === 'unauthenticated') {
+    return input.rootSegment === '(auth)' || input.socialAuthPending || input.isOAuthCallback;
+  }
+
+  return (
+    input.status === 'authenticated' &&
+    (input.rootSegment === '(tabs)' ||
+      input.rootSegment === '(modals)' ||
+      input.rootSegment === 'settings' ||
+      input.rootSegment === '(onboarding)')
+  );
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const status = useAuthStore((state) => state.status);
@@ -37,6 +67,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setCurrentRoutePath(pathname);
   }, [pathname]);
+
+  const startupVisible = isStartupDestinationVisible({
+    isHydrated,
+    status,
+    hasCompletedOnboarding,
+    rootSegment: segments[0] as string | undefined,
+    socialAuthPending,
+    isOAuthCallback: isGoogleOAuthCallbackPath(pathname),
+  });
+
+  useEffect(() => {
+    if (!startupVisible) {
+      return;
+    }
+
+    let secondFrame = 0;
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
+        void SplashScreen.hideAsync();
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(firstFrame);
+      cancelAnimationFrame(secondFrame);
+    };
+  }, [startupVisible]);
 
   useWebSocketLifecycle();
   usePushNotifications();
@@ -143,7 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ]);
 
   if (!isHydrated || status === 'idle') {
-    return <LoadingScreen />;
+    return null;
   }
 
   return (

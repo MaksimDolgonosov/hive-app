@@ -23,11 +23,9 @@ import 'react-native-reanimated';
 import { AuthProvider } from '@/src/components/auth/AuthProvider';
 import { AppShell } from '@/src/components/ui/AppShell';
 import { QueryProvider } from '@/src/components/providers/QueryProvider';
-import { LoadingScreen } from '@/src/components/ui/LoadingScreen';
 import i18n from '@/src/i18n';
 import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import { useLocaleStore } from '@/src/stores/localeStore';
-import { HIVE_NATIVEWIND_VARS } from '@/src/theme/nativewind-vars';
 import { HiveThemes } from '@/src/theme/tokens';
 
 SplashScreen.preventAutoHideAsync();
@@ -77,28 +75,8 @@ export default function RootLayout() {
 
   const isReady = (fontsLoaded || Boolean(fontError)) && localeReady && preferencesReady;
 
-  function hideNativeSplash() {
-    void SplashScreen.hideAsync();
-  }
-
-  useEffect(() => {
-    if (isReady) {
-      hideNativeSplash();
-    }
-  }, [isReady]);
-
   if (!isReady) {
-    return (
-      <View
-        style={[
-          { flex: 1, backgroundColor: HiveThemes[colorScheme].bg },
-          HIVE_NATIVEWIND_VARS[colorScheme],
-        ]}
-        onLayout={hideNativeSplash}
-      >
-        <LoadingScreen />
-      </View>
-    );
+    return <View style={{ flex: 1, backgroundColor: HiveThemes[colorScheme].bg }} />;
   }
 
   const palette = HiveThemes[colorScheme];

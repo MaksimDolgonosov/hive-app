@@ -1,10 +1,11 @@
 import { router, type Href } from 'expo-router';
-import { Bell, Camera, Share2 } from 'lucide-react-native';
+import { Bell, Camera, EyeOff, Share2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ScrollView } from 'react-native';
 
 import { DeleteAccountSetting } from '@/src/components/profile/DeleteAccountSetting';
 import { OnboardingPreviewLink } from '@/src/components/profile/OnboardingPreviewLink';
+import { CommunityGuidelinesLink } from '@/src/components/profile/CommunityGuidelinesLink';
 import { PrivacyPolicyLink } from '@/src/components/profile/PrivacyPolicyLink';
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
 import { ProfileMenuRow } from '@/src/components/profile/ProfileMenuRow';
@@ -65,7 +66,15 @@ export default function ProfileSettingsScreen() {
           label={t('share.action')}
           onPress={() => router.push('/settings/sharing' as Href)}
         />
+        <ProfileMenuRow
+          icon={EyeOff}
+          label={t('safety.blockedListTitle')}
+          onPress={() => router.push('/settings/blocked-users' as Href)}
+        />
         <PrivacyPolicyLink onPress={() => router.push('/(modals)/privacy-policy' as Href)} />
+        <CommunityGuidelinesLink
+          onPress={() => router.push('/(modals)/community-guidelines' as Href)}
+        />
         <DeleteAccountSetting />
       </ScrollView>
     </ProfileCollectionLayout>

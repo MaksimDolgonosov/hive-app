@@ -10,12 +10,17 @@ import { AuthInput } from '@/src/components/auth/AuthInput';
 import { AuthLogo } from '@/src/components/auth/AuthLogo';
 import { AuthScreenLayout } from '@/src/components/auth/AuthScreenLayout';
 import { AuthSocialLogin } from '@/src/components/auth/AuthSocialLogin';
+import { CommunityRulesCheckbox } from '@/src/components/auth/CommunityRulesCheckbox';
 import { PrivacyConsentCheckbox } from '@/src/components/auth/PrivacyConsentCheckbox';
 import { usePublicInvite } from '@/src/hooks/useInvites';
 import { useAuthStore } from '@/src/stores/authStore';
 import { loadPendingInviteCode } from '@/src/stores/invite-storage';
 import { getApiErrorCode, getApiErrorMessage } from '@/src/utils/api-error';
-import { privacyPolicyHref, verifyOtpHref } from '@/src/utils/auth-navigation';
+import {
+  communityGuidelinesHref,
+  privacyPolicyHref,
+  verifyOtpHref,
+} from '@/src/utils/auth-navigation';
 import { isValidEmail, normalizeEmail } from '@/src/utils/email';
 
 export default function RegisterScreen() {
@@ -31,8 +36,10 @@ export default function RegisterScreen() {
   const [passwordError, setPasswordError] = useState<string | undefined>();
   const [showLoginHint, setShowLoginHint] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(true);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [privacyError, setPrivacyError] = useState<string | undefined>();
+  const [acceptedCommunityRules, setAcceptedCommunityRules] = useState(false);
+  const [communityRulesError, setCommunityRulesError] = useState<string | undefined>();
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const publicInvite = usePublicInvite(inviteCode);
 
@@ -45,17 +52,22 @@ export default function RegisterScreen() {
     setEmailError(undefined);
     setPasswordError(undefined);
     setPrivacyError(undefined);
+    setCommunityRulesError(undefined);
     setShowLoginHint(false);
   }
 
-  function ensurePrivacyAccepted(): boolean {
-    if (acceptedPrivacy) {
-      setPrivacyError(undefined);
+  function ensureConsents(): boolean {
+    const privacyOk = acceptedPrivacy;
+    const rulesOk = acceptedCommunityRules;
+
+    setPrivacyError(privacyOk ? undefined : t('auth.privacyConsentRequired'));
+    setCommunityRulesError(rulesOk ? undefined : t('auth.communityRulesRequired'));
+
+    if (privacyOk && rulesOk) {
       return true;
     }
 
-    setPrivacyError(t('auth.privacyConsentRequired'));
-    setError(t('auth.privacyConsentRequired'));
+    setError(privacyOk ? t('auth.communityRulesRequired') : t('auth.privacyConsentRequired'));
     return false;
   }
 
@@ -92,8 +104,18 @@ export default function RegisterScreen() {
       setPrivacyError(t('auth.privacyConsentRequired'));
     }
 
-    if (hasFieldError || !acceptedPrivacy) {
-      setError(hasFieldError ? t('errors.VALIDATION_ERROR') : t('auth.privacyConsentRequired'));
+    if (!acceptedCommunityRules) {
+      setCommunityRulesError(t('auth.communityRulesRequired'));
+    }
+
+    if (hasFieldError || !acceptedPrivacy || !acceptedCommunityRules) {
+      setError(
+        hasFieldError
+          ? t('errors.VALIDATION_ERROR')
+          : !acceptedPrivacy
+            ? t('auth.privacyConsentRequired')
+            : t('auth.communityRulesRequired'),
+      );
       return;
     }
 
@@ -209,6 +231,21 @@ export default function RegisterScreen() {
           onOpenPolicy={() => router.push(privacyPolicyHref())}
         />
 
+        <CommunityRulesCheckbox
+          checked={acceptedCommunityRules}
+          error={communityRulesError}
+          onCheckedChange={(value) => {
+            setAcceptedCommunityRules(value);
+            setCommunityRulesError(undefined);
+            if (value) {
+              setError((current) =>
+                current === t('auth.communityRulesRequired') ? null : current,
+              );
+            }
+          }}
+          onOpenRules={() => router.push(communityGuidelinesHref())}
+        />
+
         <AuthButton
           loading={loading}
           title={t('auth.createAccount')}
@@ -217,7 +254,7 @@ export default function RegisterScreen() {
 
         <AuthSocialLogin
           disabled={loading}
-          onBeforeAuth={ensurePrivacyAccepted}
+          onBeforeAuth={ensureConsents}
           onError={(message) => {
             setShowLoginHint(false);
             setError(message);

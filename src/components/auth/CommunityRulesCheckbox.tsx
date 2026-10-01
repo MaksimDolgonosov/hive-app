@@ -2,29 +2,29 @@ import { useTranslation } from 'react-i18next';
 
 import { ConsentCheckbox } from '@/src/components/auth/ConsentCheckbox';
 
-type PrivacyConsentCheckboxProps = {
+type CommunityRulesCheckboxProps = {
   checked: boolean;
   error?: string;
   onCheckedChange: (checked: boolean) => void;
-  onOpenPolicy: () => void;
+  onOpenRules: () => void;
 };
 
-export function PrivacyConsentCheckbox({
+export function CommunityRulesCheckbox({
   checked,
   error,
   onCheckedChange,
-  onOpenPolicy,
-}: PrivacyConsentCheckboxProps) {
+  onOpenRules,
+}: CommunityRulesCheckboxProps) {
   const { t } = useTranslation();
 
   return (
     <ConsentCheckbox
       checked={checked}
       error={error}
-      linkLabel={t('auth.privacyPolicyLink')}
-      prefix={t('auth.privacyConsentPrefix')}
+      linkLabel={t('auth.communityRulesLink')}
+      prefix={t('auth.communityRulesPrefix')}
       onCheckedChange={onCheckedChange}
-      onOpenDocument={onOpenPolicy}
+      onOpenDocument={onOpenRules}
     />
   );
 }

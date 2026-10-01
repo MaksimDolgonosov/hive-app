@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Share2, Trash2, X } from 'lucide-react-native';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, Share, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -23,12 +23,14 @@ import { useDeleteSting } from '@/src/hooks/useDeleteSting';
 import { useStingDetail } from '@/src/hooks/useStingDetail';
 import { useStingReaction } from '@/src/hooks/useStingReaction';
 import { useAuthStore } from '@/src/stores/authStore';
-import type { Sting } from '@/src/types';
+import type { SafetyReportTarget, Sting } from '@/src/types';
 import { buildAvatarDisplayUri } from '@/src/utils/avatar-url';
 import { openUserProfile } from '@/src/utils/open-user-profile';
 import { resolveStingAuthor } from '@/src/utils/resolve-sting-author';
 import { StingLikeButton } from '@/src/components/feed/StingLikeButton';
 import { AccountTypeBadge } from '@/src/components/feed/AccountTypeBadge';
+import { SafetyReportSheet } from '@/src/components/safety/SafetyReportSheet';
+import { useSafetyReport } from '@/src/hooks/useSafetyReport';
 import { showApiErrorToast } from '@/src/utils/show-toast';
 import { trackEvent } from '@/src/utils/analytics-queue';
 
@@ -48,6 +50,13 @@ export default function StingDetailScreen() {
 
   const stingId = typeof id === 'string' ? id : null;
   const { data, isLoading, isError } = useStingDetail(stingId);
+  const safety = useSafetyReport();
+  const [reportTarget, setReportTarget] = useState<Extract<
+    SafetyReportTarget,
+    'sting' | 'caption'
+  > | null>(null);
+  const [reportedSting, setReportedSting] = useState(false);
+  const [reportedCaption, setReportedCaption] = useState(false);
   const reactToSting = useStingReaction(stingId ?? '');
   const deleteSting = useDeleteSting(stingId ?? '');
 
@@ -210,28 +219,78 @@ export default function StingDetailScreen() {
     );
   }
 
+  const hasCaption = Boolean(sting.comment?.trim());
+
   return (
-    <GestureDetector gesture={panGesture}>
-      <Animated.View className="flex-1 bg-black" style={animatedContainerStyle}>
-        <StingDetailBody
-          author={author}
-          authorAvatarUri={authorAvatarUri}
-          authorInitials={authorInitials}
-          deleteSting={deleteSting}
-          insets={insets}
-          isLiked={isLiked}
-          isOwnSting={isOwnSting}
-          reactToSting={reactToSting}
-          sting={sting}
-          t={t}
-          onClose={handleClose}
-          onDelete={handleDeletePress}
-          onOpenAuthorProfile={handleOpenAuthorProfile}
-          onReact={handleReact}
-          onShare={() => void handleShare(sting)}
-        />
-      </Animated.View>
-    </GestureDetector>
+    <>
+      <GestureDetector gesture={panGesture}>
+        <Animated.View className="flex-1 bg-black" style={animatedContainerStyle}>
+          <StingDetailBody
+            author={author}
+            authorAvatarUri={authorAvatarUri}
+            authorInitials={authorInitials}
+            deleteSting={deleteSting}
+            hasCaption={hasCaption}
+            insets={insets}
+            isLiked={isLiked}
+            isOwnSting={isOwnSting}
+            reactToSting={reactToSting}
+            reportedCaption={reportedCaption}
+            reportedSting={reportedSting}
+            sting={sting}
+            t={t}
+            onClose={handleClose}
+            onDelete={handleDeletePress}
+            onOpenAuthorProfile={handleOpenAuthorProfile}
+            onReact={handleReact}
+            onReportCaption={() => setReportTarget('caption')}
+            onReportSting={() => setReportTarget('sting')}
+            onShare={() => void handleShare(sting)}
+          />
+        </Animated.View>
+      </GestureDetector>
+      <SafetyReportSheet
+        submitting={safety.reporting}
+        visible={reportTarget !== null}
+        onClose={() => {
+          if (!safety.reporting) {
+            setReportTarget(null);
+          }
+        }}
+        onSubmit={(input) => {
+          if (!reportTarget) {
+            return;
+          }
+
+          const target = reportTarget;
+          void safety
+            .submitReport({
+              target,
+              targetId: sting.id,
+              reason: input.reason,
+              comment: input.comment,
+              alsoHide: input.alsoHide,
+              author: {
+                id: sting.authorId,
+                username: author?.username || sting.authorUsername || '',
+                avatarUrl: author?.avatarUrl ?? sting.authorAvatarUrl ?? null,
+              },
+            })
+            .then((accepted) => {
+              if (!accepted) {
+                return;
+              }
+
+              if (target === 'sting') {
+                setReportedSting(true);
+              } else {
+                setReportedCaption(true);
+              }
+              setReportTarget(null);
+            });
+        }}
+      />
+    </>
   );
 }
 
@@ -243,6 +302,9 @@ type StingDetailBodyProps = {
   insets: { top: number; bottom: number };
   isLiked: boolean;
   isOwnSting: boolean;
+  hasCaption: boolean;
+  reportedSting: boolean;
+  reportedCaption: boolean;
   reactToSting: { isPending: boolean };
   deleteSting: { isPending: boolean };
   t: ReturnType<typeof useTranslation>['t'];
@@ -250,6 +312,8 @@ type StingDetailBodyProps = {
   onDelete: () => void;
   onOpenAuthorProfile: () => void;
   onReact: () => void;
+  onReportSting: () => void;
+  onReportCaption: () => void;
   onShare: () => void;
 };
 
@@ -261,6 +325,9 @@ function StingDetailBody({
   insets,
   isLiked,
   isOwnSting,
+  hasCaption,
+  reportedSting,
+  reportedCaption,
   reactToSting,
   deleteSting,
   t,
@@ -268,6 +335,8 @@ function StingDetailBody({
   onDelete,
   onOpenAuthorProfile,
   onReact,
+  onReportSting,
+  onReportCaption,
   onShare,
 }: StingDetailBodyProps) {
   return (
@@ -311,6 +380,39 @@ function StingDetailBody({
         className="absolute bottom-0 left-0 right-0 gap-3 bg-black/60 px-6 pt-4"
         style={{ paddingBottom: insets.bottom + 16 }}
       >
+        {!isOwnSting ? (
+          <View className="flex-row flex-wrap gap-4">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ disabled: reportedSting }}
+              disabled={reportedSting}
+              onPress={onReportSting}
+            >
+              <Text
+                className="font-inter text-sm text-white/70"
+                style={{ opacity: reportedSting ? 0.4 : 1 }}
+              >
+                {t('safety.reportSting')}
+              </Text>
+            </Pressable>
+            {hasCaption ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ disabled: reportedCaption }}
+                disabled={reportedCaption}
+                onPress={onReportCaption}
+              >
+                <Text
+                  className="font-inter text-sm text-white/70"
+                  style={{ opacity: reportedCaption ? 0.4 : 1 }}
+                >
+                  {t('safety.reportCaption')}
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
+        ) : null}
+
         {sting.comment ? (
           <Text className="font-inter text-sm text-white/90">{sting.comment}</Text>
         ) : null}

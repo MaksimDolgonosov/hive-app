@@ -32,6 +32,10 @@ export function privacyPolicyHref(): Href {
   return '/(auth)/privacy-policy' as Href;
 }
 
+export function communityGuidelinesHref(): Href {
+  return '/(auth)/community-guidelines' as Href;
+}
+
 export function exitOnboarding() {
   if (useAuthStore.getState().status === 'authenticated') {
     router.replace('/settings' as Href);

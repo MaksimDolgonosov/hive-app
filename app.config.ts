@@ -104,6 +104,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     android: {
       package: 'com.hive.app',
       permissions: ['VIBRATE'],
+      blockedPermissions: ['android.permission.RECORD_AUDIO'],
       config: {
         googleMaps: {
           apiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
@@ -161,13 +162,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         'expo-location',
         {
           locationWhenInUsePermission:
-            'Hive использует геолокацию для отображения фото рядом с вами на карте.',
+            'Hive использует геолокацию, чтобы показывать фото рядом с вами. Точные координаты опубликованного фото видят другие пользователи, пока снимок на карте.',
         },
       ],
       [
         'expo-camera',
         {
           cameraPermission: 'Hive использует камеру для публикации фото с вашего местоположения.',
+          microphonePermission: false,
           recordAudioAndroid: false,
         },
       ],
@@ -177,8 +179,17 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           photosPermission:
             'Hive использует галерею, чтобы выбрать фото профиля и, для заведений, фото места.',
           cameraPermission: 'Hive использует камеру для фото профиля.',
+          microphonePermission: false,
         },
       ],
+      [
+        'expo-audio',
+        {
+          microphonePermission: false,
+          recordAudioAndroid: false,
+        },
+      ],
+      './plugins/with-blocked-microphone',
       [
         'expo-notifications',
         {

@@ -88,6 +88,9 @@ export type TranslationSchema = {
     privacyConsentPrefix: string;
     privacyPolicyLink: string;
     privacyConsentRequired: string;
+    communityRulesPrefix: string;
+    communityRulesLink: string;
+    communityRulesRequired: string;
   };
   home: {
     greeting: string;
@@ -185,6 +188,7 @@ export type TranslationSchema = {
     privacyPolicyLabel: string;
     privacyPolicyTitle: string;
     privacyPolicyHint: string;
+    communityGuidelinesTitle: string;
     deleteAccountLabel: string;
     deleteAccountHint: string;
     publishBuzzLabel: string;
@@ -447,6 +451,9 @@ export type TranslationSchema = {
   privacyPolicy: {
     title: string;
   };
+  communityGuidelines: {
+    title: string;
+  };
   notFound: {
     title: string;
     message: string;
@@ -547,6 +554,41 @@ export type TranslationSchema = {
     suspended: string;
     seedCta: string;
     loadError: string;
+  };
+  safety: {
+    reportUser: string;
+    reportSting: string;
+    reportCaption: string;
+    reportTitle: string;
+    reportHint: string;
+    reportSent: string;
+    reportMailFailed: string;
+    reportSentHideFailed: string;
+    alsoHide: string;
+    hide: string;
+    hideTitle: string;
+    hideBody: string;
+    hideCancel: string;
+    hidden: string;
+    hiddenStub: string;
+    unhide: string;
+    unhidden: string;
+    blockedListTitle: string;
+    blockedListEmpty: string;
+    commentPlaceholder: string;
+    submit: string;
+    rateLimited: string;
+    failed: string;
+    reasons: {
+      harassment: string;
+      sexual_content: string;
+      illegal: string;
+      spam: string;
+      impersonation: string;
+      privacy: string;
+      stolen_photo: string;
+      other: string;
+    };
   };
   errors: {
     generic: string;

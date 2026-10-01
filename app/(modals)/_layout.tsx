@@ -16,6 +16,7 @@ export default function ModalsLayout() {
       <Stack.Screen name="camera" />
       <Stack.Screen name="splash" />
       <Stack.Screen name="privacy-policy" options={{ presentation: 'card' }} />
+      <Stack.Screen name="community-guidelines" options={{ presentation: 'card' }} />
       <Stack.Screen name="preview" options={{ presentation: 'card' }} />
       <Stack.Screen name="first-capture" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="push-permission" options={{ presentation: 'fullScreenModal' }} />

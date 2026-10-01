@@ -12,6 +12,7 @@ export default function AuthLayout() {
       <Stack.Screen name="login" />
       <Stack.Screen name="register" />
       <Stack.Screen name="privacy-policy" />
+      <Stack.Screen name="community-guidelines" />
       <Stack.Screen name="verify-otp" />
       <Stack.Screen name="forgot-password" />
       <Stack.Screen name="reset-password" />

@@ -66,6 +66,8 @@ export interface ProfileOverview {
 
 export interface PublicUserProfile extends ProfileOverview {
   user: User;
+  /** Личное скрытие зрителем. Нет поля или false — обычный профиль. */
+  blockedByViewer?: boolean;
 }
 
 export interface AuthTokens {
@@ -159,6 +161,29 @@ export type PlacePauseReason = 'owner' | 'cover_missing' | 'reports' | null;
 export type PlaceMediaKind = 'cover' | 'gallery';
 export type PlaceMediaSource = 'library' | 'camera';
 export type PlaceReportReason = 'not_a_place' | 'wrong_location' | 'stolen_photos' | 'spam' | 'other';
+
+export const SAFETY_REPORT_REASONS = [
+  'harassment',
+  'sexual_content',
+  'illegal',
+  'spam',
+  'impersonation',
+  'privacy',
+  'stolen_photo',
+  'other',
+] as const;
+
+export type SafetyReportReason = (typeof SAFETY_REPORT_REASONS)[number];
+
+/** Куда уходит жалоба. Скрытие всегда применяется к автору, не к отдельному фото. */
+export type SafetyReportTarget = 'user' | 'sting' | 'caption';
+
+export interface BlockedUserSummary {
+  id: UUID;
+  username: string;
+  avatarUrl: string | null;
+  blockedAt: string;
+}
 
 export interface PlaceMedia {
   id: UUID;
@@ -532,7 +557,10 @@ export type AnalyticsEventName =
   | 'place_card_opened'
   | 'place_deeplink_opened'
   | 'place_report_submitted'
-  | 'place_seed_cta_tap';
+  | 'place_seed_cta_tap'
+  | 'safety_report_submitted'
+  | 'user_blocked'
+  | 'user_unblocked';
 
 /**
  * Событие аналитики. В `props` запрещены персональные данные: email, точные

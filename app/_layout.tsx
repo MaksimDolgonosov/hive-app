@@ -21,6 +21,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { AuthProvider } from '@/src/components/auth/AuthProvider';
+import { BlockedUsersSync } from '@/src/components/safety/BlockedUsersSync';
 import { AppShell } from '@/src/components/ui/AppShell';
 import { QueryProvider } from '@/src/components/providers/QueryProvider';
 import i18n from '@/src/i18n';
@@ -105,6 +106,7 @@ export default function RootLayout() {
         >
           <QueryProvider>
             <AuthProvider>
+              <BlockedUsersSync />
               <AppShell>
                 <Stack screenOptions={{ headerShown: false }}>
                   <Stack.Screen name="(onboarding)" />

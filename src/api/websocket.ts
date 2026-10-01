@@ -3,6 +3,7 @@ import { io, type Socket } from 'socket.io-client';
 import { env } from '@/src/config/env';
 import { queryClient } from '@/src/lib/query-client';
 import type { Hive, MapBounds, Sting } from '@/src/types';
+import { blockedAuthorIds } from '@/src/utils/blocked-users-cache';
 import {
   removeHiveFromNearbyQueries,
   removeStingFromNearbyQueries,
@@ -304,6 +305,10 @@ class WebSocketManager {
       return;
     }
 
+    if (blockedAuthorIds().has(payload.sting.authorId)) {
+      return;
+    }
+
     upsertStingInNearbyQueries(queryClient, payload.sting);
 
     if (payload.sting.hiveId) {
@@ -328,7 +333,18 @@ class WebSocketManager {
       return;
     }
 
-    upsertHiveInNearbyQueries(queryClient, payload.hive);
+    const blocked = blockedAuthorIds();
+    const hive =
+      blocked.size === 0 || !payload.hive.topContributors
+        ? payload.hive
+        : {
+            ...payload.hive,
+            topContributors: payload.hive.topContributors.filter(
+              (contributor) => !blocked.has(contributor.userId),
+            ),
+          };
+
+    upsertHiveInNearbyQueries(queryClient, hive);
   }
 
   private handleHiveDissolved(payload: { hiveId: string }): void {

@@ -89,7 +89,7 @@ export default function LoginScreen() {
 
   return (
     <AuthScreenLayout>
-      <AuthLogo />
+      <AuthLogo mark="appIcon" />
 
       <AuthFormCard title={t('auth.loginTitle')} subtitle={t('auth.loginCardSubtitle')}>
         <AuthInput

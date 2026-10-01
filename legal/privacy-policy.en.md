@@ -4,7 +4,7 @@ This Privacy Policy explains what data the Hive mobile app (“App”, “we”,
 
 ## 1. Who we are
 
-The operator of the App is Hive. The App is distributed on the App Store and Google Play under the identifier com.hive.app. For privacy questions, email privacy@hive.app.
+The operator of the App is Hive. The App is distributed on the App Store and Google Play under the identifier com.hive.app. For privacy questions, email hive.app.site@gmail.com.
 
 Hive is a social map of moments: people publish photos from the place they were taken, see nearby photos on the map and in the feed, and keep profiles. Photos on the map last a limited time (typically 4 to 72 hours) and then disappear.
 
@@ -99,7 +99,7 @@ After account deletion we delete or anonymize personal data, except information 
 
 ## 9. Security
 
-We use HTTPS to talk to the server, hash passwords, store session tokens in the device’s secure storage (not in plain text), and check photo authenticity before publish. No internet service can guarantee absolute security. If you think someone else accessed your account, change your password and email privacy@hive.app.
+We use HTTPS to talk to the server, hash passwords, store session tokens in the device’s secure storage (not in plain text), and check photo authenticity before publish. No internet service can guarantee absolute security. If you think someone else accessed your account, change your password and email hive.app.site@gmail.com.
 
 ## 10. International transfers
 
@@ -117,9 +117,9 @@ Depending on where you live, you may:
 - request data portability in a structured format;
 - lodge a complaint with a supervisory authority (in the EU, your DPA).
 
-California residents (CCPA/CPRA): we do not sell or “share” personal information for cross-context advertising. You may know what categories we collect and request deletion. Email privacy@hive.app with the subject “Privacy request”.
+California residents (CCPA/CPRA): we do not sell or “share” personal information for cross-context advertising. You may know what categories we collect and request deletion. Email hive.app.site@gmail.com with the subject “Privacy request”.
 
-To delete your account, open Profile → Settings → Delete account. This permanently removes your profile, photos, likes, and sessions. If in-app deletion is unavailable, email privacy@hive.app from the address linked to the account.
+To delete your account, open Profile → Settings → Delete account. This permanently removes your profile, photos, likes, and sessions. If in-app deletion is unavailable, email hive.app.site@gmail.com from the address linked to the account.
 
 ## 12. Children
 
@@ -135,4 +135,4 @@ We may update this Policy when the App, our vendors, or the law changes. The new
 
 ## 15. Contact
 
-For privacy, access, correction, or deletion requests: privacy@hive.app. App: Hive. Identifier: com.hive.app. Platforms: iOS and Android.
+For privacy, access, correction, or deletion requests: hive.app.site@gmail.com. App: Hive. Identifier: com.hive.app. Platforms: iOS and Android.

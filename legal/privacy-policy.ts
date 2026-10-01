@@ -1,4 +1,4 @@
-export const PRIVACY_CONTACT_EMAIL = 'privacy@hive.app';
+export const PRIVACY_CONTACT_EMAIL = 'hive.app.site@gmail.com';
 export const PRIVACY_OPERATOR_NAME = 'Hive';
 export const PRIVACY_APP_NAME = 'Hive';
 export const PRIVACY_MIN_AGE = 13;
@@ -30,7 +30,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: 'Оператор Приложения — Hive. Приложение распространяется в App Store и Google Play с идентификаторами com.hive.app. По вопросам персональных данных пишите на privacy@hive.app.',
+            text: 'Оператор Приложения — Hive. Приложение распространяется в App Store и Google Play с идентификаторами com.hive.app. По вопросам персональных данных пишите на hive.app.site@gmail.com.',
           },
           {
             type: 'paragraph',
@@ -215,7 +215,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: 'Мы используем HTTPS для обмена с сервером, хэширование паролей, хранение токенов в защищённом хранилище устройства (не в открытом виде) и проверку подлинности фото перед публикацией. Абсолютную безопасность в интернете гарантировать нельзя. Если вы подозреваете доступ к аккаунту третьих лиц, смените пароль и напишите на privacy@hive.app.',
+            text: 'Мы используем HTTPS для обмена с сервером, хэширование паролей, хранение токенов в защищённом хранилище устройства (не в открытом виде) и проверку подлинности фото перед публикацией. Абсолютную безопасность в интернете гарантировать нельзя. Если вы подозреваете доступ к аккаунту третьих лиц, смените пароль и напишите на hive.app.site@gmail.com.',
           },
         ],
       },
@@ -249,11 +249,11 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
           },
           {
             type: 'paragraph',
-            text: 'Жители Калифорнии (CCPA/CPRA): мы не продаём и не «шарим» персональные данные в смысле рекламного sharing. Вы вправе знать, какие категории данных собираются, и потребовать удаление. Для запроса напишите на privacy@hive.app с темой «Privacy request».',
+            text: 'Жители Калифорнии (CCPA/CPRA): мы не продаём и не «шарим» персональные данные в смысле рекламного sharing. Вы вправе знать, какие категории данных собираются, и потребовать удаление. Для запроса напишите на hive.app.site@gmail.com с темой «Privacy request».',
           },
           {
             type: 'paragraph',
-            text: 'Чтобы удалить аккаунт, откройте Профиль → Настройки → Удалить аккаунт. Вместе с аккаунтом удаляются профиль, фото, лайки и сессии. Если удаление из Приложения недоступно, напишите на privacy@hive.app с адреса, привязанного к аккаунту.',
+            text: 'Чтобы удалить аккаунт, откройте Профиль → Настройки → Удалить аккаунт. Вместе с аккаунтом удаляются профиль, фото, лайки и сессии. Если удаление из Приложения недоступно, напишите на hive.app.site@gmail.com с адреса, привязанного к аккаунту.',
           },
         ],
       },
@@ -289,7 +289,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: 'По вопросам конфиденциальности, доступа, исправления или удаления данных: privacy@hive.app. Приложение: Hive. Идентификатор: com.hive.app. Платформы: iOS и Android.',
+            text: 'По вопросам конфиденциальности, доступа, исправления или удаления данных: hive.app.site@gmail.com. Приложение: Hive. Идентификатор: com.hive.app. Платформы: iOS и Android.',
           },
         ],
       },
@@ -305,7 +305,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: 'The operator of the App is Hive. The App is distributed on the App Store and Google Play under the identifier com.hive.app. For privacy questions, email privacy@hive.app.',
+            text: 'The operator of the App is Hive. The App is distributed on the App Store and Google Play under the identifier com.hive.app. For privacy questions, email hive.app.site@gmail.com.',
           },
           {
             type: 'paragraph',
@@ -490,7 +490,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: 'We use HTTPS to talk to the server, hash passwords, store session tokens in the device’s secure storage (not in plain text), and check photo authenticity before publish. No internet service can guarantee absolute security. If you think someone else accessed your account, change your password and email privacy@hive.app.',
+            text: 'We use HTTPS to talk to the server, hash passwords, store session tokens in the device’s secure storage (not in plain text), and check photo authenticity before publish. No internet service can guarantee absolute security. If you think someone else accessed your account, change your password and email hive.app.site@gmail.com.',
           },
         ],
       },
@@ -524,11 +524,11 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
           },
           {
             type: 'paragraph',
-            text: 'California residents (CCPA/CPRA): we do not sell or “share” personal information for cross-context advertising. You may know what categories we collect and request deletion. Email privacy@hive.app with the subject “Privacy request”.',
+            text: 'California residents (CCPA/CPRA): we do not sell or “share” personal information for cross-context advertising. You may know what categories we collect and request deletion. Email hive.app.site@gmail.com with the subject “Privacy request”.',
           },
           {
             type: 'paragraph',
-            text: 'To delete your account, open Profile → Settings → Delete account. This permanently removes your profile, photos, likes, and sessions. If in-app deletion is unavailable, email privacy@hive.app from the address linked to the account.',
+            text: 'To delete your account, open Profile → Settings → Delete account. This permanently removes your profile, photos, likes, and sessions. If in-app deletion is unavailable, email hive.app.site@gmail.com from the address linked to the account.',
           },
         ],
       },
@@ -564,7 +564,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: 'For privacy, access, correction, or deletion requests: privacy@hive.app. App: Hive. Identifier: com.hive.app. Platforms: iOS and Android.',
+            text: 'For privacy, access, correction, or deletion requests: hive.app.site@gmail.com. App: Hive. Identifier: com.hive.app. Platforms: iOS and Android.',
           },
         ],
       },

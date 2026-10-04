@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Share, Text, View } from 'react-native';
 
+import { inviteShareUrl } from '@/legal/public-site';
 import { AuthButton } from '@/src/components/auth/AuthButton';
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
@@ -65,7 +66,7 @@ export default function InvitesScreen() {
       return;
     }
 
-    const url = activeInvite.url ?? `https://hive.app/i/${activeInvite.code}`;
+    const url = inviteShareUrl(activeInvite.code);
     try {
       await Share.share({ message: `${t('invite.shareMessage')}\n${url}`, url });
     } catch {

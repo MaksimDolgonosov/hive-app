@@ -1,3 +1,4 @@
+import { placePageUrl } from '@/legal/public-site';
 import { apiClient } from '@/src/api/client';
 import { jpegFormFile, multipartRequestConfig } from '@/src/api/multipart';
 import type {
@@ -91,5 +92,5 @@ export async function reportPlace(
 }
 
 export function placeShareUrl(id: string): string {
-  return `https://hive.app/p/${id}`;
+  return placePageUrl(id);
 }

@@ -4,7 +4,7 @@ This Privacy Policy explains what data the Hive mobile app (“App”, “we”,
 
 ## 1. Who we are
 
-The operator of the App is Hive. The App is distributed on the App Store and Google Play under the identifier com.hive.app. For privacy questions, email hive.app.site@gmail.com.
+The operator of the App is Hive. The App is distributed on the App Store and Google Play under the identifier com.hive.app. For privacy questions, email hive.app.site@gmail.com. The current version of this Policy is published at https://hive-app.site/policy.
 
 Hive is a social map of moments: people publish photos from the place they were taken, see nearby photos on the map and in the feed, and keep profiles. Photos on the map last a limited time (typically 4 to 72 hours) and then disappear.
 
@@ -119,7 +119,7 @@ Depending on where you live, you may:
 
 California residents (CCPA/CPRA): we do not sell or “share” personal information for cross-context advertising. You may know what categories we collect and request deletion. Email hive.app.site@gmail.com with the subject “Privacy request”.
 
-To delete your account, open Profile → Settings → Delete account. This permanently removes your profile, photos, likes, and sessions. If in-app deletion is unavailable, email hive.app.site@gmail.com from the address linked to the account.
+To delete your account, open Profile → Settings → Delete account. This permanently removes your profile, photos, likes, and sessions. You can also request deletion without the App at https://hive-app.site/delete-account. If in-app deletion is unavailable, email hive.app.site@gmail.com from the address linked to the account.
 
 ## 12. Children
 
@@ -131,8 +131,8 @@ Published content may go through automated or human safety review. We may reject
 
 ## 14. Changes to this Policy
 
-We may update this Policy when the App, our vendors, or the law changes. The new version will be available in the App with an updated date. If a change materially expands data collection, we will try to notify you in a prominent way (including asking for consent again if the law requires it).
+We may update this Policy when the App, our vendors, or the law changes. The new version will be available in the App and at https://hive-app.site/policy. If a change materially expands data collection, we will try to notify you in a prominent way (including asking for consent again if the law requires it).
 
 ## 15. Contact
 
-For privacy, access, correction, or deletion requests: hive.app.site@gmail.com. App: Hive. Identifier: com.hive.app. Platforms: iOS and Android.
+For privacy, access, correction, or deletion requests: hive.app.site@gmail.com. Policy: https://hive-app.site/policy. Account deletion: https://hive-app.site/delete-account. App: Hive. Identifier: com.hive.app. Platforms: iOS and Android.

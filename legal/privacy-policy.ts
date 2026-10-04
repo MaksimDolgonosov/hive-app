@@ -1,3 +1,5 @@
+import { DELETE_ACCOUNT_URL, PRIVACY_POLICY_URL } from '@/legal/public-site';
+
 export const PRIVACY_CONTACT_EMAIL = 'hive.app.site@gmail.com';
 export const PRIVACY_OPERATOR_NAME = 'Hive';
 export const PRIVACY_APP_NAME = 'Hive';
@@ -30,7 +32,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: 'Оператор Приложения — Hive. Приложение распространяется в App Store и Google Play с идентификаторами com.hive.app. По вопросам персональных данных пишите на hive.app.site@gmail.com.',
+            text: `Оператор Приложения — Hive. Приложение распространяется в App Store и Google Play с идентификаторами com.hive.app. По вопросам персональных данных пишите на ${PRIVACY_CONTACT_EMAIL}. Актуальная версия этой Политики опубликована на ${PRIVACY_POLICY_URL}.`,
           },
           {
             type: 'paragraph',
@@ -253,7 +255,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
           },
           {
             type: 'paragraph',
-            text: 'Чтобы удалить аккаунт, откройте Профиль → Настройки → Удалить аккаунт. Вместе с аккаунтом удаляются профиль, фото, лайки и сессии. Если удаление из Приложения недоступно, напишите на hive.app.site@gmail.com с адреса, привязанного к аккаунту.',
+            text: `Чтобы удалить аккаунт, откройте Профиль → Настройки → Удалить аккаунт. Вместе с аккаунтом удаляются профиль, фото, лайки и сессии. Запросить удаление без приложения можно на ${DELETE_ACCOUNT_URL}. Если удаление из Приложения недоступно, напишите на ${PRIVACY_CONTACT_EMAIL} с адреса, привязанного к аккаунту.`,
           },
         ],
       },
@@ -280,7 +282,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: 'Мы можем обновить эту Политику, если изменятся функции Приложения, подрядчики или закон. Новая версия будет доступна в Приложении с обновлённой датой. Существенные изменения, которые расширяют сбор данных, мы постараемся довести до вас заметным способом (в том числе повторным согласием, если этого требует закон).',
+            text: `Мы можем обновить эту Политику, если изменятся функции Приложения, подрядчики или закон. Новая версия будет доступна в Приложении и на ${PRIVACY_POLICY_URL}. Существенные изменения, которые расширяют сбор данных, мы постараемся довести до вас заметным способом (в том числе повторным согласием, если этого требует закон).`,
           },
         ],
       },
@@ -289,7 +291,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: 'По вопросам конфиденциальности, доступа, исправления или удаления данных: hive.app.site@gmail.com. Приложение: Hive. Идентификатор: com.hive.app. Платформы: iOS и Android.',
+            text: `По вопросам конфиденциальности, доступа, исправления или удаления данных: ${PRIVACY_CONTACT_EMAIL}. Политика: ${PRIVACY_POLICY_URL}. Удаление аккаунта: ${DELETE_ACCOUNT_URL}. Приложение: Hive. Идентификатор: com.hive.app. Платформы: iOS и Android.`,
           },
         ],
       },
@@ -305,7 +307,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: 'The operator of the App is Hive. The App is distributed on the App Store and Google Play under the identifier com.hive.app. For privacy questions, email hive.app.site@gmail.com.',
+            text: `The operator of the App is Hive. The App is distributed on the App Store and Google Play under the identifier com.hive.app. For privacy questions, email ${PRIVACY_CONTACT_EMAIL}. The current version of this Policy is published at ${PRIVACY_POLICY_URL}.`,
           },
           {
             type: 'paragraph',
@@ -528,7 +530,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
           },
           {
             type: 'paragraph',
-            text: 'To delete your account, open Profile → Settings → Delete account. This permanently removes your profile, photos, likes, and sessions. If in-app deletion is unavailable, email hive.app.site@gmail.com from the address linked to the account.',
+            text: `To delete your account, open Profile → Settings → Delete account. This permanently removes your profile, photos, likes, and sessions. You can also request deletion without the App at ${DELETE_ACCOUNT_URL}. If in-app deletion is unavailable, email ${PRIVACY_CONTACT_EMAIL} from the address linked to the account.`,
           },
         ],
       },
@@ -555,7 +557,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: 'We may update this Policy when the App, our vendors, or the law changes. The new version will be available in the App with an updated date. If a change materially expands data collection, we will try to notify you in a prominent way (including asking for consent again if the law requires it).',
+            text: `We may update this Policy when the App, our vendors, or the law changes. The new version will be available in the App and at ${PRIVACY_POLICY_URL}. If a change materially expands data collection, we will try to notify you in a prominent way (including asking for consent again if the law requires it).`,
           },
         ],
       },
@@ -564,7 +566,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: 'For privacy, access, correction, or deletion requests: hive.app.site@gmail.com. App: Hive. Identifier: com.hive.app. Platforms: iOS and Android.',
+            text: `For privacy, access, correction, or deletion requests: ${PRIVACY_CONTACT_EMAIL}. Policy: ${PRIVACY_POLICY_URL}. Account deletion: ${DELETE_ACCOUNT_URL}. App: Hive. Identifier: com.hive.app. Platforms: iOS and Android.`,
           },
         ],
       },

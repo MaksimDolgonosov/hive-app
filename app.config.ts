@@ -1,5 +1,7 @@
 import { ConfigContext, ExpoConfig } from 'expo/config';
 
+import { PUBLIC_SITE_HOST } from './legal/public-site';
+
 const PRODUCTION_API_URL = 'https://hive-backend-nodejs-production.up.railway.app/api/v1';
 const PRODUCTION_WS_URL = 'wss://hive-backend-nodejs-production.up.railway.app/ws';
 
@@ -92,7 +94,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       supportsTablet: false,
       bundleIdentifier: 'com.hive.app',
       icon: './assets/Hive.icon',
-      associatedDomains: ['applinks:hive.app'],
+      associatedDomains: [`applinks:${PUBLIC_SITE_HOST}`],
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
@@ -140,12 +142,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           data: [
             {
               scheme: 'https',
-              host: 'hive.app',
+              host: PUBLIC_SITE_HOST,
               pathPrefix: '/i',
             },
             {
               scheme: 'https',
-              host: 'hive.app',
+              host: PUBLIC_SITE_HOST,
               pathPrefix: '/p',
             },
           ],

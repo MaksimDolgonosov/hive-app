@@ -1,6 +1,8 @@
 import { ConfigContext, ExpoConfig } from 'expo/config';
 
-import { PUBLIC_SITE_HOST } from './legal/public-site';
+// Expo evaluates this file with sucrase. Node then cannot resolve other .ts imports,
+// so the host is duplicated from legal/public-site.ts.
+const PUBLIC_SITE_HOST = 'hive-app.site';
 
 const PRODUCTION_API_URL = 'https://hive-backend-nodejs-production.up.railway.app/api/v1';
 const PRODUCTION_WS_URL = 'wss://hive-backend-nodejs-production.up.railway.app/ws';

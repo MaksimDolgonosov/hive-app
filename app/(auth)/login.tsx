@@ -10,6 +10,8 @@ import { AuthInput } from '@/src/components/auth/AuthInput';
 import { AuthLogo } from '@/src/components/auth/AuthLogo';
 import { AuthScreenLayout } from '@/src/components/auth/AuthScreenLayout';
 import { AuthSocialLogin } from '@/src/components/auth/AuthSocialLogin';
+import { CommunityRulesCheckbox } from '@/src/components/auth/CommunityRulesCheckbox';
+import { PrivacyConsentCheckbox } from '@/src/components/auth/PrivacyConsentCheckbox';
 import { useAuthStore } from '@/src/stores/authStore';
 import {
   getApiErrorCode,
@@ -17,7 +19,12 @@ import {
   getApiErrorMessage,
   logApiError,
 } from '@/src/utils/api-error';
-import { forgotPasswordHref, verifyOtpHref } from '@/src/utils/auth-navigation';
+import {
+  communityGuidelinesHref,
+  forgotPasswordHref,
+  privacyPolicyHref,
+  verifyOtpHref,
+} from '@/src/utils/auth-navigation';
 import { isValidEmail, normalizeEmail } from '@/src/utils/email';
 import { parseOtpPurpose } from '@/src/utils/otp';
 
@@ -31,6 +38,25 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [privacyError, setPrivacyError] = useState<string | undefined>();
+  const [acceptedCommunityRules, setAcceptedCommunityRules] = useState(false);
+  const [communityRulesError, setCommunityRulesError] = useState<string | undefined>();
+
+  function ensureConsents(): boolean {
+    const privacyOk = acceptedPrivacy;
+    const rulesOk = acceptedCommunityRules;
+
+    setPrivacyError(privacyOk ? undefined : t('auth.privacyConsentRequired'));
+    setCommunityRulesError(rulesOk ? undefined : t('auth.communityRulesRequired'));
+
+    if (privacyOk && rulesOk) {
+      return true;
+    }
+
+    setError(privacyOk ? t('auth.communityRulesRequired') : t('auth.privacyConsentRequired'));
+    return false;
+  }
 
   async function openEmailVerification(
     pendingEmail: string,
@@ -133,7 +159,37 @@ export default function LoginScreen() {
 
         <AuthButton loading={loading} title={t('auth.login')} onPress={() => void handleLogin()} />
 
-        <AuthSocialLogin disabled={loading} onError={setError} />
+        <PrivacyConsentCheckbox
+          checked={acceptedPrivacy}
+          error={privacyError}
+          onCheckedChange={(value) => {
+            setAcceptedPrivacy(value);
+            setPrivacyError(undefined);
+            if (value) {
+              setError((current) =>
+                current === t('auth.privacyConsentRequired') ? null : current,
+              );
+            }
+          }}
+          onOpenPolicy={() => router.push(privacyPolicyHref())}
+        />
+
+        <CommunityRulesCheckbox
+          checked={acceptedCommunityRules}
+          error={communityRulesError}
+          onCheckedChange={(value) => {
+            setAcceptedCommunityRules(value);
+            setCommunityRulesError(undefined);
+            if (value) {
+              setError((current) =>
+                current === t('auth.communityRulesRequired') ? null : current,
+              );
+            }
+          }}
+          onOpenRules={() => router.push(communityGuidelinesHref())}
+        />
+
+        <AuthSocialLogin disabled={loading} onBeforeAuth={ensureConsents} onError={setError} />
       </AuthFormCard>
 
       <View className="mt-6 flex-row items-center justify-center gap-1">

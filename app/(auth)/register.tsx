@@ -37,9 +37,9 @@ export default function RegisterScreen() {
   const [showLoginHint, setShowLoginHint] = useState(false);
   const [loading, setLoading] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
-  const [privacyError, setPrivacyError] = useState<string | undefined>();
+  const [privacyInvalid, setPrivacyInvalid] = useState(false);
   const [acceptedCommunityRules, setAcceptedCommunityRules] = useState(false);
-  const [communityRulesError, setCommunityRulesError] = useState<string | undefined>();
+  const [communityRulesInvalid, setCommunityRulesInvalid] = useState(false);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const publicInvite = usePublicInvite(inviteCode);
 
@@ -51,24 +51,15 @@ export default function RegisterScreen() {
     setUsernameError(undefined);
     setEmailError(undefined);
     setPasswordError(undefined);
-    setPrivacyError(undefined);
-    setCommunityRulesError(undefined);
+    setPrivacyInvalid(false);
+    setCommunityRulesInvalid(false);
     setShowLoginHint(false);
   }
 
   function ensureConsents(): boolean {
-    const privacyOk = acceptedPrivacy;
-    const rulesOk = acceptedCommunityRules;
-
-    setPrivacyError(privacyOk ? undefined : t('auth.privacyConsentRequired'));
-    setCommunityRulesError(rulesOk ? undefined : t('auth.communityRulesRequired'));
-
-    if (privacyOk && rulesOk) {
-      return true;
-    }
-
-    setError(privacyOk ? t('auth.communityRulesRequired') : t('auth.privacyConsentRequired'));
-    return false;
+    setPrivacyInvalid(!acceptedPrivacy);
+    setCommunityRulesInvalid(!acceptedCommunityRules);
+    return acceptedPrivacy && acceptedCommunityRules;
   }
 
   async function handleRegister() {
@@ -101,21 +92,17 @@ export default function RegisterScreen() {
     }
 
     if (!acceptedPrivacy) {
-      setPrivacyError(t('auth.privacyConsentRequired'));
+      setPrivacyInvalid(true);
     }
 
     if (!acceptedCommunityRules) {
-      setCommunityRulesError(t('auth.communityRulesRequired'));
+      setCommunityRulesInvalid(true);
     }
 
     if (hasFieldError || !acceptedPrivacy || !acceptedCommunityRules) {
-      setError(
-        hasFieldError
-          ? t('errors.VALIDATION_ERROR')
-          : !acceptedPrivacy
-            ? t('auth.privacyConsentRequired')
-            : t('auth.communityRulesRequired'),
-      );
+      if (hasFieldError) {
+        setError(t('errors.VALIDATION_ERROR'));
+      }
       return;
     }
 
@@ -218,14 +205,11 @@ export default function RegisterScreen() {
 
         <PrivacyConsentCheckbox
           checked={acceptedPrivacy}
-          error={privacyError}
+          invalid={privacyInvalid}
           onCheckedChange={(value) => {
             setAcceptedPrivacy(value);
-            setPrivacyError(undefined);
             if (value) {
-              setError((current) =>
-                current === t('auth.privacyConsentRequired') ? null : current,
-              );
+              setPrivacyInvalid(false);
             }
           }}
           onOpenPolicy={() => router.push(privacyPolicyHref())}
@@ -233,14 +217,11 @@ export default function RegisterScreen() {
 
         <CommunityRulesCheckbox
           checked={acceptedCommunityRules}
-          error={communityRulesError}
+          invalid={communityRulesInvalid}
           onCheckedChange={(value) => {
             setAcceptedCommunityRules(value);
-            setCommunityRulesError(undefined);
             if (value) {
-              setError((current) =>
-                current === t('auth.communityRulesRequired') ? null : current,
-              );
+              setCommunityRulesInvalid(false);
             }
           }}
           onOpenRules={() => router.push(communityGuidelinesHref())}

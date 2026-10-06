@@ -4,14 +4,14 @@ import { ConsentCheckbox } from '@/src/components/auth/ConsentCheckbox';
 
 type PrivacyConsentCheckboxProps = {
   checked: boolean;
-  error?: string;
+  invalid?: boolean;
   onCheckedChange: (checked: boolean) => void;
   onOpenPolicy: () => void;
 };
 
 export function PrivacyConsentCheckbox({
   checked,
-  error,
+  invalid,
   onCheckedChange,
   onOpenPolicy,
 }: PrivacyConsentCheckboxProps) {
@@ -20,7 +20,7 @@ export function PrivacyConsentCheckbox({
   return (
     <ConsentCheckbox
       checked={checked}
-      error={error}
+      invalid={invalid}
       linkLabel={t('auth.privacyPolicyLink')}
       prefix={t('auth.privacyConsentPrefix')}
       onCheckedChange={onCheckedChange}

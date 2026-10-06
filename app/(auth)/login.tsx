@@ -39,23 +39,14 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
-  const [privacyError, setPrivacyError] = useState<string | undefined>();
+  const [privacyInvalid, setPrivacyInvalid] = useState(false);
   const [acceptedCommunityRules, setAcceptedCommunityRules] = useState(false);
-  const [communityRulesError, setCommunityRulesError] = useState<string | undefined>();
+  const [communityRulesInvalid, setCommunityRulesInvalid] = useState(false);
 
   function ensureConsents(): boolean {
-    const privacyOk = acceptedPrivacy;
-    const rulesOk = acceptedCommunityRules;
-
-    setPrivacyError(privacyOk ? undefined : t('auth.privacyConsentRequired'));
-    setCommunityRulesError(rulesOk ? undefined : t('auth.communityRulesRequired'));
-
-    if (privacyOk && rulesOk) {
-      return true;
-    }
-
-    setError(privacyOk ? t('auth.communityRulesRequired') : t('auth.privacyConsentRequired'));
-    return false;
+    setPrivacyInvalid(!acceptedPrivacy);
+    setCommunityRulesInvalid(!acceptedCommunityRules);
+    return acceptedPrivacy && acceptedCommunityRules;
   }
 
   async function openEmailVerification(
@@ -161,14 +152,11 @@ export default function LoginScreen() {
 
         <PrivacyConsentCheckbox
           checked={acceptedPrivacy}
-          error={privacyError}
+          invalid={privacyInvalid}
           onCheckedChange={(value) => {
             setAcceptedPrivacy(value);
-            setPrivacyError(undefined);
             if (value) {
-              setError((current) =>
-                current === t('auth.privacyConsentRequired') ? null : current,
-              );
+              setPrivacyInvalid(false);
             }
           }}
           onOpenPolicy={() => router.push(privacyPolicyHref())}
@@ -176,14 +164,11 @@ export default function LoginScreen() {
 
         <CommunityRulesCheckbox
           checked={acceptedCommunityRules}
-          error={communityRulesError}
+          invalid={communityRulesInvalid}
           onCheckedChange={(value) => {
             setAcceptedCommunityRules(value);
-            setCommunityRulesError(undefined);
             if (value) {
-              setError((current) =>
-                current === t('auth.communityRulesRequired') ? null : current,
-              );
+              setCommunityRulesInvalid(false);
             }
           }}
           onOpenRules={() => router.push(communityGuidelinesHref())}

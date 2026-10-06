@@ -4,14 +4,14 @@ import { ConsentCheckbox } from '@/src/components/auth/ConsentCheckbox';
 
 type CommunityRulesCheckboxProps = {
   checked: boolean;
-  error?: string;
+  invalid?: boolean;
   onCheckedChange: (checked: boolean) => void;
   onOpenRules: () => void;
 };
 
 export function CommunityRulesCheckbox({
   checked,
-  error,
+  invalid,
   onCheckedChange,
   onOpenRules,
 }: CommunityRulesCheckboxProps) {
@@ -20,7 +20,7 @@ export function CommunityRulesCheckbox({
   return (
     <ConsentCheckbox
       checked={checked}
-      error={error}
+      invalid={invalid}
       linkLabel={t('auth.communityRulesLink')}
       prefix={t('auth.communityRulesPrefix')}
       onCheckedChange={onCheckedChange}

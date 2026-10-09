@@ -719,7 +719,7 @@ export function MapContainer() {
         </MapView>
       ) : (
         <View className="flex-1 items-center justify-center bg-hive-surface px-8">
-          <Text className="text-center font-inter text-base font-semibold text-hive-foreground">
+          <Text className="text-center font-inter-semibold text-base text-hive-foreground">
             {t('map.mapsKeyMissingTitle')}
           </Text>
           <Text className="mt-2 text-center font-inter text-sm text-hive-muted">
@@ -794,7 +794,7 @@ export function MapContainer() {
               pointerEvents="none"
               className="rounded-hive-md bg-hive-surface/95 px-4 py-2.5 shadow-sm"
             >
-              <Text className="text-center font-inter text-xs font-semibold text-hive-muted">
+              <Text className="text-center font-inter-semibold text-xs text-hive-muted">
                 {t('growth.expandedRadius', { distance: formatDistance(data.appliedRadiusM) })}
               </Text>
             </View>
@@ -813,7 +813,7 @@ export function MapContainer() {
 
           {filterEmpty ? (
             <View className="rounded-hive-md bg-hive-surface/95 px-4 py-3 shadow-sm">
-              <Text className="text-center font-inter text-sm font-semibold text-hive-foreground">
+              <Text className="text-center font-inter-semibold text-sm text-hive-foreground">
                 {t('map.filter.emptyTitle')}
               </Text>
               <Text className="mt-1 text-center font-inter text-xs text-hive-muted">
@@ -824,7 +824,7 @@ export function MapContainer() {
                 className="mt-2"
                 onPress={() => setMapFilter('all')}
               >
-                <Text className="text-center font-inter text-sm font-bold text-hive-primary">
+                <Text className="text-center font-inter-bold text-sm text-hive-primary">
                   {t('map.filter.reset')}
                 </Text>
               </Pressable>

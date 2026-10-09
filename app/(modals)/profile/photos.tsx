@@ -57,14 +57,14 @@ export default function MyPhotosScreen() {
             className="mt-4 rounded-full bg-hive-primary px-5 py-2.5"
             onPress={() => void refetch()}
           >
-            <Text className="font-inter text-sm font-semibold text-hive-on-accent">
+            <Text className="font-inter-semibold text-sm text-hive-on-accent">
               {t('profile.collections.retry')}
             </Text>
           </Pressable>
         </View>
       ) : stings.length === 0 ? (
         <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center font-inter text-base font-semibold text-hive-foreground">
+          <Text className="text-center font-inter-semibold text-base text-hive-foreground">
             {t('profile.collections.photosEmptyTitle')}
           </Text>
           <Text className="mt-2 text-center font-inter text-sm text-hive-muted">

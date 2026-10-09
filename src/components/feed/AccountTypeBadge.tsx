@@ -19,7 +19,7 @@ export function AccountTypeBadge({ accountType }: AccountTypeBadgeProps) {
 
   return (
     <View className="rounded-full bg-hive-primary/20 px-1.5 py-0.5">
-      <Text className="font-inter text-[10px] font-bold uppercase tracking-[0.4px] text-hive-primary">
+      <Text className="font-inter-bold text-[10px] uppercase tracking-[0.4px] text-hive-primary">
         {label}
       </Text>
     </View>

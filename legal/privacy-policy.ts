@@ -32,7 +32,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: `Оператор Приложения — Hive. Приложение распространяется в App Store и Google Play с идентификаторами com.hive.app. По вопросам персональных данных пишите на ${PRIVACY_CONTACT_EMAIL}. Актуальная версия этой Политики опубликована на ${PRIVACY_POLICY_URL}.`,
+            text: `Оператор Приложения — Hive. Приложение распространяется в App Store и Google Play с идентификаторами site.hiveapp.app. По вопросам персональных данных пишите на ${PRIVACY_CONTACT_EMAIL}. Актуальная версия этой Политики опубликована на ${PRIVACY_POLICY_URL}.`,
           },
           {
             type: 'paragraph',
@@ -291,7 +291,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: `По вопросам конфиденциальности, доступа, исправления или удаления данных: ${PRIVACY_CONTACT_EMAIL}. Политика: ${PRIVACY_POLICY_URL}. Удаление аккаунта: ${DELETE_ACCOUNT_URL}. Приложение: Hive. Идентификатор: com.hive.app. Платформы: iOS и Android.`,
+            text: `По вопросам конфиденциальности, доступа, исправления или удаления данных: ${PRIVACY_CONTACT_EMAIL}. Политика: ${PRIVACY_POLICY_URL}. Удаление аккаунта: ${DELETE_ACCOUNT_URL}. Приложение: Hive. Идентификатор: site.hiveapp.app. Платформы: iOS и Android.`,
           },
         ],
       },
@@ -307,7 +307,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: `The operator of the App is Hive. The App is distributed on the App Store and Google Play under the identifier com.hive.app. For privacy questions, email ${PRIVACY_CONTACT_EMAIL}. The current version of this Policy is published at ${PRIVACY_POLICY_URL}.`,
+            text: `The operator of the App is Hive. The App is distributed on the App Store and Google Play under the identifier site.hiveapp.app. For privacy questions, email ${PRIVACY_CONTACT_EMAIL}. The current version of this Policy is published at ${PRIVACY_POLICY_URL}.`,
           },
           {
             type: 'paragraph',
@@ -566,7 +566,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
         blocks: [
           {
             type: 'paragraph',
-            text: `For privacy, access, correction, or deletion requests: ${PRIVACY_CONTACT_EMAIL}. Policy: ${PRIVACY_POLICY_URL}. Account deletion: ${DELETE_ACCOUNT_URL}. App: Hive. Identifier: com.hive.app. Platforms: iOS and Android.`,
+            text: `For privacy, access, correction, or deletion requests: ${PRIVACY_CONTACT_EMAIL}. Policy: ${PRIVACY_POLICY_URL}. Account deletion: ${DELETE_ACCOUNT_URL}. App: Hive. Identifier: site.hiveapp.app. Platforms: iOS and Android.`,
           },
         ],
       },

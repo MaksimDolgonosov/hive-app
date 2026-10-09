@@ -1,7 +1,7 @@
 import { router, type Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, Share, Text, View } from 'react-native';
+import { Platform, Pressable, Share, Text, View } from 'react-native';
 
 import { inviteShareUrl } from '@/legal/public-site';
 import { AuthButton } from '@/src/components/auth/AuthButton';
@@ -11,6 +11,7 @@ import { useCreateInvite, useMyInvites } from '@/src/hooks/useInvites';
 import { showInfoToast } from '@/src/stores/toastStore';
 import { getApiErrorCode, getApiErrorRetryAfterSec } from '@/src/utils/api-error';
 import { copyToClipboard } from '@/src/utils/clipboard';
+import { pickActiveInvite } from '@/src/utils/invite-code';
 import { showApiErrorToast } from '@/src/utils/show-toast';
 
 export default function InvitesScreen() {
@@ -19,7 +20,9 @@ export default function InvitesScreen() {
   const createInvite = useCreateInvite();
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
 
-  const activeInvite = useMemo(() => data?.invites[0] ?? null, [data?.invites]);
+  const activeInvite = useMemo(() => pickActiveInvite(data?.invites ?? []), [data?.invites]);
+  const hasStaleInvite = !activeInvite && (data?.invites.length ?? 0) > 0;
+  const isQuotaExhausted = data?.usesLeft === 0;
   const isRateBlocked = blockedUntil != null && Date.now() < blockedUntil;
 
   function handleBack() {
@@ -52,7 +55,7 @@ export default function InvitesScreen() {
       return;
     }
 
-    const copied = await copyToClipboard(activeInvite.code);
+    const copied = await copyToClipboard(inviteShareUrl(activeInvite.code));
     if (copied) {
       showInfoToast({ message: t('invite.copied') });
       return;
@@ -67,8 +70,12 @@ export default function InvitesScreen() {
     }
 
     const url = inviteShareUrl(activeInvite.code);
+    const text = `${t('invite.shareMessage')}\n${t('invite.shareCode', { code: activeInvite.code })}`;
     try {
-      await Share.share({ message: `${t('invite.shareMessage')}\n${url}`, url });
+      // iOS добавляет `url` к `message` сам, Android поле `url` игнорирует.
+      await Share.share(
+        Platform.OS === 'ios' ? { message: text, url } : { message: `${text}\n${url}` },
+      );
     } catch {
       // Cancel in the system sheet is not an error.
     }
@@ -90,7 +97,7 @@ export default function InvitesScreen() {
             className="mt-4 rounded-full bg-hive-primary px-5 py-2.5"
             onPress={() => void refetch()}
           >
-            <Text className="font-inter text-sm font-semibold text-hive-on-accent">
+            <Text className="font-inter-semibold text-sm text-hive-on-accent">
               {t('profile.collections.retry')}
             </Text>
           </Pressable>
@@ -101,17 +108,11 @@ export default function InvitesScreen() {
 
           {activeInvite ? (
             <View className="mt-8 items-center rounded-3xl border border-hive-stroke bg-hive-surface px-5 py-8">
-              <Text className="font-inter text-xs font-semibold uppercase tracking-[1px] text-hive-muted">
+              <Text className="font-inter-semibold text-xs uppercase tracking-[1px] text-hive-muted">
                 {t('invite.codeLabel')}
               </Text>
-              <Text className="mt-3 font-display text-[34px] font-bold tracking-[4px] text-hive-foreground">
+              <Text className="mt-3 font-display text-[34px] tracking-[4px] text-hive-foreground">
                 {activeInvite.code}
-              </Text>
-              <Text className="mt-4 font-inter text-sm text-hive-muted">
-                {t('invite.accepted', {
-                  accepted: data?.acceptedCount ?? activeInvite.usesCount,
-                  total: activeInvite.usesLimit,
-                })}
               </Text>
               <Text className="mt-2 text-center font-inter text-xs text-hive-dim">
                 {t('invite.bonusHint')}
@@ -119,14 +120,33 @@ export default function InvitesScreen() {
             </View>
           ) : (
             <View className="mt-16 items-center px-4">
-              <Text className="text-center font-inter text-base font-semibold text-hive-foreground">
-                {t('invite.emptyTitle')}
+              <Text className="text-center font-inter-semibold text-base text-hive-foreground">
+                {isQuotaExhausted
+                  ? t('invite.limitTitle')
+                  : hasStaleInvite
+                    ? t('invite.expiredTitle')
+                    : t('invite.emptyTitle')}
               </Text>
               <Text className="mt-2 text-center font-inter text-sm text-hive-muted">
-                {t('invite.emptyMessage')}
+                {isQuotaExhausted
+                  ? t('invite.limitMessage')
+                  : hasStaleInvite
+                    ? t('invite.expiredMessage')
+                    : t('invite.emptyMessage')}
               </Text>
             </View>
           )}
+
+          {data ? (
+            <View className="mt-5 flex-row justify-center gap-4">
+              <Text className="font-inter text-sm text-hive-muted">
+                {t('invite.acceptedCount', { count: data.acceptedCount })}
+              </Text>
+              <Text className="font-inter text-sm text-hive-muted">
+                {t('invite.usesLeft', { count: data.usesLeft })}
+              </Text>
+            </View>
+          ) : null}
 
           <View className="mt-auto gap-3">
             {activeInvite ? (
@@ -141,14 +161,14 @@ export default function InvitesScreen() {
                   className="h-14 items-center justify-center rounded-full border border-hive-stroke"
                   onPress={() => void handleShare()}
                 >
-                  <Text className="font-inter text-base font-bold text-hive-foreground">
+                  <Text className="font-inter-bold text-base text-hive-foreground">
                     {t('invite.share')}
                   </Text>
                 </Pressable>
               </>
             ) : (
               <AuthButton
-                disabled={isRateBlocked}
+                disabled={isRateBlocked || isQuotaExhausted}
                 loading={createInvite.isPending}
                 title={t('invite.create')}
                 onPress={() => void handleCreate()}

@@ -48,7 +48,7 @@ export function ConsentCheckbox({
         </Text>
         <Text
           accessibilityRole="link"
-          className="font-inter text-[14px] font-semibold text-hive-primary"
+          className="font-inter-semibold text-[14px] text-hive-primary"
           onPress={onOpenDocument}
         >
           {linkLabel}

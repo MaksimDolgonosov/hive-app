@@ -66,7 +66,7 @@ function StingMarkerFace({
           start={{ x: 0, y: 0 }}
           style={styles.fallback}
         >
-          <Text className="font-display text-xs font-bold text-hive-on-accent">{initials}</Text>
+          <Text className="font-display text-xs text-hive-on-accent">{initials}</Text>
         </LinearGradient>
       )}
     </View>

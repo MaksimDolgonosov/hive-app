@@ -40,7 +40,7 @@ export function ProfileHiveCard({ hive, distanceM, onPress }: ProfileHiveCardPro
       </View>
 
       <View className="min-w-0 flex-1">
-        <Text className="font-inter text-base font-semibold" numberOfLines={1} style={{ color: theme.text }}>
+        <Text className="font-inter-semibold text-base " numberOfLines={1} style={{ color: theme.text }}>
           {t(isSeed ? 'hive.seed.title' : 'hive.title')}
         </Text>
         <Text className="mt-0.5 font-inter text-xs" numberOfLines={1} style={{ color: theme.textMuted }}>
@@ -52,7 +52,7 @@ export function ProfileHiveCard({ hive, distanceM, onPress }: ProfileHiveCardPro
       </View>
 
       {distanceM != null ? (
-        <Text className="font-inter text-sm font-semibold" style={{ color: theme.accent }}>
+        <Text className="font-inter-semibold text-sm " style={{ color: theme.accent }}>
           {formatDistance(distanceM)}
         </Text>
       ) : null}

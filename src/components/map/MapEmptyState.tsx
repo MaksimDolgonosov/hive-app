@@ -40,7 +40,7 @@ export function MapEmptyState({
                 <TitleIcon color={theme.accent} size={14} strokeWidth={2.4} />
                 <Text
                   numberOfLines={1}
-                  className="min-w-0 flex-1 font-display text-[15px] font-bold text-hive-foreground"
+                  className="min-w-0 flex-1 font-display text-[15px] text-hive-foreground"
                 >
                   {isFirstEver ? t('growth.emptyFirstTitle') : t('growth.emptyQuietTitle')}
                 </Text>
@@ -60,7 +60,7 @@ export function MapEmptyState({
               onPress={onCapture}
             >
               <Camera color={theme.textOnAccent} size={14} strokeWidth={2.5} />
-              <Text className="font-inter text-xs font-bold text-hive-on-accent">
+              <Text className="font-inter-bold text-xs text-hive-on-accent">
                 {t('growth.firstCaptureAction')}
               </Text>
             </Pressable>
@@ -75,7 +75,7 @@ export function MapEmptyState({
                 onPress={onNearest}
               >
                 <MapPin color={theme.accent} size={12} strokeWidth={2.4} />
-                <Text className="font-inter text-xs font-semibold text-hive-primary">
+                <Text className="font-inter-semibold text-xs text-hive-primary">
                   {t('growth.ctaNearest', { distance: formatDistance(nearestDistanceM) })}
                 </Text>
               </Pressable>
@@ -88,7 +88,7 @@ export function MapEmptyState({
               onPress={onInvite}
             >
               <UserPlus color={theme.textMuted} size={12} strokeWidth={2.4} />
-              <Text className="font-inter text-xs font-semibold text-hive-muted">
+              <Text className="font-inter-semibold text-xs text-hive-muted">
                 {t('growth.ctaInvite')}
               </Text>
             </Pressable>

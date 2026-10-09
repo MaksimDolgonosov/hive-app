@@ -106,7 +106,7 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
       >
         {data ? (
           <View className="flex-row items-center gap-2" style={{ marginTop: 15 }}>
-            <Text className="font-inter text-[13px] font-semibold text-hive-primary">
+            <Text className="font-inter-semibold text-[13px] text-hive-primary">
               {t('hive.photoCount', { count: photoCount })}
             </Text>
             <HiveContributorAvatars ringColor={theme.bg} stings={stingsNewestFirst} />
@@ -136,11 +136,11 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-2">
                     <Clock color={theme.accent} size={18} strokeWidth={2.25} />
-                    <Text className="font-inter text-[13px] font-medium text-hive-muted">
+                    <Text className="font-inter-medium text-[13px] text-hive-muted">
                       {t('hive.dissolvesIn')}
                     </Text>
                   </View>
-                  <Text className="font-display text-[15px] font-bold text-hive-primary">
+                  <Text className="font-display text-[15px] text-hive-primary">
                     {countdown.isExpired ? '0:00' : countdown.remainingLabel}
                   </Text>
                 </View>
@@ -167,7 +167,7 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
             onPress={openCamera}
           >
             <Camera color={theme.textOnAccent} size={20} strokeWidth={2.25} />
-            <Text className="font-inter text-[15px] font-bold text-hive-on-accent">
+            <Text className="font-inter-bold text-[15px] text-hive-on-accent">
               {t('hive.addPhoto')}
             </Text>
           </Pressable>

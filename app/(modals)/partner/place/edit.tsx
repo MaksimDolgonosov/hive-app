@@ -340,7 +340,7 @@ export default function PlaceEditScreen() {
           })}
         </Text>
         <View className="gap-3">
-          <Text className="font-inter text-sm font-semibold text-hive-foreground">{t('profile.socialTitle')}</Text>
+          <Text className="font-inter-semibold text-sm text-hive-foreground">{t('profile.socialTitle')}</Text>
           <Text className="font-inter text-xs leading-4 text-hive-muted">{t('profile.socialHint')}</Text>
           {visibleSocialKeys.map((key) => (
             <SocialLinkField
@@ -496,7 +496,7 @@ function LabeledInput({
 
   return (
     <View ref={fieldRef} className="gap-2" collapsable={false}>
-      <Text className="font-inter text-sm font-semibold text-hive-foreground">{label}</Text>
+      <Text className="font-inter-semibold text-sm text-hive-foreground">{label}</Text>
       <TextInput
         className={`rounded-hive-md border border-hive-stroke bg-hive-input-bg px-4 py-3 font-inter text-base text-hive-foreground ${multiline ? 'min-h-[96px]' : ''}`}
         editable={editable}
@@ -535,7 +535,7 @@ function SocialLinkField({
     <View ref={fieldRef} className="gap-1.5" collapsable={false}>
       <View className="flex-row items-center gap-2">
         <SocialLinkIcon socialKey={socialKey} />
-        <Text className="font-inter text-sm font-semibold text-hive-foreground">{t(meta.labelKey)}</Text>
+        <Text className="font-inter-semibold text-sm text-hive-foreground">{t(meta.labelKey)}</Text>
       </View>
       <TextInput
         autoCapitalize="none"

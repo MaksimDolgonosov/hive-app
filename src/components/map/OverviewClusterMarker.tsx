@@ -36,13 +36,13 @@ export function OverviewClusterMarker({ cluster, onPress }: OverviewClusterMarke
         className="items-center justify-center rounded-full bg-hive-primary"
         style={{ width: size, height: size }}
       >
-        <Text className="font-display text-[13px] font-bold text-hive-on-accent">
+        <Text className="font-display text-[13px] text-hive-on-accent">
           {cluster.activeStingsCount}
         </Text>
         {cluster.label ? (
           <Text
             numberOfLines={1}
-            className="max-w-[72px] px-1 font-inter text-[8px] font-semibold text-hive-on-accent"
+            className="max-w-[72px] px-1 font-inter-semibold text-[8px] text-hive-on-accent"
           >
             {cluster.label}
           </Text>

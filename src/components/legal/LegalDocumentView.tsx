@@ -31,7 +31,7 @@ function LegalBlockView({ block }: { block: LegalBlock }) {
 function LegalSectionView({ section }: { section: LegalSection }) {
   return (
     <View className="gap-3">
-      <Text className="font-display text-[20px] font-bold leading-[26px] text-hive-foreground">
+      <Text className="font-display text-[20px] leading-[26px] text-hive-foreground">
         {section.heading}
       </Text>
       {section.blocks.map((block, index) => (
@@ -49,7 +49,7 @@ export function LegalDocumentView({ document, showTitle = true }: LegalDocumentV
     <View className="gap-6">
       <View className="gap-3">
         {showTitle ? (
-          <Text className="font-display text-[32px] font-bold leading-[38px] text-hive-foreground">
+          <Text className="font-display text-[32px] leading-[38px] text-hive-foreground">
             {document.title}
           </Text>
         ) : null}

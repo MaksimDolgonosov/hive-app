@@ -31,7 +31,10 @@ module.exports = {
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
-        display: ['SpaceGrotesk-Bold', 'sans-serif'],
+        'inter-medium': ['Inter-Medium', 'sans-serif'],
+        'inter-semibold': ['Inter-SemiBold', 'sans-serif'],
+        'inter-bold': ['Inter-Bold', 'sans-serif'],
+        display: ['Unbounded-SemiBold', 'sans-serif'],
       },
     },
   },

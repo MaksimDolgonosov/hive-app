@@ -33,13 +33,13 @@ export default function FirstCaptureScreen() {
         className="flex-1 justify-end px-6"
         style={{ paddingBottom: insets.bottom + 24, paddingTop: insets.top + 24 }}
       >
-        <Text className="font-display text-[28px] font-bold text-hive-foreground">
+        <Text className="font-display text-[28px] text-hive-foreground">
           {t('growth.firstCaptureTitle')}
         </Text>
         <Text className="mt-3 font-inter text-[15px] text-hive-muted">
           {t('growth.firstCaptureDescription')}
         </Text>
-        <Text className="mt-4 font-inter text-sm font-semibold text-hive-primary">
+        <Text className="mt-4 font-inter-semibold text-sm text-hive-primary">
           {zone.data
             ? t('growth.firstCaptureTtl', { ttl: formatTtl(zone.data.ttlSec) })
             : t('growth.emptyTtlPending')}
@@ -52,7 +52,7 @@ export default function FirstCaptureScreen() {
             className="h-12 items-center justify-center"
             onPress={() => void dismiss()}
           >
-            <Text className="font-inter text-sm font-semibold text-hive-muted">
+            <Text className="font-inter-semibold text-sm text-hive-muted">
               {t('growth.firstCaptureLater')}
             </Text>
           </Pressable>

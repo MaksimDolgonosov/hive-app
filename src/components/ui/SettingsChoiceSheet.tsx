@@ -51,7 +51,7 @@ export function SettingsChoiceSheet<T extends string>({
           onPress={(event) => event.stopPropagation()}
         >
           <View className="mb-3 h-1 w-10 self-center rounded-full bg-hive-primary/30" />
-          <Text className="mb-3 text-center font-inter text-base font-semibold text-hive-foreground">
+          <Text className="mb-3 text-center font-inter-semibold text-base text-hive-foreground">
             {title}
           </Text>
 
@@ -73,7 +73,7 @@ export function SettingsChoiceSheet<T extends string>({
                   <View className="flex-1 flex-row items-center gap-3">
                     {item.leading}
                     <Text
-                      className={`font-inter text-[15px] ${isActive ? 'font-semibold' : 'font-medium'}`}
+                      className={`text-[15px] ${isActive ? 'font-inter-semibold' : 'font-inter-medium'}`}
                       style={{ color: isActive ? theme.accent : theme.text }}
                     >
                       {item.label}

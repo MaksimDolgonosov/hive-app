@@ -50,7 +50,7 @@ const SHARED = {
   radiusLg: 28,
   radiusMd: 18,
   radiusPill: 999,
-  fontDisplay: 'SpaceGrotesk-Bold',
+  fontDisplay: 'Unbounded-SemiBold',
   fontBody: 'Inter',
   fontBodyMedium: 'Inter-Medium',
   fontBodySemiBold: 'Inter-SemiBold',

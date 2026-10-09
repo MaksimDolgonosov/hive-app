@@ -50,12 +50,12 @@ export function StingAuthorBadge({
             backgroundColor: HiveTheme.accent,
           }}
         >
-          <Text className="font-display text-[9px] font-bold text-hive-on-accent">{initials}</Text>
+          <Text className="font-display text-[9px] text-hive-on-accent">{initials}</Text>
         </View>
       )}
 
       <Text
-        className="max-w-[140px] font-inter text-[12px] font-medium text-[#F6F2EA]"
+        className="max-w-[140px] font-inter-medium text-[12px] text-[#F6F2EA]"
         numberOfLines={1}
       >
         {username}

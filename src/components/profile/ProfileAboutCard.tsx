@@ -44,7 +44,7 @@ export function ProfileAboutCard({
     <ProfileGlassCard>
       <View className="gap-2 px-2 py-1">
         <View className="flex-row items-start justify-start">
-          {/* <Text className="font-inter text-base font-semibold text-hive-foreground">
+          {/* <Text className="font-inter-semibold text-base text-hive-foreground">
             {t('profile.aboutTitle')}
           </Text> */}
           {onEdit ? (
@@ -85,7 +85,7 @@ export function ProfileAboutCard({
                   onPress={() => void Linking.openURL(url)}
                 >
                   <SocialLinkIcon socialKey={key} />
-                  <Text className="font-inter text-xs font-medium text-hive-foreground">
+                  <Text className="font-inter-medium text-xs text-hive-foreground">
                     {t(meta.labelKey)}
                   </Text>
                 </Pressable>

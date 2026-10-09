@@ -72,14 +72,14 @@ export function SaveMapPlaceModal({
           >
             <View className="mb-4 h-1 w-10 self-center rounded-full bg-hive-primary/30" />
 
-            <Text className="font-inter text-xl font-bold text-hive-foreground">
+            <Text className="font-inter-bold text-xl text-hive-foreground">
               {t('map.savePlaceTitle')}
             </Text>
             <Text className="mt-2 font-inter text-sm leading-5 text-hive-muted">
               {t('map.savePlaceDescription')}
             </Text>
 
-            <Text className="mb-2 mt-5 font-inter text-sm font-semibold text-hive-foreground">
+            <Text className="mb-2 mt-5 font-inter-semibold text-sm text-hive-foreground">
               {t('map.savePlaceNameLabel')}
             </Text>
             <TextInput
@@ -118,7 +118,7 @@ export function SaveMapPlaceModal({
                 disabled={saving}
                 onPress={onClose}
               >
-                <Text className="font-inter text-base font-semibold text-hive-muted">
+                <Text className="font-inter-semibold text-base text-hive-muted">
                   {t('map.savePlaceCancel')}
                 </Text>
               </Pressable>

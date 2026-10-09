@@ -153,7 +153,6 @@ const styles = StyleSheet.create({
   },
   skipLabel: {
     fontSize: 14,
-    fontWeight: '600',
   },
   illustrationSection: {
     flex: 1,
@@ -176,21 +175,18 @@ const styles = StyleSheet.create({
   title: {
     width: '100%',
     fontSize: 26,
-    fontWeight: '700',
     lineHeight: 32,
     textAlign: 'center',
   },
   subtitle: {
     width: '100%',
     fontSize: 15,
-    fontWeight: '600',
     lineHeight: 22,
     textAlign: 'center',
   },
   description: {
     width: '100%',
     fontSize: 15,
-    fontWeight: '400',
     lineHeight: 22,
     textAlign: 'center',
   },

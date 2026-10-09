@@ -140,7 +140,7 @@ export default function CameraScreen() {
                 className="items-center justify-center gap-5 px-8"
               >
                 <HiveLoader size={88} strokeWidth={3} />
-                <Text className="text-center font-inter text-base font-medium text-hive-primary">
+                <Text className="text-center font-inter-medium text-base text-hive-primary">
                   {t('camera.verifyingPhoto')}
                 </Text>
               </View>
@@ -162,7 +162,7 @@ export default function CameraScreen() {
         >
           <X color="#FFFFFF" size={22} />
         </Pressable>
-        <Text className="font-inter text-sm font-semibold text-white">{t('camera.title')}</Text>
+        <Text className="font-inter-semibold text-sm text-white">{t('camera.title')}</Text>
         <CameraControls
           facing={facing}
           flash={flash}

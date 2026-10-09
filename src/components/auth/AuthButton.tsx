@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: HiveTheme.fontBodyBold,
     fontSize: 16,
-    fontWeight: '700',
     color: HiveTheme.textOnAccent,
     textAlign: 'center',
   },

@@ -42,9 +42,7 @@ export function MapFilterChips({ value, onChange }: MapFilterChipsProps) {
           >
             {selected ? (
               <View className="h-8 items-center justify-center rounded-full bg-hive-primary px-3">
-                <Text className="font-inter text-xs font-semibold text-hive-on-accent">
-                  {label}
-                </Text>
+                <Text className="font-inter-semibold text-xs text-hive-on-accent">{label}</Text>
               </View>
             ) : (
               <View style={styles.shadow}>
@@ -54,9 +52,7 @@ export function MapFilterChips({ value, onChange }: MapFilterChipsProps) {
                   interactive
                   style={styles.chip}
                 >
-                  <Text className="font-inter text-xs font-semibold text-hive-foreground">
-                    {label}
-                  </Text>
+                  <Text className="font-inter-semibold text-xs text-hive-foreground">{label}</Text>
                 </GlassSurface>
               </View>
             )}

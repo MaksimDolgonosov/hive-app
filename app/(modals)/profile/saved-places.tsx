@@ -75,7 +75,7 @@ export default function SavedPlacesScreen() {
             <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-hive-primary/15">
               <Bookmark color="#FFB800" size={28} strokeWidth={2} />
             </View>
-            <Text className="text-center font-inter text-base font-semibold text-hive-foreground">
+            <Text className="text-center font-inter-semibold text-base text-hive-foreground">
               {t('profile.collections.savedPlacesEmptyTitle')}
             </Text>
             <Text className="mt-2 text-center font-inter text-sm text-hive-muted">
@@ -96,7 +96,7 @@ export default function SavedPlacesScreen() {
 
               <View className="min-w-0 flex-1">
                 <Text
-                  className="font-inter text-base font-semibold text-hive-foreground"
+                  className="font-inter-semibold text-base text-hive-foreground"
                   numberOfLines={1}
                 >
                   {item.name}

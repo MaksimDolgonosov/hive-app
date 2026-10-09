@@ -53,7 +53,7 @@ export function OtpInput({
                 key={index}
                 className={`h-14 flex-1 items-center justify-center rounded-hive-md border bg-hive-input-bg ${borderClass}`}
               >
-                <Text className="font-inter text-xl font-semibold text-hive-foreground">
+                <Text className="font-inter-semibold text-xl text-hive-foreground">
                   {digits[index] ?? ''}
                 </Text>
               </View>

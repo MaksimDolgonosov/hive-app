@@ -211,9 +211,7 @@ export default function StingDetailScreen() {
           className="mt-6 rounded-full bg-hive-primary px-6 py-3"
           onPress={handleClose}
         >
-          <Text className="font-inter text-base font-bold text-hive-on-accent">
-            {t('sting.close')}
-          </Text>
+          <Text className="font-inter-bold text-base text-hive-on-accent">{t('sting.close')}</Text>
         </Pressable>
       </View>
     );
@@ -420,10 +418,7 @@ function StingDetailBody({
         <View className="flex-row items-end justify-between">
           <View>
             <Text className="font-inter text-xs text-white/70">{t('sting.expiresIn')}</Text>
-            <Timer
-              expiresAt={sting.expiresAt}
-              className="font-inter text-lg font-semibold text-white"
-            />
+            <Timer expiresAt={sting.expiresAt} className="font-inter-semibold text-lg text-white" />
           </View>
 
           <View className="flex-row items-center gap-2">
@@ -470,14 +465,12 @@ function StingDetailBody({
                       justifyContent: 'center',
                     }}
                   >
-                    <Text className="font-inter text-[10px] font-bold text-white">
-                      {authorInitials}
-                    </Text>
+                    <Text className="font-inter-bold text-[10px] text-white">{authorInitials}</Text>
                   </LinearGradient>
                 )}
 
                 <View className="max-w-[88px]">
-                  <Text className="font-inter text-sm font-semibold text-white" numberOfLines={1}>
+                  <Text className="font-inter-semibold text-sm text-white" numberOfLines={1}>
                     {author.username}
                   </Text>
                   <AccountTypeBadge accountType={sting.authorAccountType} />

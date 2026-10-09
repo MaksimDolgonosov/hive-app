@@ -44,12 +44,12 @@ export function ProfileRecentPhotos({
             : 'flex-row items-center justify-between'
         }
       >
-        <Text className="font-inter text-[15px] font-bold text-hive-foreground">
+        <Text className="font-inter-bold text-[15px] text-hive-foreground">
           {t('profile.recentPhotos')}
         </Text>
         {onViewAll ? (
           <Pressable accessibilityRole="button" hitSlop={8} onPress={onViewAll}>
-            <Text className="font-inter text-[13px] font-semibold text-hive-primary">
+            <Text className="font-inter-semibold text-[13px] text-hive-primary">
               {t('profile.viewAll')}
             </Text>
           </Pressable>

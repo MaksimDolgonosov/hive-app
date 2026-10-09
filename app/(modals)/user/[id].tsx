@@ -96,7 +96,7 @@ export default function PublicUserProfileScreen() {
           className="mt-6 rounded-full bg-hive-primary px-6 py-3"
           onPress={handleBack}
         >
-          <Text className="font-inter text-base font-bold text-hive-on-accent">
+          <Text className="font-inter-bold text-base text-hive-on-accent">
             {t('userProfile.back')}
           </Text>
         </Pressable>
@@ -127,7 +127,7 @@ export default function PublicUserProfileScreen() {
             className="mt-6 rounded-full bg-hive-primary px-6 py-3"
             onPress={handleBack}
           >
-            <Text className="font-inter text-base font-bold text-hive-on-accent">
+            <Text className="font-inter-bold text-base text-hive-on-accent">
               {t('userProfile.back')}
             </Text>
           </Pressable>
@@ -256,7 +256,7 @@ function BlockedProfileStub({
   return (
     <View className="items-center gap-4 px-5 pt-6">
       <ProfileAvatar avatarUrl={user.avatarUrl} size={88} username={user.username} />
-      <Text className="font-display text-xl font-bold text-hive-foreground">{user.username}</Text>
+      <Text className="font-display text-xl text-hive-foreground">{user.username}</Text>
       <Text className="text-center font-inter text-sm text-hive-muted">
         {t('safety.hiddenStub')}
       </Text>
@@ -266,9 +266,7 @@ function BlockedProfileStub({
         disabled={unhiding}
         onPress={onUnhide}
       >
-        <Text className="font-inter text-base font-bold text-hive-on-accent">
-          {t('safety.unhide')}
-        </Text>
+        <Text className="font-inter-bold text-base text-hive-on-accent">{t('safety.unhide')}</Text>
       </Pressable>
       <Pressable
         accessibilityRole="button"

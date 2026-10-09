@@ -31,7 +31,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
               onPress={() => void setLanguage(lang as AppLanguage)}
             >
               <Text
-                className={`font-inter text-xs font-semibold uppercase ${
+                className={`font-inter-semibold text-xs uppercase ${
                   isActive ? 'text-hive-on-accent' : 'text-hive-muted'
                 }`}
               >

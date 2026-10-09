@@ -123,7 +123,7 @@ export default function PlaceCardScreen() {
         {placeQuery.isError ? <Text className="font-inter text-sm text-hive-muted">{t('place.loadError')}</Text> : null}
         {place?.hidden ? (
           <View className="gap-2 rounded-2xl bg-hive-surface p-4">
-            <Text className="font-display text-lg font-bold text-hive-foreground">{t('place.hiddenTitle')}</Text>
+            <Text className="font-display text-lg text-hive-foreground">{t('place.hiddenTitle')}</Text>
             <Text className="font-inter text-sm text-hive-muted">{t('place.hiddenBody')}</Text>
           </View>
         ) : null}
@@ -133,9 +133,9 @@ export default function PlaceCardScreen() {
               <Image source={{ uri: place.cover.imageUrl }} style={{ width: '100%', height: 240, borderRadius: 18 }} />
             ) : null}
             <View className="flex-row items-center gap-2">
-              <Text className="font-display text-2xl font-bold text-hive-foreground">{place.name}</Text>
+              <Text className="font-display text-2xl text-hive-foreground">{place.name}</Text>
             </View>
-            <Text className="font-inter text-sm font-semibold text-hive-primary">{t('place.badge')}</Text>
+            <Text className="font-inter-semibold text-sm text-hive-primary">{t('place.badge')}</Text>
             <Text className="font-inter text-sm text-hive-muted">
               {t(`partner.categories.${place.category}`)}
               {place.address.formatted ? ` · ${place.address.formatted}` : ''}
@@ -151,15 +151,15 @@ export default function PlaceCardScreen() {
               borderColor={theme.stroke}
             />
             <Pressable className="h-[52px] items-center justify-center rounded-full bg-hive-primary" onPress={openCamera}>
-              <Text className="font-inter font-bold text-hive-on-accent">{t('place.shootHere')}</Text>
+              <Text className="font-inter-bold text-hive-on-accent">{t('place.shootHere')}</Text>
             </Pressable>
             {outside ? <Text className="font-inter text-xs text-hive-muted">{t('place.outsideRadius')}</Text> : null}
-            <Text className="font-inter text-sm font-semibold text-hive-foreground">{t('place.guests')}</Text>
+            <Text className="font-inter-semibold text-sm text-hive-foreground">{t('place.guests')}</Text>
             {(stingsQuery.data?.stings.length ?? 0) === 0 ? (
               <View className="gap-3 rounded-2xl bg-hive-surface p-4">
                 <Text className="font-inter text-sm text-hive-muted">{t('place.quietTitle')}</Text>
                 <Pressable onPress={openCamera}>
-                  <Text className="font-inter font-semibold text-hive-primary">{t('place.quietCta')}</Text>
+                  <Text className="font-inter-semibold text-hive-primary">{t('place.quietCta')}</Text>
                 </Pressable>
               </View>
             ) : (
@@ -173,7 +173,7 @@ export default function PlaceCardScreen() {
             )}
             {place.hiveStage === 'hive' && place.hiveId ? (
               <Pressable onPress={() => router.push(`/(modals)/hive/${place.hiveId}` as Href)}>
-                <Text className="font-inter font-semibold text-hive-primary">{t('place.openHive')}</Text>
+                <Text className="font-inter-semibold text-hive-primary">{t('place.openHive')}</Text>
               </Pressable>
             ) : null}
             {placeQuery.data?.viewerIsOwner && place.status === 'live' ? (
@@ -227,7 +227,7 @@ function PlaceSocialLinks({
             onPress={() => void Linking.openURL(url)}
           >
             <SocialLinkIcon socialKey={key} />
-            <Text className="font-inter text-xs font-medium" style={{ color: textColor }}>
+            <Text className="font-inter-medium text-xs " style={{ color: textColor }}>
               {t(meta.labelKey)}
             </Text>
           </Pressable>
@@ -282,7 +282,7 @@ function ReportReasonSheet({
           paddingBottom: 28,
         }}
       >
-        <Text className="mb-3 font-inter text-base font-semibold" style={{ color: theme.text }}>
+        <Text className="mb-3 font-inter-semibold text-base " style={{ color: theme.text }}>
           {t('place.reportTitle')}
         </Text>
         {REASONS.map((reason) => (
@@ -293,7 +293,7 @@ function ReportReasonSheet({
           </Pressable>
         ))}
         <Pressable className="mt-1 py-3" onPress={onClose}>
-          <Text className="font-inter text-base font-semibold" style={{ color: theme.textMuted }}>
+          <Text className="font-inter-semibold text-base " style={{ color: theme.textMuted }}>
             {t('sting.deleteCancel')}
           </Text>
         </Pressable>

@@ -31,6 +31,7 @@ export function useNotificationSettings() {
   });
 
   const mutation = useMutation({
+    mutationKey: QUERY_KEY,
     mutationFn: (patch: Partial<NotificationSettings>) => notificationsApi.updateSettings(patch),
     scope: { id: 'notification-settings' },
     onMutate: async (patch) => {
@@ -45,6 +46,11 @@ export function useNotificationSettings() {
       }
     },
     onSuccess: (settings) => {
+      // Ответ ещё не знает о патчах из очереди scope — иначе тумблер мигнёт назад.
+      if (queryClient.isMutating({ mutationKey: QUERY_KEY }) > 1) {
+        return;
+      }
+
       queryClient.setQueryData<NotificationSettings>(QUERY_KEY, (current) =>
         mergeSettings(current, settings),
       );
@@ -57,7 +63,7 @@ export function useNotificationSettings() {
       (key) => patch[key] !== current[key],
     );
 
-    if (!hasChange || mutation.isPending) {
+    if (!hasChange) {
       return;
     }
 

@@ -48,9 +48,7 @@ export function AuthSocialButton({
         <>
           {children}
           {isRow && label ? (
-            <Text className="font-inter text-[15px] font-semibold text-hive-foreground">
-              {label}
-            </Text>
+            <Text className="font-inter-semibold text-[15px] text-hive-foreground">{label}</Text>
           ) : null}
         </>
       )}

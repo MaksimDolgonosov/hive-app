@@ -191,7 +191,7 @@ export default function PreviewScreen() {
             style={{ top: insets.top + 12 }}
             pointerEvents="none"
           >
-            <Text className="text-center font-inter text-sm font-semibold text-white">
+            <Text className="text-center font-inter-semibold text-sm text-white">
               {isStaleCapture ? t('camera.staleCaptureWarning') : t('camera.lowAccuracyWarning')}
             </Text>
           </View>
@@ -241,7 +241,7 @@ export default function PreviewScreen() {
                 disabled={publishSting.isPending}
                 onPress={handleRetake}
               >
-                <Text className="font-inter text-base font-semibold text-white">
+                <Text className="font-inter-semibold text-base text-white">
                   {t('camera.retake')}
                 </Text>
               </Pressable>
@@ -252,7 +252,7 @@ export default function PreviewScreen() {
                 disabled={publishSting.isPending}
                 onPress={handleCancel}
               >
-                <Text className="font-inter text-base font-semibold text-white">
+                <Text className="font-inter-semibold text-base text-white">
                   {t('camera.cancel')}
                 </Text>
               </Pressable>

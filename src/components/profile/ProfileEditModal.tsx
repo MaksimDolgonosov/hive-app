@@ -129,12 +129,12 @@ export function ProfileEditModal({ visible, user, onClose }: ProfileEditModalPro
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
-              <Text className="text-center font-inter text-lg font-semibold text-hive-foreground">
+              <Text className="text-center font-inter-semibold text-lg text-hive-foreground">
                 {t('profile.editAbout')}
               </Text>
 
               <View className="gap-1.5">
-                <Text className="font-inter text-[13px] font-semibold text-hive-foreground">
+                <Text className="font-inter-semibold text-[13px] text-hive-foreground">
                   {t('profile.bioLabel')}
                 </Text>
                 <TextInput
@@ -153,7 +153,7 @@ export function ProfileEditModal({ visible, user, onClose }: ProfileEditModalPro
               </View>
 
               <View className="gap-3">
-                <Text className="font-inter text-[13px] font-semibold text-hive-foreground">
+                <Text className="font-inter-semibold text-[13px] text-hive-foreground">
                   {t('profile.socialTitle')}
                 </Text>
                 <Text className="font-inter text-xs leading-4 text-hive-muted">
@@ -167,7 +167,7 @@ export function ProfileEditModal({ visible, user, onClose }: ProfileEditModalPro
                     <View key={key} className="gap-1.5">
                       <View className="flex-row items-center gap-2">
                         <SocialLinkIcon socialKey={key} />
-                        <Text className="font-inter text-[13px] font-semibold text-hive-foreground">
+                        <Text className="font-inter-semibold text-[13px] text-hive-foreground">
                           {t(meta.labelKey)}
                         </Text>
                       </View>
@@ -201,7 +201,7 @@ export function ProfileEditModal({ visible, user, onClose }: ProfileEditModalPro
                 {updateProfile.isPending ? (
                   <HiveLoader color="#9C9287" size="small" />
                 ) : (
-                  <Text className="font-inter text-sm font-semibold text-hive-muted">
+                  <Text className="font-inter-semibold text-sm text-hive-muted">
                     {t('profile.avatarCancel')}
                   </Text>
                 )}

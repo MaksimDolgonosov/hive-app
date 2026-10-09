@@ -69,7 +69,7 @@
 | Коллекции профиля             | `src/components/profile/ProfileCollectionLayout.tsx`, `ProfileMenuRow`, `app/(modals)/profile/*`         | Переиспользуются для наград и инвайтов (§G5, §G8)                                        |
 | Тосты                         | `src/stores/toastStore.ts`, `src/utils/show-toast.ts`                                                    | Награды и результаты действий                                                            |
 | Настройки                     | `src/components/profile/ProfileSettingsModal.tsx`, `src/stores/preferencesStore.ts`                      | Тумблеры пушей и слоя эха (§G10, §G2)                                                    |
-| Deep links                    | `app/+native-intent.ts`, `scheme: ['hiveapp', 'com.hive.app', …]` в `app.config.ts`                      | Инвайт-ссылки и переходы из пушей (§G8, §G10)                                            |
+| Deep links                    | `app/+native-intent.ts`, `scheme: ['hiveapp', 'site.hiveapp.app', …]` в `app.config.ts`                      | Инвайт-ссылки и переходы из пушей (§G8, §G10)                                            |
 | i18n                          | `src/i18n/locales/{ru,en}.ts` + схема `types.ts`                                                         | Все новые строки только через схему                                                      |
 
 Новые зависимости (устанавливать через `npx expo install`, версии для SDK 54):

@@ -32,16 +32,16 @@ export function CampaignBanner({ campaign, onPress }: CampaignBannerProps) {
     >
       <View className="flex-row items-center justify-between gap-3">
         <View className="flex-1">
-          <Text className="font-display text-[15px] font-bold text-hive-on-accent">{title}</Text>
+          <Text className="font-display text-[15px] text-hive-on-accent">{title}</Text>
           <Text className="mt-0.5 font-inter text-xs text-hive-on-accent/80">
             {t('campaign.ttlBonus')}
           </Text>
         </View>
         <View className="items-end">
-          <Text className="font-inter text-[10px] font-semibold uppercase text-hive-on-accent/70">
+          <Text className="font-inter-semibold text-[10px] uppercase text-hive-on-accent/70">
             {t('campaign.endsIn')}
           </Text>
-          <Text className="font-display text-[15px] font-bold text-hive-on-accent">
+          <Text className="font-display text-[15px] text-hive-on-accent">
             {countdown.remainingLabel}
           </Text>
         </View>

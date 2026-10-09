@@ -45,7 +45,7 @@ export function HiveCameraView({
   if (!permission.granted) {
     return (
       <View className="flex-1 items-center justify-center bg-black px-8">
-        <Text className="text-center font-inter text-lg font-semibold text-white">
+        <Text className="text-center font-inter-semibold text-lg text-white">
           {t('camera.permissionDeniedTitle')}
         </Text>
         <Text className="mt-2 text-center font-inter text-sm text-white/70">
@@ -62,7 +62,7 @@ export function HiveCameraView({
             void Linking.openSettings();
           }}
         >
-          <Text className="font-inter text-base font-bold text-hive-on-accent">
+          <Text className="font-inter-bold text-base text-hive-on-accent">
             {permission.canAskAgain ? t('camera.requestPermission') : t('map.openSettings')}
           </Text>
         </Pressable>

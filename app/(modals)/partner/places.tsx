@@ -64,7 +64,7 @@ function PlaceListCard({
       )}
 
       <View className="min-w-0 flex-1">
-        <Text className="font-inter text-base font-semibold" numberOfLines={1} style={{ color: theme.text }}>
+        <Text className="font-inter-semibold text-base " numberOfLines={1} style={{ color: theme.text }}>
           {place.name}
         </Text>
         <Text className={`mt-0.5 font-inter text-xs ${statusClass(place.status)}`}>
@@ -187,7 +187,7 @@ export default function MyPlacesScreen() {
               >
                 <Store color={theme.accent} size={28} strokeWidth={2} />
               </View>
-              <Text className="text-center font-inter text-base font-semibold text-hive-foreground">
+              <Text className="text-center font-inter-semibold text-base text-hive-foreground">
                 {t('partner.emptyPlaces')}
               </Text>
             </View>
@@ -198,7 +198,7 @@ export default function MyPlacesScreen() {
               className="mt-2 h-[52px] items-center justify-center rounded-full bg-hive-primary"
               onPress={() => router.push('/(modals)/partner/apply' as Href)}
             >
-              <Text className="font-inter text-[15px] font-bold text-hive-on-accent">
+              <Text className="font-inter-bold text-[15px] text-hive-on-accent">
                 {t('partner.addPlace')}
               </Text>
             </Pressable>

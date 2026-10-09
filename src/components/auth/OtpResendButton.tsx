@@ -27,12 +27,12 @@ export function OtpResendButton({
       onPress={onPress}
     >
       <Text
-        className={`text-center font-inter text-sm ${
+        className={`text-center text-sm ${
           isDisabled
-            ? 'text-hive-muted'
+            ? 'font-inter text-hive-muted'
             : emphasize
-              ? 'font-bold text-hive-primary'
-              : 'font-semibold text-hive-primary'
+              ? 'font-inter-bold text-hive-primary'
+              : 'font-inter-semibold text-hive-primary'
         }`}
       >
         {isCoolingDown

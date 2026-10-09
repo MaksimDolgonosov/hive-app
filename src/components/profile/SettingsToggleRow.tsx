@@ -46,7 +46,7 @@ export function SettingsToggleRow({
       >
         <View className="min-w-0 flex-1 flex-row items-center gap-3.5 pr-3">
           <Icon color={theme.accent} size={18} strokeWidth={2} />
-          <Text className="flex-shrink font-inter text-[15px] font-medium text-hive-foreground">
+          <Text className="flex-shrink font-inter-medium text-[15px] text-hive-foreground">
             {label}
           </Text>
         </View>

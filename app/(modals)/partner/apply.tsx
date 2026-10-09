@@ -244,7 +244,7 @@ export default function PartnerApplyScreen() {
                 className={`rounded-full px-4 py-2 ${selected ? 'bg-hive-primary' : 'bg-hive-surface'}`}
                 onPress={() => setCategory(item)}
               >
-                <Text className={selected ? 'font-inter text-sm font-semibold text-hive-on-accent' : 'font-inter text-sm text-hive-foreground'}>
+                <Text className={selected ? 'font-inter-semibold text-sm text-hive-on-accent' : 'font-inter text-sm text-hive-foreground'}>
                   {t(`partner.categories.${item}`)}
                 </Text>
               </Pressable>
@@ -275,7 +275,7 @@ function FieldLabel({ label, required = false }: { label: string; required?: boo
   return (
     <Text
       accessibilityLabel={required ? `${label}, ${t('partner.required')}` : label}
-      className="font-inter text-sm font-semibold text-hive-foreground"
+      className="font-inter-semibold text-sm text-hive-foreground"
     >
       {label}
       {required ? <Text className="text-hive-primary"> *</Text> : null}

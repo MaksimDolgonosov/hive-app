@@ -92,11 +92,11 @@ export function HiveNearbyCard({ hive, distanceM, onPress }: HiveNearbyCardProps
         </View>
 
         <View className="flex-1 gap-1.5">
-          <Text className="font-display text-[17px] font-bold text-hive-foreground">
+          <Text className="font-display text-[17px] text-hive-foreground">
             {isSeed ? t('hive.seed.title') : t('hive.title')}
           </Text>
           <View className="flex-row items-center gap-2">
-            <Text className="font-inter text-[13px] font-semibold text-hive-muted">
+            <Text className="font-inter-semibold text-[13px] text-hive-muted">
               {t('hive.photoCount', { count: photoCount })}
             </Text>
             {isSeed ? (
@@ -113,7 +113,7 @@ export function HiveNearbyCard({ hive, distanceM, onPress }: HiveNearbyCardProps
                   <Clock color={theme.accent} size={13} strokeWidth={2.25} />
                   <Timer
                     expiresAt={expiresAt}
-                    className="font-inter text-[13px] font-bold text-hive-primary"
+                    className="font-inter-bold text-[13px] text-hive-primary"
                   />
                 </View>
               </>
@@ -123,7 +123,7 @@ export function HiveNearbyCard({ hive, distanceM, onPress }: HiveNearbyCardProps
 
         <View className="flex-row items-center gap-1.5">
           <Navigation color={theme.signal} fill={theme.signal} size={13} strokeWidth={2.25} />
-          <Text className="font-inter text-xs font-bold text-hive-foreground">
+          <Text className="font-inter-bold text-xs text-hive-foreground">
             {formatDistance(distanceM)}
           </Text>
           <ChevronRight color={theme.textMuted} size={18} strokeWidth={2.25} />

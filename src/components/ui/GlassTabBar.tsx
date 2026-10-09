@@ -210,7 +210,6 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: HiveTheme.fontBodySemiBold,
     fontSize: 10,
-    fontWeight: '600',
     color: INACTIVE_TAB_COLOR,
   },
   labelActive: {

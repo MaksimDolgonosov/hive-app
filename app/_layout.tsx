@@ -7,7 +7,7 @@ import {
   Inter_700Bold,
   useFonts,
 } from '@expo-google-fonts/inter';
-import { SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk';
+import { Unbounded_600SemiBold } from '@expo-google-fonts/unbounded';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -46,7 +46,7 @@ export default function RootLayout() {
     'Inter-Medium': Inter_500Medium,
     'Inter-SemiBold': Inter_600SemiBold,
     'Inter-Bold': Inter_700Bold,
-    'SpaceGrotesk-Bold': SpaceGrotesk_700Bold,
+    'Unbounded-SemiBold': Unbounded_600SemiBold,
   });
 
   useEffect(() => {

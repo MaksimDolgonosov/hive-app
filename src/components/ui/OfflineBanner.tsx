@@ -22,7 +22,7 @@ export function OfflineBanner() {
     >
       <View className="flex-row items-center justify-center gap-2">
         <WifiOff color="#FFFFFF" size={16} strokeWidth={2.5} />
-        <Text className="font-inter text-sm font-semibold text-white">{t('network.offline')}</Text>
+        <Text className="font-inter-semibold text-sm text-white">{t('network.offline')}</Text>
       </View>
       <Text className="mt-0.5 text-center font-inter text-xs text-white/85">
         {t('network.offlineHint')}

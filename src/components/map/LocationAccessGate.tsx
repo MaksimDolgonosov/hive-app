@@ -31,7 +31,7 @@ export function LocationAccessGate({
         className="items-center justify-center px-8"
         style={{ paddingBottom: bottomInset }}
       >
-        <Text className="text-center font-inter text-lg font-semibold text-hive-foreground">
+        <Text className="text-center font-inter-semibold text-lg text-hive-foreground">
           {t('onboarding.locationTitle')}
         </Text>
         <Text className="mt-2 text-center font-inter text-sm text-hive-muted">
@@ -42,7 +42,7 @@ export function LocationAccessGate({
           className="mt-6 rounded-full bg-hive-primary px-6 py-3"
           onPress={onRequestPermission}
         >
-          <Text className="font-inter text-base font-bold text-hive-on-accent">
+          <Text className="font-inter-bold text-base text-hive-on-accent">
             {t('onboarding.allowLocation')}
           </Text>
         </Pressable>
@@ -56,7 +56,7 @@ export function LocationAccessGate({
         className="items-center justify-center px-8"
         style={{ paddingBottom: bottomInset }}
       >
-        <Text className="text-center font-inter text-lg font-semibold text-hive-foreground">
+        <Text className="text-center font-inter-semibold text-lg text-hive-foreground">
           {t('map.locationDeniedTitle')}
         </Text>
         <Text className="mt-2 text-center font-inter text-sm text-hive-muted">
@@ -67,7 +67,7 @@ export function LocationAccessGate({
           className="mt-6 rounded-full bg-hive-primary px-6 py-3"
           onPress={() => void Linking.openSettings()}
         >
-          <Text className="font-inter text-base font-bold text-hive-on-accent">
+          <Text className="font-inter-bold text-base text-hive-on-accent">
             {t('map.openSettings')}
           </Text>
         </Pressable>

@@ -574,8 +574,8 @@ Frontend **не** обещает отдельный экран «создайт�
 | Переменная                             | Где                               | Зачем                                                           |
 | -------------------------------------- | --------------------------------- | --------------------------------------------------------------- |
 | `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`     | `.env`, `app.config.ts` → `extra` | Обязателен. Часто `aud` idToken = Web client (`serverClientId`) |
-| `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`     | то же                             | iOS OAuth client, bundle `com.hive.app`                         |
-| `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID` | то же                             | Android OAuth client, package `com.hive.app` + SHA-1            |
+| `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`     | то же                             | iOS OAuth client, bundle `site.hiveapp.app`                         |
+| `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID` | то же                             | Android OAuth client, package `site.hiveapp.app` + SHA-1            |
 
 Проброс уже есть в `app.config.ts` / `src/config/env.ts`. Значения **не** коммитить. Для EAS — secrets / `eas.json` env, не хардкод в git.
 
@@ -585,8 +585,8 @@ Frontend **не** обещает отдельный экран «создайт�
 
 1. OAuth consent screen (External / Testing + test users на этапе разработки).
 2. **Web application** Client ID — для мобилки Authorized redirect URIs / JS origins можно оставить пустыми: Google Web-тип **не принимает** `exp://` и `hiveapp://`.
-3. **iOS** Client ID: bundle id `com.hive.app`.
-4. **Android** Client ID: package `com.hive.app` + SHA-1 **того keystore, которым подписана установленная сборка** (debug / EAS development ≠ Play upload key).
+3. **iOS** Client ID: bundle id `site.hiveapp.app`.
+4. **Android** Client ID: package `site.hiveapp.app` + SHA-1 **того keystore, которым подписана установленная сборка** (debug / EAS development ≠ Play upload key).
 
 Scheme приложения: `hiveapp` (`app.config.ts`).
 
@@ -594,7 +594,7 @@ Scheme приложения: `hiveapp` (`app.config.ts`).
 
 | Причина                                                           | Следствие                                                                              |
 | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Bundle / package Expo Go — `host.exp.Exponent`, не `com.hive.app` | iOS/Android OAuth clients Hive не совпадут                                             |
+| Bundle / package Expo Go — `host.exp.Exponent`, не `site.hiveapp.app` | iOS/Android OAuth clients Hive не совпадут                                             |
 | Web client не принимает `exp://` и custom scheme                  | Нестабильный/невозможный redirect в Go                                                 |
 | Целевой UX — native build                                         | Тестировать в **dev client** (`eas.json` profile `development`) или preview/production |
 

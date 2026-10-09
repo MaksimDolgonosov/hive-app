@@ -48,14 +48,14 @@ export default function AwardsScreen() {
             className="mt-4 rounded-full bg-hive-primary px-5 py-2.5"
             onPress={() => void refetch()}
           >
-            <Text className="font-inter text-sm font-semibold text-hive-on-accent">
+            <Text className="font-inter-semibold text-sm text-hive-on-accent">
               {t('profile.collections.retry')}
             </Text>
           </Pressable>
         </View>
       ) : awards.length === 0 ? (
         <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center font-inter text-base font-semibold text-hive-foreground">
+          <Text className="text-center font-inter-semibold text-base text-hive-foreground">
             {t('awards.emptyTitle')}
           </Text>
           <Text className="mt-2 text-center font-inter text-sm text-hive-muted">
@@ -66,7 +66,7 @@ export default function AwardsScreen() {
             className="mt-6 rounded-full bg-hive-primary px-5 py-2.5"
             onPress={() => router.push('/(modals)/camera' as Href)}
           >
-            <Text className="font-inter text-sm font-semibold text-hive-on-accent">
+            <Text className="font-inter-semibold text-sm text-hive-on-accent">
               {t('growth.ctaCapture')}
             </Text>
           </Pressable>
@@ -106,9 +106,7 @@ export default function AwardsScreen() {
                 key={award.id ?? `${award.type}-${award.createdAt}-${index}`}
                 className="rounded-2xl border border-hive-stroke bg-hive-surface px-4 py-3.5"
               >
-                <Text className="font-display text-[16px] font-bold text-hive-foreground">
-                  {copy.title}
-                </Text>
+                <Text className="font-display text-[16px] text-hive-foreground">{copy.title}</Text>
                 {copy.hint ? (
                   <Text className="mt-1 font-inter text-[13px] text-hive-muted">{copy.hint}</Text>
                 ) : null}

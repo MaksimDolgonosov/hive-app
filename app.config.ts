@@ -74,7 +74,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
-    scheme: ['hiveapp', 'com.hive.app', ...googleOAuthSchemes],
+    scheme: ['hiveapp', 'site.hiveapp.app', ...googleOAuthSchemes],
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     platforms: ['ios', 'android'],
@@ -94,7 +94,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     ios: {
       supportsTablet: false,
-      bundleIdentifier: 'com.hive.app',
+      bundleIdentifier: 'site.hiveapp.app',
       icon: './assets/Hive.icon',
       associatedDomains: [`applinks:${PUBLIC_SITE_HOST}`],
       infoPlist: {
@@ -106,7 +106,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
     },
     android: {
-      package: 'com.hive.app',
+      package: 'site.hiveapp.app',
       permissions: ['VIBRATE'],
       blockedPermissions: ['android.permission.RECORD_AUDIO'],
       config: {
@@ -197,7 +197,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       [
         'expo-notifications',
         {
-          icon: './assets/images/icon.png',
+          icon: './assets/images/android-icon-monochrome.png',
           color: '#FFB800',
           defaultChannel: 'default',
         },

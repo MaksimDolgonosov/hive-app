@@ -126,10 +126,10 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
                   />
                 ) : null}
                 <View className="gap-1 px-3 py-3">
-                  <Text className="font-display text-lg font-bold text-hive-foreground">
+                  <Text className="font-display text-lg text-hive-foreground">
                     {data.hive.place.name}
                   </Text>
-                  <Text className="font-inter text-xs font-semibold text-hive-primary">{t('place.badge')}</Text>
+                  <Text className="font-inter-semibold text-xs text-hive-primary">{t('place.badge')}</Text>
                   {isSeed ? (
                     <Text className="font-inter text-[13px] text-hive-muted">
                       {t('place.seedCta', { name: data.hive.place.name })}
@@ -139,7 +139,7 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
               </Pressable>
             ) : null}
             <View className="flex-row items-center gap-2">
-            <Text className="font-inter text-[13px] font-semibold text-hive-primary">
+            <Text className="font-inter-semibold text-[13px] text-hive-primary">
               {t('hive.photoCount', { count: photoCount })}
             </Text>
             <HiveContributorAvatars ringColor={theme.bg} stings={stingsNewestFirst} />
@@ -165,7 +165,7 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
 
         {isSeed ? (
           <View className="gap-1 rounded-2xl bg-hive-surface2 p-3.5">
-            <Text className="font-display text-[15px] font-bold text-hive-foreground">
+            <Text className="font-display text-[15px] text-hive-foreground">
               {t('hive.seed.title')}
             </Text>
             <Text className="font-inter text-[13px] text-hive-muted">{t('hive.seed.hint')}</Text>
@@ -179,11 +179,11 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-2">
                     <Clock color={theme.accent} size={18} strokeWidth={2.25} />
-                    <Text className="font-inter text-[13px] font-medium text-hive-muted">
+                    <Text className="font-inter-medium text-[13px] text-hive-muted">
                       {isSeed ? t('hive.seed.photosDisappearIn') : t('hive.dissolvesIn')}
                     </Text>
                   </View>
-                  <Text className="font-display text-[15px] font-bold text-hive-primary">
+                  <Text className="font-display text-[15px] text-hive-primary">
                     {countdown.isExpired ? '0:00' : countdown.remainingLabel}
                   </Text>
                 </View>
@@ -210,7 +210,7 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
             onPress={openCamera}
           >
             <Camera color={theme.textOnAccent} size={20} strokeWidth={2.25} />
-            <Text className="font-inter text-[15px] font-bold text-hive-on-accent">
+            <Text className="font-inter-bold text-[15px] text-hive-on-accent">
               {isSeed ? t('hive.seed.addPhoto') : t('hive.addPhoto')}
             </Text>
           </Pressable>

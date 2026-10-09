@@ -4,7 +4,7 @@ This Privacy Policy explains what data the Hive mobile app (“App”, “we”,
 
 ## 1. Who we are
 
-The operator of the App is Hive. The App is distributed on the App Store and Google Play under the identifier com.hive.app. For privacy questions, email hive.app.site@gmail.com. The current version of this Policy is published at https://hive-app.site/policy.
+The operator of the App is Hive. The App is distributed on the App Store and Google Play under the identifier site.hiveapp.app. For privacy questions, email hive.app.site@gmail.com. The current version of this Policy is published at https://hive-app.site/policy.
 
 Hive is a social map of moments: people publish photos from the place they were taken, see nearby photos on the map and in the feed, and keep profiles. Photos on the map last a limited time (typically 4 to 72 hours) and then disappear.
 
@@ -135,4 +135,4 @@ We may update this Policy when the App, our vendors, or the law changes. The new
 
 ## 15. Contact
 
-For privacy, access, correction, or deletion requests: hive.app.site@gmail.com. Policy: https://hive-app.site/policy. Account deletion: https://hive-app.site/delete-account. App: Hive. Identifier: com.hive.app. Platforms: iOS and Android.
+For privacy, access, correction, or deletion requests: hive.app.site@gmail.com. Policy: https://hive-app.site/policy. Account deletion: https://hive-app.site/delete-account. App: Hive. Identifier: site.hiveapp.app. Platforms: iOS and Android.

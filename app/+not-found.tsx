@@ -31,7 +31,7 @@ export default function NotFoundScreen() {
             <Hexagon color="#0B0A08" fill="#0B0A08" size={44} strokeWidth={0} />
           </View>
 
-          <Text className="font-inter text-[28px] font-bold text-hive-foreground">
+          <Text className="font-inter-bold text-[28px] text-hive-foreground">
             {t('notFound.title')}
           </Text>
           <Text className="mt-3 max-w-[300px] text-center font-inter text-[15px] leading-[22px] text-hive-muted">

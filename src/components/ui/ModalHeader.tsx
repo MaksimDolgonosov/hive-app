@@ -35,7 +35,7 @@ export function ModalHeader({ title, backLabel }: ModalHeaderProps) {
       >
         <ChevronLeft color={theme.text} size={24} />
       </Pressable>
-      <Text className="flex-1 font-display text-xl font-bold text-hive-foreground" numberOfLines={1}>
+      <Text className="flex-1 font-display text-xl text-hive-foreground" numberOfLines={1}>
         {title}
       </Text>
     </View>

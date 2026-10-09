@@ -157,7 +157,7 @@ export function StingLikeButton({
       </Animated.View>
 
       <Text
-        className={`font-inter text-base font-semibold ${showLikedButton ? 'text-hive-on-accent' : 'text-white'}`}
+        className={`font-inter-semibold text-base ${showLikedButton ? 'text-hive-on-accent' : 'text-white'}`}
       >
         {reactionsCount}
       </Text>

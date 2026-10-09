@@ -97,7 +97,7 @@ export function SafetyReportSheet({
             contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
             keyboardShouldPersistTaps="handled"
           >
-            <Text className="font-inter text-base font-semibold" style={{ color: theme.text }}>
+            <Text className="font-inter-semibold text-base " style={{ color: theme.text }}>
               {t('safety.reportTitle')}
             </Text>
             <Text className="font-inter text-sm" style={{ color: theme.textMuted }}>
@@ -192,7 +192,7 @@ export function SafetyReportSheet({
                 <HiveLoader color={theme.textOnAccent} size="small" />
               ) : (
                 <Text
-                  className="font-inter text-base font-bold"
+                  className="font-inter-bold text-base "
                   style={{ color: canSubmit ? theme.textOnAccent : theme.textDim }}
                 >
                   {t('safety.submit')}

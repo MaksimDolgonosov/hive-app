@@ -87,7 +87,7 @@ export function AuthInput({
   return (
     <View className="gap-1.5">
       <Pressable accessibilityRole="button" hitSlop={8} onPress={focusInput}>
-        <Text className="font-inter text-[11px] font-semibold uppercase tracking-[1.2px] text-hive-dim">
+        <Text className="font-inter-semibold text-[11px] uppercase tracking-[1.2px] text-hive-dim">
           {label}
         </Text>
       </Pressable>

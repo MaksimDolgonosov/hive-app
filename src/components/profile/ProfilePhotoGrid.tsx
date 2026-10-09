@@ -58,7 +58,7 @@ export function ProfilePhotoGrid({ stings, onPressSting }: ProfilePhotoGridProps
               <View className="absolute bottom-0 left-0 right-0 bg-black/45 px-1.5 py-1">
                 <Timer
                   expiresAt={sting.expiresAt}
-                  className="font-inter text-[10px] font-medium text-white"
+                  className="font-inter-medium text-[10px] text-white"
                 />
               </View>
             </Pressable>

@@ -46,7 +46,7 @@ export function NearbyCard({ sting, distanceM, onPress, onAuthorPress }: NearbyC
 
         <View className="absolute left-3 top-3 flex-row items-center gap-1.5 rounded-[13px] bg-black/65 px-2.5 py-1.5">
           <MapPin color="#F6F2EA" size={12} strokeWidth={2.25} />
-          <Text className="font-inter text-xs font-medium text-[#F6F2EA]">
+          <Text className="font-inter-medium text-xs text-[#F6F2EA]">
             {formatDistance(distanceM)}
           </Text>
         </View>
@@ -55,13 +55,13 @@ export function NearbyCard({ sting, distanceM, onPress, onAuthorPress }: NearbyC
           <Clock color={HiveTheme.accent} size={12} strokeWidth={2.25} />
           <Timer
             expiresAt={sting.expiresAt}
-            className="font-inter text-xs font-semibold text-hive-primary"
+            className="font-inter-semibold text-xs text-hive-primary"
           />
         </View>
 
         <View className="absolute bottom-3 left-3 right-3 gap-1.5">
           {sting.comment ? (
-            <Text className="font-display text-[18px] font-bold text-[#F6F2EA]" numberOfLines={1}>
+            <Text className="font-display text-[18px] text-[#F6F2EA]" numberOfLines={1}>
               {sting.comment}
             </Text>
           ) : null}

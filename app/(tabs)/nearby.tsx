@@ -203,12 +203,10 @@ export default function NearbyScreen() {
         className="flex-row items-end justify-between px-5 pb-4"
         style={{ paddingTop: insets.top + 8 }}
       >
-        <Text className="font-display text-[28px] font-bold text-hive-foreground">
-          {t('nearby.title')}
-        </Text>
+        <Text className="font-display text-[28px] text-hive-foreground">{t('nearby.title')}</Text>
         <View className="flex-row items-center gap-1.5 rounded-full bg-hive-signal/20 px-3 py-[7px]">
           <View className="h-1.5 w-1.5 rounded-full bg-hive-signal" />
-          <Text className="font-inter text-xs font-semibold text-hive-signal">
+          <Text className="font-inter-semibold text-xs text-hive-signal">
             {t('nearby.activeCount', { count: feedItems.length })}
           </Text>
         </View>
@@ -216,7 +214,7 @@ export default function NearbyScreen() {
 
       {SHOW_EXPANDED_RADIUS_BANNER && data?.expanded && data.appliedRadiusM ? (
         <View className="mx-5 mb-3 rounded-hive-md bg-hive-surface px-4 py-2.5">
-          <Text className="text-center font-inter text-xs font-semibold text-hive-muted">
+          <Text className="text-center font-inter-semibold text-xs text-hive-muted">
             {t('growth.expandedRadius', { distance: formatDistance(data.appliedRadiusM) })}
           </Text>
         </View>
@@ -273,7 +271,7 @@ export default function NearbyScreen() {
                 className="mt-4 rounded-full bg-hive-primary px-5 py-2.5"
                 onPress={() => void refetch()}
               >
-                <Text className="font-inter text-sm font-semibold text-hive-on-accent">
+                <Text className="font-inter-semibold text-sm text-hive-on-accent">
                   {t('nearby.retry')}
                 </Text>
               </Pressable>

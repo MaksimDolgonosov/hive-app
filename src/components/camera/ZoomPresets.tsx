@@ -76,7 +76,6 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Inter-SemiBold',
     fontSize: 13,
-    fontWeight: '600',
     color: '#FFFFFF',
   },
   labelActive: {

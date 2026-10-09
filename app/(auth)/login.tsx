@@ -139,7 +139,7 @@ export default function LoginScreen() {
             router.push(forgotPasswordHref(normalizeEmail(email) || undefined));
           }}
         >
-          <Text className="font-inter text-[13px] font-semibold text-hive-primary">
+          <Text className="font-inter-semibold text-[13px] text-hive-primary">
             {t('auth.forgotPassword')}
           </Text>
         </Pressable>
@@ -181,9 +181,7 @@ export default function LoginScreen() {
         <Text className="font-inter text-sm text-hive-muted">{t('auth.noAccount')}</Text>
         <Link href="/(auth)/register" asChild>
           <Pressable accessibilityRole="link">
-            <Text className="font-inter text-sm font-bold text-hive-primary">
-              {t('auth.register')}
-            </Text>
+            <Text className="font-inter-bold text-sm text-hive-primary">{t('auth.register')}</Text>
           </Pressable>
         </Link>
       </View>

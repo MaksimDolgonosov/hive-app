@@ -45,15 +45,13 @@ export function ProfileMenuRow({
     >
       <View className="min-w-0 flex-1 flex-row items-center gap-3.5 pr-3">
         <Icon color={iconColor} size={18} strokeWidth={2} />
-        <Text className={`flex-shrink font-inter text-[15px] font-medium ${labelClass}`}>
-          {label}
-        </Text>
+        <Text className={`flex-shrink font-inter-medium text-[15px] ${labelClass}`}>{label}</Text>
       </View>
 
       <View className="flex-row items-center gap-2">
         {accessory}
         {badge !== undefined && (
-          <Text className="font-inter text-[14px] font-semibold text-hive-dim">{badge}</Text>
+          <Text className="font-inter-semibold text-[14px] text-hive-dim">{badge}</Text>
         )}
         {chevronVisible && <ChevronRight color={theme.textDim} size={16} strokeWidth={2} />}
       </View>

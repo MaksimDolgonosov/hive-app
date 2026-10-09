@@ -46,7 +46,7 @@ export default function BlockedUsersScreen() {
               {t('safety.failed')}
             </Text>
             <Pressable accessibilityRole="button" onPress={() => void blocked.refetch()}>
-              <Text className="font-inter text-base font-bold text-hive-primary">
+              <Text className="font-inter-bold text-base text-hive-primary">
                 {t('nearby.retry')}
               </Text>
             </Pressable>
@@ -89,7 +89,7 @@ export default function BlockedUsersScreen() {
                     className="items-center justify-center rounded-full bg-hive-primary"
                     style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
                   >
-                    <Text className="font-inter text-xs font-bold text-hive-on-accent">
+                    <Text className="font-inter-bold text-xs text-hive-on-accent">
                       {getProfileInitials(user.username) || '?'}
                     </Text>
                   </View>
@@ -105,7 +105,7 @@ export default function BlockedUsersScreen() {
                   disabled={safety.hiding}
                   onPress={() => void safety.unhideUser(user.id)}
                 >
-                  <Text className="font-inter text-sm font-semibold text-hive-primary">
+                  <Text className="font-inter-semibold text-sm text-hive-primary">
                     {t('safety.unhide')}
                   </Text>
                 </Pressable>

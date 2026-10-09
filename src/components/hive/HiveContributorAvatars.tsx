@@ -117,9 +117,7 @@ export function HiveContributorAvatars({
                 style={{ width: size, height: size }}
               />
             ) : (
-              <Text className="font-inter text-[9px] font-bold text-hive-on-accent">
-                {initials}
-              </Text>
+              <Text className="font-inter-bold text-[9px] text-hive-on-accent">{initials}</Text>
             )}
           </View>
         );

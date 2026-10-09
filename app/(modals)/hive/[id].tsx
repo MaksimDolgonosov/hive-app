@@ -44,7 +44,7 @@ export default function HiveDetailScreen() {
         >
           <ChevronLeft color={theme.text} size={24} />
         </Pressable>
-        <Text className="flex-1 text-center font-display text-lg font-bold text-hive-foreground">
+        <Text className="flex-1 text-center font-display text-lg text-hive-foreground">
           {headerTitle}
         </Text>
         <View className="w-10" />
@@ -62,9 +62,7 @@ export default function HiveDetailScreen() {
             className="mt-6 rounded-full bg-hive-primary px-6 py-3"
             onPress={handleBack}
           >
-            <Text className="font-inter text-base font-bold text-hive-on-accent">
-              {t('hive.back')}
-            </Text>
+            <Text className="font-inter-bold text-base text-hive-on-accent">{t('hive.back')}</Text>
           </Pressable>
         </View>
       )}

@@ -38,7 +38,7 @@ export function ErrorToast() {
 
         <View className="min-w-0 flex-1">
           {title ? (
-            <Text className="font-inter text-sm font-semibold text-hive-foreground">{title}</Text>
+            <Text className="font-inter-semibold text-sm text-hive-foreground">{title}</Text>
           ) : null}
           <Text
             className={`font-inter text-sm text-hive-muted ${title ? 'mt-0.5' : ''}`}

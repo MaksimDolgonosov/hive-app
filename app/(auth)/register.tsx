@@ -1,5 +1,5 @@
 import { Link, router } from 'expo-router';
-import { Lock, Mail, User } from 'lucide-react-native';
+import { Gift, Lock, Mail, User } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,11 @@ import { CommunityRulesCheckbox } from '@/src/components/auth/CommunityRulesChec
 import { PrivacyConsentCheckbox } from '@/src/components/auth/PrivacyConsentCheckbox';
 import { usePublicInvite } from '@/src/hooks/useInvites';
 import { useAuthStore } from '@/src/stores/authStore';
-import { loadPendingInviteCode } from '@/src/stores/invite-storage';
+import {
+  clearPendingInviteCode,
+  loadPendingInviteCode,
+  savePendingInviteCode,
+} from '@/src/stores/invite-storage';
 import { getApiErrorCode, getApiErrorMessage } from '@/src/utils/api-error';
 import {
   communityGuidelinesHref,
@@ -22,6 +26,7 @@ import {
   verifyOtpHref,
 } from '@/src/utils/auth-navigation';
 import { isValidEmail, normalizeEmail } from '@/src/utils/email';
+import { isCompleteInviteCode, normalizeInviteCode } from '@/src/utils/invite-code';
 
 export default function RegisterScreen() {
   const { t } = useTranslation();
@@ -40,12 +45,23 @@ export default function RegisterScreen() {
   const [privacyInvalid, setPrivacyInvalid] = useState(false);
   const [acceptedCommunityRules, setAcceptedCommunityRules] = useState(false);
   const [communityRulesInvalid, setCommunityRulesInvalid] = useState(false);
-  const [inviteCode, setInviteCode] = useState<string | null>(null);
-  const publicInvite = usePublicInvite(inviteCode);
+  const [inviteCode, setInviteCode] = useState('');
+  const publicInvite = usePublicInvite(isCompleteInviteCode(inviteCode) ? inviteCode : null);
+  const inviteInvalid = isCompleteInviteCode(inviteCode) && publicInvite.data?.valid === false;
 
   useEffect(() => {
-    void loadPendingInviteCode().then(setInviteCode);
+    void loadPendingInviteCode().then((code) => {
+      if (code) {
+        setInviteCode(normalizeInviteCode(code));
+      }
+    });
   }, []);
+
+  function handleInviteCodeChange(value: string) {
+    const code = normalizeInviteCode(value);
+    setInviteCode(code);
+    void (isCompleteInviteCode(code) ? savePendingInviteCode(code) : clearPendingInviteCode());
+  }
 
   function clearFieldErrors() {
     setUsernameError(undefined);
@@ -135,12 +151,8 @@ export default function RegisterScreen() {
 
       <AuthFormCard title={t('auth.registerTitle')} subtitle={t('auth.registerCardSubtitle')}>
         {publicInvite.data?.valid && publicInvite.data.ownerUsername ? (
-          <Text className="mb-3 text-center font-inter text-sm font-semibold text-hive-primary">
+          <Text className="mb-3 text-center font-inter-semibold text-sm text-hive-primary">
             {t('invite.invitedBy', { username: publicInvite.data.ownerUsername })}
-          </Text>
-        ) : publicInvite.data && !publicInvite.data.valid ? (
-          <Text className="mb-3 text-center font-inter text-sm text-hive-muted">
-            {t('errors.INVITE_EXPIRED')}
           </Text>
         ) : null}
         <AuthInput
@@ -186,6 +198,15 @@ export default function RegisterScreen() {
             setPassword(value);
           }}
         />
+        <AuthInput
+          autoCapitalize="characters"
+          error={inviteInvalid ? t('errors.INVITE_EXPIRED') : undefined}
+          icon={Gift}
+          label={t('invite.codeFieldLabel')}
+          placeholder={t('invite.codeFieldPlaceholder')}
+          value={inviteCode}
+          onChangeText={handleInviteCodeChange}
+        />
 
         {error ? (
           <Text className="text-center font-inter text-sm text-red-500">{error}</Text>
@@ -195,7 +216,7 @@ export default function RegisterScreen() {
           <View className="items-center">
             <Link href="/(auth)/login" asChild>
               <Pressable accessibilityRole="link">
-                <Text className="font-inter text-sm font-bold text-hive-primary">
+                <Text className="font-inter-bold text-sm text-hive-primary">
                   {t('auth.goToLogin')}
                 </Text>
               </Pressable>
@@ -247,9 +268,7 @@ export default function RegisterScreen() {
         <Text className="font-inter text-sm text-hive-muted">{t('auth.hasAccount')}</Text>
         <Link href="/(auth)/login" asChild>
           <Pressable accessibilityRole="link">
-            <Text className="font-inter text-sm font-bold text-hive-primary">
-              {t('auth.login')}
-            </Text>
+            <Text className="font-inter-bold text-sm text-hive-primary">{t('auth.login')}</Text>
           </Pressable>
         </Link>
       </View>

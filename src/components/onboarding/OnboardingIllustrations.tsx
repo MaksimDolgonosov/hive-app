@@ -356,7 +356,6 @@ const styles = StyleSheet.create({
   },
   galleryBadgeLabel: {
     fontSize: 12,
-    fontWeight: '600',
   },
   lifetimeRow: {
     flexDirection: 'row',
@@ -380,7 +379,6 @@ const styles = StyleSheet.create({
   },
   lifetimeBadgeLabel: {
     fontSize: 14,
-    fontWeight: '700',
   },
   locationRow: {
     flexDirection: 'row',
@@ -389,7 +387,6 @@ const styles = StyleSheet.create({
   },
   locationLabel: {
     fontSize: 12,
-    fontWeight: '400',
   },
   hiveMark: {
     ...StyleSheet.absoluteFillObject,

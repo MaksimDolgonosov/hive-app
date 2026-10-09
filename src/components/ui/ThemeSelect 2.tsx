@@ -23,7 +23,7 @@ export function ThemeSelect({ className }: ThemeSelectProps) {
 
   return (
     <View className={className}>
-      <Text className="mb-2 font-inter text-[13px] font-semibold text-hive-foreground">
+      <Text className="mb-2 font-inter-semibold text-[13px] text-hive-foreground">
         {t('theme.label')}
       </Text>
 
@@ -48,7 +48,7 @@ export function ThemeSelect({ className }: ThemeSelectProps) {
                 strokeWidth={2.25}
               />
               <Text
-                className={`font-inter text-[14px] font-semibold ${
+                className={`font-inter-semibold text-[14px] ${
                   isActive ? 'text-hive-on-accent' : 'text-hive-muted'
                 }`}
               >

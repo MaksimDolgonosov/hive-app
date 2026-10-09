@@ -110,9 +110,7 @@ export default function ProfileScreen() {
           }}
           showsVerticalScrollIndicator={false}
         >
-          <Text className="font-display text-[28px] font-bold text-hive-foreground">
-            {t('tabs.profile')}
-          </Text>
+          <Text className="font-display text-[28px] text-hive-foreground">{t('tabs.profile')}</Text>
           <ProfileSkeleton />
         </ScrollView>
       </ScreenBackground>
@@ -131,9 +129,7 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="flex-row items-center justify-between">
-          <Text className="font-display text-[28px] font-bold text-hive-foreground">
-            {t('tabs.profile')}
-          </Text>
+          <Text className="font-display text-[28px] text-hive-foreground">{t('tabs.profile')}</Text>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('profile.menuSettings')}

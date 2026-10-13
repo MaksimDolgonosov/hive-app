@@ -10,7 +10,7 @@ import { savePendingInviteCode } from '@/src/stores/invite-storage';
  * Cold start (`initial`) still needs a real route, otherwise the app opens on tabs.
  *
  * Invite links (`/i/{code}`) are handled after the OAuth check so Google login
- * is not broken (`RN_FRONTEND_TZ.md` §8).
+ * is not broken (`TECH_DOCS.md`, часть «ТЗ frontend» §8).
  */
 export function redirectSystemPath({
   path,

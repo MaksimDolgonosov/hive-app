@@ -324,7 +324,7 @@ export interface MapBounds {
   neLng: number;
 }
 
-/** Эфемерный фильтр маркеров карты (`RN_FRONTEND_TZ.md` §9). */
+/** Эфемерный фильтр маркеров карты (`TECH_DOCS.md`, часть «ТЗ frontend» §9). */
 export type MapFilter = 'all' | 'fresh' | 'hives' | 'expiring';
 
 /**

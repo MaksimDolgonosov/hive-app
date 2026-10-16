@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
-import { Marker } from 'react-native-maps';
+import { Marker } from 'expo-yandex-mapkit';
 
 import type { MapOverviewCluster, MapRegion } from '@/src/types';
 
@@ -12,6 +12,11 @@ type OverviewClusterMarkerProps = {
 export function OverviewClusterMarker({ cluster, onPress }: OverviewClusterMarkerProps) {
   const [tracksViewChanges, setTracksViewChanges] = useState(true);
   const size = Math.min(64, 36 + Math.log2(Math.max(cluster.activeStingsCount, 1)) * 8);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setTracksViewChanges(false), 400);
+    return () => clearTimeout(timer);
+  }, [cluster.cellId, cluster.activeStingsCount, size]);
 
   function handlePress() {
     const latitudeDelta = Math.max(0.04, (cluster.radiusM / 111_000) * 2.4);
@@ -26,9 +31,9 @@ export function OverviewClusterMarker({ cluster, onPress }: OverviewClusterMarke
   return (
     <Marker
       anchor={{ x: 0.5, y: 0.5 }}
-      coordinate={{ latitude: cluster.center.lat, longitude: cluster.center.lng }}
+      handled
+      point={{ latitude: cluster.center.lat, longitude: cluster.center.lng }}
       tracksViewChanges={tracksViewChanges}
-      onLayout={() => setTracksViewChanges(false)}
       onPress={handlePress}
     >
       <View

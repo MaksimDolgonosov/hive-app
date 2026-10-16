@@ -1,14 +1,14 @@
+import type { YandexMapViewRef } from 'expo-yandex-mapkit';
 import { router, type Href } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import MapView, { type Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CampaignBanner, pickSoonestCampaign } from '@/src/components/map/CampaignBanner';
 import { EchoMarker } from '@/src/components/map/EchoMarker';
 import { HiveCircle } from '@/src/components/map/HiveCircle';
-import { HiveMarkerCapture } from '@/src/components/map/HiveMarkerCapture';
+import { HiveMapView } from '@/src/components/map/HiveMapView';
 import { HiveSeedMarker } from '@/src/components/map/HiveSeedMarker';
 import { LocationAccessGate } from '@/src/components/map/LocationAccessGate';
 import { MapBookmarkButton } from '@/src/components/map/MapBookmarkButton';
@@ -17,13 +17,12 @@ import { MapFilterChips } from '@/src/components/map/MapFilterChips';
 import { MapLocationButton } from '@/src/components/map/MapLocationButton';
 import { MapTypeButton } from '@/src/components/map/MapTypeButton';
 import { OverviewClusterMarker } from '@/src/components/map/OverviewClusterMarker';
-import { PlaceMarker, PlaceMarkerCapture } from '@/src/components/map/PlaceMarker';
+import { PlaceMarker } from '@/src/components/map/PlaceMarker';
 import { SaveMapPlaceModal } from '@/src/components/map/SaveMapPlaceModal';
 import { WaitlistContent } from '@/src/components/growth/WaitlistContent';
 import { getGlassTabBarInset } from '@/src/components/ui/GlassTabBar';
 import { HiveLoader } from '@/src/components/ui/HiveLoader';
-import { isGoogleMapsConfigured } from '@/src/config/env';
-import { HIVE_DARK_MAP_STYLE, HIVE_LIGHT_MAP_STYLE } from '@/src/constants/map-style';
+import { isYandexMapKitConfigured } from '@/src/config/env';
 import * as zonesApi from '@/src/api/zones';
 import { useActiveCampaigns } from '@/src/hooks/useActiveCampaigns';
 import { useFilteredMapMarkers } from '@/src/hooks/useFilteredMapMarkers';
@@ -52,12 +51,13 @@ import {
   OVERVIEW_ENTER_DELTA,
   OVERVIEW_EXIT_DELTA,
   regionToBounds,
+  regionToCamera,
 } from '@/src/utils/map';
 import { openHive } from '@/src/utils/open-hive';
 import { resolveMapViewRegion } from '@/src/utils/resolve-map-view-region';
 import { showApiErrorToast, showMessageToast } from '@/src/utils/show-toast';
 
-import { StingMarker, StingMarkerCapture } from './StingMarker';
+import { StingMarker } from './StingMarker';
 
 const REGION_DEBOUNCE_MS = 300;
 const PUBLISH_FOCUS_DELTA = 0.008;
@@ -94,20 +94,21 @@ function shouldCenterOnUserAtStartup(): boolean {
   return !region || isDefaultMapRegion(region);
 }
 
-function toMapRegion(region: Region): MapRegion {
-  return {
-    latitude: region.latitude,
-    longitude: region.longitude,
-    latitudeDelta: region.latitudeDelta,
-    longitudeDelta: region.longitudeDelta,
-  };
+function focusMap(map: YandexMapViewRef | null, region: MapRegion, durationMs: number) {
+  void map?.setCenter(regionToCamera(region), {
+    durationSeconds: durationMs / 1000,
+    animation: 'smooth',
+  });
 }
 
 export function MapContainer() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const colorScheme = useAppColorScheme();
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<YandexMapViewRef>(null);
+  const [initialCamera] = useState(() =>
+    regionToCamera(resolveStartupRegion() ?? DEFAULT_MAP_REGION),
+  );
   const liveRegionRef = useRef<MapRegion | null>(null);
   const hasCenteredOnUser = useRef(false);
   const hasRestoredCachedRegion = useRef(false);
@@ -143,9 +144,6 @@ export function MapContainer() {
   const [draftRegion, setDraftRegion] = useState<MapRegion | null>(null);
   const [isSavingPlace, setIsSavingPlace] = useState(false);
   const [debouncedBounds, setDebouncedBounds] = useState<MapBounds | null>(null);
-  const [hiveMarkerImages, setHiveMarkerImages] = useState<Record<string, string>>({});
-  const [stingMarkerImages, setStingMarkerImages] = useState<Record<string, string>>({});
-  const [placeMarkerImages, setPlaceMarkerImages] = useState<Record<string, string>>({});
   const [initialRegion, setInitialRegion] = useState<MapRegion | null>(resolveStartupRegion);
   const [centerOnUserAtStartup] = useState(shouldCenterOnUserAtStartup);
 
@@ -170,41 +168,11 @@ export function MapContainer() {
       setInitialRegion((current) => current ?? nextRegion);
 
       if (options?.programmatic) {
-        mapRef.current?.animateToRegion(nextRegion, 500);
+        focusMap(mapRef.current, nextRegion, 500);
       }
     },
     [setRegion],
   );
-
-  const handleHiveMarkerCaptured = useCallback((hiveId: string, uri: string) => {
-    setHiveMarkerImages((previous) => {
-      if (previous[hiveId] === uri) {
-        return previous;
-      }
-
-      return { ...previous, [hiveId]: uri };
-    });
-  }, []);
-
-  const handleStingMarkerCaptured = useCallback((stingId: string, uri: string) => {
-    setStingMarkerImages((previous) => {
-      if (previous[stingId] === uri) {
-        return previous;
-      }
-
-      return { ...previous, [stingId]: uri };
-    });
-  }, []);
-
-  const handlePlaceMarkerCaptured = useCallback((placeId: string, uri: string) => {
-    setPlaceMarkerImages((previous) => {
-      if (previous[placeId] === uri) {
-        return previous;
-      }
-
-      return { ...previous, [placeId]: uri };
-    });
-  }, []);
 
   const { data, isFetching, isError } = useStingsNearby(debouncedBounds, {
     minResults: 10,
@@ -428,19 +396,16 @@ export function MapContainer() {
     clearPendingSavedRegion();
   }, [applyMapRegion, clearPendingSavedRegion, pendingSavedRegion, setSelectedStingId]);
 
-  function handleRegionChange(nextRegion: Region) {
-    const mapped = toMapRegion(nextRegion);
-    if (isDefaultMapRegion(mapped)) {
+  function handleRegionChange(nextRegion: MapRegion) {
+    if (isDefaultMapRegion(nextRegion)) {
       return;
     }
 
-    liveRegionRef.current = mapped;
+    liveRegionRef.current = nextRegion;
   }
 
-  function handleRegionChangeComplete(nextRegion: Region) {
-    const mapped = toMapRegion(nextRegion);
-
-    if (isDefaultMapRegion(mapped)) {
+  function handleRegionChangeComplete(nextRegion: MapRegion) {
+    if (isDefaultMapRegion(nextRegion)) {
       if (hasRecoveredFromDefaultRegion.current) {
         return;
       }
@@ -452,15 +417,12 @@ export function MapContainer() {
       }
 
       hasRecoveredFromDefaultRegion.current = true;
-      mapRef.current?.animateToRegion(
-        coordsToUserMapRegion(target.latitude, target.longitude),
-        350,
-      );
+      focusMap(mapRef.current, coordsToUserMapRegion(target.latitude, target.longitude), 350);
       return;
     }
 
-    liveRegionRef.current = mapped;
-    setRegion(mapped);
+    liveRegionRef.current = nextRegion;
+    setRegion(nextRegion);
   }
 
   async function readVisibleMapRegion(): Promise<MapRegion | null> {
@@ -605,7 +567,6 @@ export function MapContainer() {
   });
 
   const tabBarInset = getGlassTabBarInset(insets.bottom);
-  const mapRegion = initialRegion ?? DEFAULT_MAP_REGION;
 
   if (locationStatus !== 'granted') {
     return (
@@ -635,29 +596,19 @@ export function MapContainer() {
 
   return (
     <View className="flex-1">
-      {isGoogleMapsConfigured() ? (
-        <MapView
-          key={Platform.OS === 'android' ? `${colorScheme}-${mapType}` : 'map'}
+      {isYandexMapKitConfigured() ? (
+        <HiveMapView
           ref={mapRef}
+          bottomInset={tabBarInset}
+          cameraPosition={initialCamera}
+          colorScheme={colorScheme}
+          mapType={mapType}
           style={styles.mapLayer}
-          initialRegion={liveRegionRef.current ?? mapRegion}
-          onRegionChange={handleRegionChange}
-          onRegionChangeComplete={handleRegionChangeComplete}
           onMapReady={() => {
             void readVisibleMapRegion();
           }}
-          showsUserLocation
-          showsMyLocationButton={false}
-          userInterfaceStyle={colorScheme}
-          mapType={mapType === 'satellite' ? 'hybrid' : 'standard'}
-          customMapStyle={
-            mapType === 'standard'
-              ? colorScheme === 'dark'
-                ? HIVE_DARK_MAP_STYLE
-                : HIVE_LIGHT_MAP_STYLE
-              : undefined
-          }
-          {...(Platform.OS === 'android' ? { googleRenderer: 'LEGACY' as const } : {})}
+          onRegionChange={handleRegionChange}
+          onRegionChangeComplete={handleRegionChangeComplete}
         >
           {isOverview
             ? (overviewQuery.data?.clusters ?? []).map((cluster) => (
@@ -675,12 +626,7 @@ export function MapContainer() {
             : null}
           {!isOverview
             ? filtered.stings.map((sting) => (
-                <StingMarker
-                  key={sting.id}
-                  sting={sting}
-                  imageUri={stingMarkerImages[sting.id]}
-                  onPress={() => openSting(sting.id)}
-                />
+                <StingMarker key={sting.id} sting={sting} onPress={() => openSting(sting.id)} />
               ))
             : null}
           {!isOverview
@@ -688,7 +634,6 @@ export function MapContainer() {
                 <HiveSeedMarker
                   key={hive.id}
                   hive={hive}
-                  imageUri={hiveMarkerImages[hive.id]}
                   onPress={() => {
                     trackEvent('seed_marker_tap', { zoneId: zoneQuery.data?.id });
                     openHive(hive.id);
@@ -698,25 +643,19 @@ export function MapContainer() {
             : null}
           {!isOverview
             ? activeHives.map((hive) => (
-                <HiveCircle
-                  key={hive.id}
-                  hive={hive}
-                  imageUri={hiveMarkerImages[hive.id]}
-                  onPress={() => openHive(hive.id)}
-                />
+                <HiveCircle key={hive.id} hive={hive} onPress={() => openHive(hive.id)} />
               ))
             : null}
           {!isOverview
             ? quietPlaces.map((place) => (
                 <PlaceMarker
                   key={place.id}
-                  imageUri={placeMarkerImages[place.id]}
                   place={place}
                   onPress={() => router.push(`/(modals)/place/${place.id}` as Href)}
                 />
               ))
             : null}
-        </MapView>
+        </HiveMapView>
       ) : (
         <View className="flex-1 items-center justify-center bg-hive-surface px-8">
           <Text className="text-center font-inter-semibold text-base text-hive-foreground">
@@ -729,48 +668,6 @@ export function MapContainer() {
       )}
 
       <View pointerEvents="box-none" style={styles.overlayLayer}>
-        {Platform.OS === 'android' &&
-          !isOverview &&
-          activeHives.map((hive) => (
-            <HiveMarkerCapture
-              key={`${hive.id}:hive:${hive.activeStingsCount}`}
-              count={hive.activeStingsCount}
-              hiveId={hive.id}
-              variant="hive"
-              onCaptured={handleHiveMarkerCaptured}
-            />
-          ))}
-        {Platform.OS === 'android' &&
-          !isOverview &&
-          seedHives.map((hive) => (
-            <HiveMarkerCapture
-              key={`${hive.id}:seed:${hive.activeStingsCount}`}
-              count={hive.activeStingsCount}
-              hiveId={hive.id}
-              variant="seed"
-              onCaptured={handleHiveMarkerCaptured}
-            />
-          ))}
-        {Platform.OS === 'android' &&
-          !isOverview &&
-          filtered.stings.map((sting) => (
-            <StingMarkerCapture
-              key={sting.id}
-              sting={sting}
-              onCaptured={handleStingMarkerCaptured}
-            />
-          ))}
-        {Platform.OS === 'android' &&
-          !isOverview &&
-          quietPlaces.map((place) => (
-            <PlaceMarkerCapture
-              key={`${place.id}:${place.coverThumbnailUrl ?? ''}`}
-              coverUrl={place.coverThumbnailUrl}
-              placeId={place.id}
-              onCaptured={handlePlaceMarkerCaptured}
-            />
-          ))}
-
         {!isOverview ? (
           <View pointerEvents="box-none" style={[styles.filterChips, { top: chipsTop }]}>
             <MapFilterChips value={mapFilter} onChange={setMapFilter} />

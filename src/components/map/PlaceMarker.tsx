@@ -1,41 +1,44 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
-import { Marker } from 'react-native-maps';
+import { useEffect, useId, useMemo, useRef, useState, type Ref } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Marker } from 'expo-yandex-mapkit';
 import Svg, { ClipPath, Defs, Path, Image as SvgImage } from 'react-native-svg';
-import { captureRef } from 'react-native-view-shot';
 
+import {
+  captureSvgMarkerIcon,
+  markerIconScale,
+} from '@/src/components/map/capture-svg-marker-icon';
 import { SEED_FILL } from '@/src/components/map/HiveMarkerFace';
 import type { PlaceSummary } from '@/src/types';
 import { getRoundedHexagonPath } from '@/src/utils/hive-hexagon';
 
-export const PLACE_MARKER_SIZE = 52;
+export const PLACE_MARKER_SIZE = 100;
 const BORDER = 2;
 
 type PlaceMarkerProps = {
   place: PlaceSummary;
-  imageUri?: string | null;
   onPress?: () => void;
-};
-
-type PlaceMarkerCaptureProps = {
-  placeId: string;
-  coverUrl: string | null;
-  onCaptured: (placeId: string, uri: string) => void;
 };
 
 function PlaceMarkerFace({
   coverUrl,
   onImageLoad,
+  svgRef,
 }: {
   coverUrl: string | null;
   onImageLoad?: () => void;
+  svgRef?: Ref<Svg>;
 }) {
   const clipId = useId().replace(/:/g, '');
   const path = useMemo(() => getRoundedHexagonPath(PLACE_MARKER_SIZE, 8, BORDER / 2 + 0.5), []);
 
   return (
     <View collapsable={false} style={styles.root}>
-      <Svg height={PLACE_MARKER_SIZE} width={PLACE_MARKER_SIZE}>
+      <Svg
+        ref={svgRef}
+        height={PLACE_MARKER_SIZE}
+        viewBox={`0 0 ${PLACE_MARKER_SIZE} ${PLACE_MARKER_SIZE}`}
+        width={PLACE_MARKER_SIZE}
+      >
         <Defs>
           <ClipPath id={clipId}>
             <Path d={path} />
@@ -59,84 +62,43 @@ function PlaceMarkerFace({
   );
 }
 
-export function PlaceMarkerCapture({ placeId, coverUrl, onCaptured }: PlaceMarkerCaptureProps) {
-  const viewRef = useRef<View>(null);
+export function PlaceMarker({ place, onPress }: PlaceMarkerProps) {
+  const svgRef = useRef<Svg>(null);
+  const [iconUri, setIconUri] = useState<string | null>(null);
+  const coverUrl = place.coverThumbnailUrl;
+  const point = { latitude: place.center.lat, longitude: place.center.lng };
 
-  const capture = useCallback(async () => {
-    if (!viewRef.current) {
+  useEffect(() => {
+    setIconUri(null);
+  }, [coverUrl]);
+
+  const handleImageLoad = () => {
+    const svg = svgRef.current;
+    if (!svg) {
       return;
     }
 
-    try {
-      const uri = await captureRef(viewRef, {
-        format: 'png',
-        quality: 1,
-        result: 'tmpfile',
-      });
-      onCaptured(placeId, uri);
-    } catch {
-      // Повторим, когда обложка догрузится.
-    }
-  }, [onCaptured, placeId]);
+    setTimeout(() => {
+      if (svgRef.current !== svg) {
+        return;
+      }
 
-  useEffect(() => {
-    const timer = setTimeout(
-      () => {
-        void capture();
-      },
-      coverUrl ? 200 : 80,
-    );
-
-    return () => clearTimeout(timer);
-  }, [capture, coverUrl]);
-
-  return (
-    <View
-      ref={viewRef}
-      collapsable={false}
-      pointerEvents="none"
-      style={styles.offscreen}
-      onLayout={() => {
-        if (!coverUrl) {
-          void capture();
+      void captureSvgMarkerIcon(svg, PLACE_MARKER_SIZE).then((uri) => {
+        if (uri && svgRef.current === svg) {
+          setIconUri(uri);
         }
-      }}
-    >
-      <PlaceMarkerFace
-        coverUrl={coverUrl}
-        onImageLoad={() => {
-          void capture();
-        }}
-      />
-    </View>
-  );
-}
-
-export function PlaceMarker({ place, imageUri, onPress }: PlaceMarkerProps) {
-  const [tracksViewChanges, setTracksViewChanges] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setTracksViewChanges(false), 800);
-    return () => clearTimeout(timer);
-  }, [place.coverThumbnailUrl]);
-
-  const coordinate = {
-    latitude: place.center.lat,
-    longitude: place.center.lng,
+      });
+    }, 50);
   };
 
-  // На Android New Architecture кастомный View в Marker снимается в bitmap ~100px
-  // и шестиугольник обрезается. Тот же обход, что у улья и жала: готовый png.
-  if (Platform.OS === 'android') {
-    if (!imageUri) {
-      return null;
-    }
-
+  if (coverUrl && iconUri) {
     return (
       <Marker
         anchor={{ x: 0.5, y: 0.5 }}
-        coordinate={coordinate}
-        image={{ uri: imageUri, width: PLACE_MARKER_SIZE, height: PLACE_MARKER_SIZE }}
+        handled
+        point={point}
+        scale={markerIconScale()}
+        source={{ uri: iconUri }}
         tracksViewChanges={false}
         onPress={onPress}
       />
@@ -144,14 +106,22 @@ export function PlaceMarker({ place, imageUri, onPress }: PlaceMarkerProps) {
   }
 
   return (
-    <Marker
-      anchor={{ x: 0.5, y: 0.5 }}
-      coordinate={coordinate}
-      tracksViewChanges={tracksViewChanges}
-      onPress={onPress}
-    >
-      <PlaceMarkerFace coverUrl={place.coverThumbnailUrl} />
-    </Marker>
+    <>
+      {coverUrl ? (
+        <View collapsable={false} pointerEvents="none" style={styles.rasterizer}>
+          <PlaceMarkerFace coverUrl={coverUrl} svgRef={svgRef} onImageLoad={handleImageLoad} />
+        </View>
+      ) : null}
+      <Marker
+        anchor={{ x: 0.5, y: 0.5 }}
+        handled
+        point={point}
+        tracksViewChanges={false}
+        onPress={onPress}
+      >
+        <PlaceMarkerFace coverUrl={null} />
+      </Marker>
+    </>
   );
 }
 
@@ -160,12 +130,11 @@ const styles = StyleSheet.create({
     width: PLACE_MARKER_SIZE,
     height: PLACE_MARKER_SIZE,
   },
-  offscreen: {
+  rasterizer: {
     position: 'absolute',
-    left: -9999,
+    left: -1000,
     top: 0,
     width: PLACE_MARKER_SIZE,
     height: PLACE_MARKER_SIZE,
-    opacity: 0,
   },
 });

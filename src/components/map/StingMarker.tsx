@@ -1,8 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { useCallback, useEffect, useRef } from 'react';
-import { Image, Platform, StyleSheet, Text, View } from 'react-native';
-import { Marker } from 'react-native-maps';
-import { captureRef } from 'react-native-view-shot';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import { Marker } from 'expo-yandex-mapkit';
 
 import { getProfileInitials } from '@/src/components/profile/ProfileAvatar';
 import { useMapMarkerTracking } from '@/src/hooks/useMapMarkerTracking';
@@ -19,12 +17,6 @@ const SURFACE_STRONG = '#201C16';
 interface StingMarkerProps {
   sting: Sting;
   onPress?: () => void;
-  imageUri?: string | null;
-}
-
-interface StingMarkerCaptureProps {
-  sting: Sting;
-  onCaptured: (stingId: string, uri: string) => void;
 }
 
 function useStingMarkerVisual(sting: Sting) {
@@ -73,97 +65,19 @@ function StingMarkerFace({
   );
 }
 
-export function StingMarkerCapture({ sting, onCaptured }: StingMarkerCaptureProps) {
-  const viewRef = useRef<View>(null);
-  const { username, displayUri, initials } = useStingMarkerVisual(sting);
-
-  const capture = useCallback(async () => {
-    if (!viewRef.current) {
-      return;
-    }
-
-    try {
-      const uri = await captureRef(viewRef, {
-        format: 'png',
-        quality: 1,
-        result: 'tmpfile',
-      });
-      onCaptured(sting.id, uri);
-    } catch {
-      // Повторим на следующем layout/таймере.
-    }
-  }, [onCaptured, sting.id]);
-
-  useEffect(() => {
-    const timer = setTimeout(
-      () => {
-        void capture();
-      },
-      displayUri ? 200 : 80,
-    );
-
-    return () => clearTimeout(timer);
-  }, [capture, displayUri]);
-
-  return (
-    <View
-      ref={viewRef}
-      collapsable={false}
-      pointerEvents="none"
-      style={styles.offscreen}
-      onLayout={() => {
-        if (!displayUri) {
-          void capture();
-        }
-      }}
-    >
-      <StingMarkerFace
-        displayUri={displayUri}
-        initials={initials}
-        username={username}
-        onImageLoad={() => {
-          void capture();
-        }}
-      />
-    </View>
-  );
-}
-
-export function StingMarker({ sting, onPress, imageUri }: StingMarkerProps) {
+export function StingMarker({ sting, onPress }: StingMarkerProps) {
   const { username, displayUri, initials } = useStingMarkerVisual(sting);
   const { tracksViewChanges, handleLayout } = useMapMarkerTracking(
     `${sting.id}:${displayUri ?? 'initials'}`,
   );
 
-  const coordinate = {
-    latitude: sting.location.lat,
-    longitude: sting.location.lng,
-  };
-
-  // На Android New Architecture кастомный View в Marker снимается в bitmap ~100px
-  // и кружок обрезается на физических экранах высокой плотности.
-  if (Platform.OS === 'android') {
-    if (!imageUri) {
-      return null;
-    }
-
-    return (
-      <Marker
-        coordinate={coordinate}
-        anchor={{ x: 0.5, y: 0.5 }}
-        image={{ uri: imageUri, width: STING_MARKER_SIZE, height: STING_MARKER_SIZE }}
-        tracksViewChanges={false}
-        onPress={onPress}
-      />
-    );
-  }
-
   return (
     <Marker
-      coordinate={coordinate}
-      onPress={onPress}
-      tracksViewChanges={tracksViewChanges}
       anchor={{ x: 0.5, y: 0.5 }}
+      handled
+      point={{ latitude: sting.location.lat, longitude: sting.location.lng }}
+      tracksViewChanges={tracksViewChanges}
+      onPress={onPress}
     >
       <View collapsable={false} onLayout={handleLayout} style={styles.shadow}>
         <StingMarkerFace
@@ -208,13 +122,5 @@ const styles = StyleSheet.create({
     borderRadius: INNER_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  offscreen: {
-    position: 'absolute',
-    left: -9999,
-    top: 0,
-    width: STING_MARKER_SIZE,
-    height: STING_MARKER_SIZE,
-    opacity: 0,
   },
 });

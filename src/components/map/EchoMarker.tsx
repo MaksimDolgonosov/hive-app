@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { Marker } from 'react-native-maps';
+import { Marker } from 'expo-yandex-mapkit';
 
 import type { StingEchoCell } from '@/src/types';
 
@@ -16,12 +16,17 @@ export function EchoMarker({ echo, onPress }: EchoMarkerProps) {
   const [tracksViewChanges, setTracksViewChanges] = useState(true);
   const size = Math.min(MAX_SIZE, MIN_SIZE + echo.count * 2);
 
+  useEffect(() => {
+    const timer = setTimeout(() => setTracksViewChanges(false), 400);
+    return () => clearTimeout(timer);
+  }, [echo.cellId, size]);
+
   return (
     <Marker
       anchor={{ x: 0.5, y: 0.5 }}
-      coordinate={{ latitude: echo.center.lat, longitude: echo.center.lng }}
+      handled
+      point={{ latitude: echo.center.lat, longitude: echo.center.lng }}
       tracksViewChanges={tracksViewChanges}
-      onLayout={() => setTracksViewChanges(false)}
       onPress={() => onPress(echo)}
     >
       <View

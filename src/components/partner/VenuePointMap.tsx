@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import { StyleSheet, View } from 'react-native';
+import { Marker, type YandexMapViewRef } from 'expo-yandex-mapkit';
 
-import { isGoogleMapsConfigured } from '@/src/config/env';
-import { HIVE_DARK_MAP_STYLE, HIVE_LIGHT_MAP_STYLE } from '@/src/constants/map-style';
+import { HiveMapView } from '@/src/components/map/HiveMapView';
 import { useAppColorScheme } from '@/src/hooks/useHiveTheme';
 import type { GeoPoint } from '@/src/types';
+import { regionToCamera } from '@/src/utils/map';
 
 const DELTA = 0.012;
 
@@ -25,24 +25,33 @@ export function VenuePointMap({
   onInteractionChange,
 }: VenuePointMapProps) {
   const colorScheme = useAppColorScheme();
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<YandexMapViewRef>(null);
   const [ready, setReady] = useState(false);
   const movedToCamera = useRef(false);
   const center = point ?? camera ?? { lat: 55.751244, lng: 37.618423 };
+  const [initialCamera] = useState(() =>
+    regionToCamera({
+      latitude: center.lat,
+      longitude: center.lng,
+      latitudeDelta: DELTA,
+      longitudeDelta: DELTA,
+    }),
+  );
 
   useEffect(() => {
     if (!ready || point || !camera || movedToCamera.current) {
       return;
     }
+
     movedToCamera.current = true;
-    mapRef.current?.animateToRegion(
-      {
+    void mapRef.current?.setCenter(
+      regionToCamera({
         latitude: camera.lat,
         longitude: camera.lng,
         latitudeDelta: DELTA,
         longitudeDelta: DELTA,
-      },
-      250,
+      }),
+      { durationSeconds: 0.25, animation: 'smooth' },
     );
   }, [camera, point, ready]);
 
@@ -50,27 +59,24 @@ export function VenuePointMap({
     if (!ready || !point) {
       return;
     }
-    mapRef.current?.animateToRegion(
-      {
+
+    void mapRef.current?.setCenter(
+      regionToCamera({
         latitude: point.lat,
         longitude: point.lng,
         latitudeDelta: DELTA,
         longitudeDelta: DELTA,
-      },
-      250,
+      }),
+      { durationSeconds: 0.25, animation: 'smooth' },
     );
   }, [point, ready]);
 
-  function select(event: { nativeEvent: { coordinate: { latitude: number; longitude: number } } }) {
+  function select(latitude: number, longitude: number) {
     if (!editable || !onChange) {
       return;
     }
-    const { latitude, longitude } = event.nativeEvent.coordinate;
-    onChange({ lat: latitude, lng: longitude });
-  }
 
-  if (!isGoogleMapsConfigured()) {
-    return null;
+    onChange({ lat: latitude, lng: longitude });
   }
 
   return (
@@ -81,37 +87,34 @@ export function VenuePointMap({
       onTouchEnd={() => onInteractionChange?.(false)}
       onTouchStart={() => onInteractionChange?.(true)}
     >
-      <MapView
+      <HiveMapView
         ref={mapRef}
-        style={styles.map}
-        initialRegion={{
-          latitude: center.lat,
-          longitude: center.lng,
-          latitudeDelta: DELTA,
-          longitudeDelta: DELTA,
-        }}
-        userInterfaceStyle={colorScheme}
-        showsUserLocation
-        showsMyLocationButton={false}
-        mapType="standard"
-        customMapStyle={colorScheme === 'dark' ? HIVE_DARK_MAP_STYLE : HIVE_LIGHT_MAP_STYLE}
-        onMapReady={() => setReady(true)}
+        cameraPosition={initialCamera}
+        colorScheme={colorScheme}
         scrollEnabled={editable}
+        showUserPosition
+        style={styles.map}
         zoomEnabled={editable}
-        rotateEnabled={editable}
-        pitchEnabled={editable}
-        onPress={editable ? select : undefined}
-        {...(Platform.OS === 'android' ? { googleRenderer: 'LEGACY' as const } : {})}
+        onMapReady={() => setReady(true)}
+        onPress={editable ? (next) => select(next.latitude, next.longitude) : undefined}
       >
         {point ? (
           <Marker
-            coordinate={{ latitude: point.lat, longitude: point.lng }}
+            anchor={{ x: 0.5, y: 0.5 }}
             draggable={editable}
-            pinColor="#FFB800"
-            onDragEnd={editable ? select : undefined}
-          />
+            handled
+            point={{ latitude: point.lat, longitude: point.lng }}
+            onDragEnd={
+              editable
+                ? (event) =>
+                    select(event.nativeEvent.point.latitude, event.nativeEvent.point.longitude)
+                : undefined
+            }
+          >
+            <View style={styles.pin} />
+          </Marker>
         ) : null}
-      </MapView>
+      </HiveMapView>
     </View>
   );
 }
@@ -122,5 +125,13 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  pin: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#FFB800',
+    borderWidth: 2,
+    borderColor: '#201C16',
   },
 });

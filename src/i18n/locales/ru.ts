@@ -135,7 +135,7 @@ export const ru: TranslationSchema = {
     emptyMessage: 'Стань первым здесь — твой кадр появится на карте сразу.',
     mapsKeyMissingTitle: 'Карта недоступна',
     mapsKeyMissingMessage:
-      'Этот APK собран без Google Maps API key. Ключ в .env недостаточно — нужна новая native-сборка с секретом EAS.',
+      'Сборка без ключа Yandex MapKit. Ключ в .env недостаточен — нужна новая native-сборка с секретом EAS YANDEX_MAPKIT_API_KEY.',
     filter: {
       all: 'Всё',
       fresh: 'Свежее',

@@ -92,7 +92,7 @@ export function HiveNearbyCard({ hive, distanceM, onPress }: HiveNearbyCardProps
         </View>
 
         <View className="flex-1 gap-1.5">
-          <Text className="font-display text-[17px] text-hive-foreground">
+          <Text className="font-semibold font-display text-[17px] text-hive-foreground">
             {isSeed ? t('hive.seed.title') : t('hive.title')}
           </Text>
           <View className="flex-row items-center gap-2">

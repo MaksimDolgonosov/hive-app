@@ -126,7 +126,7 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
                   />
                 ) : null}
                 <View className="gap-1 px-3 py-3">
-                  <Text className="font-display text-lg text-hive-foreground">
+                  <Text className="font-semibold font-display text-lg text-hive-foreground">
                     {data.hive.place.name}
                   </Text>
                   <Text className="font-inter-semibold text-xs text-hive-primary">{t('place.badge')}</Text>
@@ -165,7 +165,7 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
 
         {isSeed ? (
           <View className="gap-1 rounded-2xl bg-hive-surface2 p-3.5">
-            <Text className="font-display text-[15px] text-hive-foreground">
+            <Text className="font-semibold font-display text-[15px] text-hive-foreground">
               {t('hive.seed.title')}
             </Text>
             <Text className="font-inter text-[13px] text-hive-muted">{t('hive.seed.hint')}</Text>
@@ -183,7 +183,7 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
                       {isSeed ? t('hive.seed.photosDisappearIn') : t('hive.dissolvesIn')}
                     </Text>
                   </View>
-                  <Text className="font-display text-[15px] text-hive-primary">
+                  <Text className="font-semibold font-display text-[15px] text-hive-primary">
                     {countdown.isExpired ? '0:00' : countdown.remainingLabel}
                   </Text>
                 </View>

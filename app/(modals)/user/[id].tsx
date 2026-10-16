@@ -256,7 +256,7 @@ function BlockedProfileStub({
   return (
     <View className="items-center gap-4 px-5 pt-6">
       <ProfileAvatar avatarUrl={user.avatarUrl} size={88} username={user.username} />
-      <Text className="font-display text-xl text-hive-foreground">{user.username}</Text>
+      <Text className="font-semibold font-display text-xl text-hive-foreground">{user.username}</Text>
       <Text className="text-center font-inter text-sm text-hive-muted">
         {t('safety.hiddenStub')}
       </Text>

@@ -49,7 +49,7 @@ export function usePushNotificationRouting(enabled: boolean) {
       });
 
       if (cancelled) {
-        subscription.remove();
+        subscription?.remove();
         return;
       }
 

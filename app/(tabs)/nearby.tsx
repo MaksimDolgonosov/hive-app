@@ -203,7 +203,7 @@ export default function NearbyScreen() {
         className="flex-row items-end justify-between px-5 pb-4"
         style={{ paddingTop: insets.top + 8 }}
       >
-        <Text className="font-display text-[28px] text-hive-foreground">{t('nearby.title')}</Text>
+        <Text className="font-semibold font-display text-[28px] text-hive-foreground">{t('nearby.title')}</Text>
         <View className="flex-row items-center gap-1.5 rounded-full bg-hive-signal/20 px-3 py-[7px]">
           <View className="h-1.5 w-1.5 rounded-full bg-hive-signal" />
           <Text className="font-inter-semibold text-xs text-hive-signal">

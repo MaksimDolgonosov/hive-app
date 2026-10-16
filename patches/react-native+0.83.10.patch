@@ -1,0 +1,105 @@
+diff --git a/node_modules/react-native/scripts/cocoapods/rncore.rb b/node_modules/react-native/scripts/cocoapods/rncore.rb
+index 9aeb449..8fe8c39 100644
+--- a/node_modules/react-native/scripts/cocoapods/rncore.rb
++++ b/node_modules/react-native/scripts/cocoapods/rncore.rb
+@@ -86,7 +86,7 @@ class ReactNativeCoreUtils
+         if ENV["RCT_TESTONLY_RNCORE_TARBALL_PATH"]
+             abort_if_use_local_rncore_with_no_file()
+             rncore_log("Using local xcframework at #{ENV["RCT_TESTONLY_RNCORE_TARBALL_PATH"]}")
+-            return {:http => "file://#{ENV["RCT_TESTONLY_RNCORE_TARBALL_PATH"]}" }
++            return {:http => ReactNativePodsUtils.local_file_uri(ENV["RCT_TESTONLY_RNCORE_TARBALL_PATH"]) }
+         end
+ 
+         if ENV["RCT_USE_PREBUILT_RNCORE"] == "1"
+@@ -143,7 +143,7 @@ class ReactNativeCoreUtils
+         rncore_log("  #{Pathname.new(destinationDebug).relative_path_from(Pathname.pwd).to_s}")
+         rncore_log("  #{Pathname.new(destinationRelease).relative_path_from(Pathname.pwd).to_s}")
+ 
+-        return {:http => URI::File.build(path: destinationDebug).to_s }
++        return {:http => ReactNativePodsUtils.local_file_uri(destinationDebug) }
+     end
+ 
+     def self.podspec_source_download_prebuilt_nightly_tarball()
+@@ -179,7 +179,7 @@ class ReactNativeCoreUtils
+         rncore_log("Resolved nightly ReactNativeCore-prebuilt version:")
+         rncore_log("  #{Pathname.new(destinationDebug).relative_path_from(Pathname.pwd).to_s}")
+         rncore_log("  #{Pathname.new(destinationRelease).relative_path_from(Pathname.pwd).to_s}")
+-        return {:http => URI::File.build(path: destinationDebug).to_s }
++        return {:http => ReactNativePodsUtils.local_file_uri(destinationDebug) }
+     end
+ 
+     def self.process_dsyms(frameworkTarball, dSymsTarball)
+diff --git a/node_modules/react-native/scripts/cocoapods/rndependencies.rb b/node_modules/react-native/scripts/cocoapods/rndependencies.rb
+index 24ebaa5..061e44e 100644
+--- a/node_modules/react-native/scripts/cocoapods/rndependencies.rb
++++ b/node_modules/react-native/scripts/cocoapods/rndependencies.rb
+@@ -70,7 +70,7 @@ class ReactNativeDependenciesUtils
+         if ENV["RCT_USE_LOCAL_RN_DEP"]
+             abort_if_use_local_rndeps_with_no_file()
+             rndeps_log("Using local xcframework at #{ENV["RCT_USE_LOCAL_RN_DEP"]}")
+-            return {:http => "file://#{ENV["RCT_USE_LOCAL_RN_DEP"]}" }
++            return {:http => ReactNativePodsUtils.local_file_uri(ENV["RCT_USE_LOCAL_RN_DEP"]) }
+         end
+ 
+         if ENV["RCT_USE_RN_DEP"] && ENV["RCT_USE_RN_DEP"] == "1"
+@@ -161,7 +161,7 @@ class ReactNativeDependenciesUtils
+         destinationDebug = download_stable_rndeps(@@react_native_path, @@react_native_version, :debug)
+         download_stable_rndeps(@@react_native_path, @@react_native_version, :release)
+ 
+-        return {:http => URI::File.build(path: destinationDebug).to_s }
++        return {:http => ReactNativePodsUtils.local_file_uri(destinationDebug) }
+     end
+ 
+     def self.release_tarball_url(version, build_type)
+@@ -228,7 +228,7 @@ class ReactNativeDependenciesUtils
+         destinationDebug = download_nightly_rndeps(@@react_native_path, @@react_native_version, :debug)
+         download_nightly_rndeps(@@react_native_path, @@react_native_version, :release)
+ 
+-        return {:http => URI::File.build(path: destinationDebug).to_s }
++        return {:http => ReactNativePodsUtils.local_file_uri(destinationDebug) }
+         return {:http => url}
+     end
+ 
+diff --git a/node_modules/react-native/scripts/cocoapods/utils.rb b/node_modules/react-native/scripts/cocoapods/utils.rb
+index 9070355..0a095d0 100644
+--- a/node_modules/react-native/scripts/cocoapods/utils.rb
++++ b/node_modules/react-native/scripts/cocoapods/utils.rb
+@@ -4,12 +4,18 @@
+ # LICENSE file in the root directory of this source tree.
+ 
+ require 'shellwords'
++require 'uri'
+ 
+ require_relative "./helpers.rb"
+ require_relative "./jsengine.rb"
+ 
+ # Utilities class for React Native Cocoapods
+ class ReactNativePodsUtils
++    # URI::File.build validates path components as ASCII, so escape the filesystem path first.
++    def self.local_file_uri(path)
++        URI::File.build(path: URI::DEFAULT_PARSER.escape(path)).to_s
++    end
++
+     def self.warn_if_not_on_arm64
+         if SysctlChecker.new().call_sysctl_arm64() == 1 && !Environment.new().ruby_platform().include?('arm64')
+             Pod::UI.warn 'Do not use "pod install" from inside Rosetta2 (x86_64 emulation on arm64).'
+diff --git a/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec b/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec
+index 523b509..d7cdcda 100644
+--- a/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec
++++ b/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec
+@@ -14,6 +14,7 @@ begin
+     {paths: [process.argv[1]]},
+     )', __dir__]).strip
+   )
++  react_native_path.force_encoding(Encoding::UTF_8)
+ rescue => e
+   # Fallback to the parent directory if the above command fails (e.g when building locally in OOT Platform)
+   react_native_path = File.join(__dir__, "..", "..")
+@@ -75,6 +76,7 @@ Pod::Spec.new do |spec|
+       hermes_compiler_path = File.dirname(Pod::Executable.execute_command('node', ['-p',
+         "require.resolve(\"hermes-compiler\", {paths: [\"#{react_native_path}\"]})", __dir__]).strip
+       )
++      hermes_compiler_path.force_encoding(Encoding::UTF_8)
+       hermesc_path = File.join(hermes_compiler_path, 'hermesc', 'osx-bin', 'hermesc')
+ 
+       pods_root = Pod::Config.instance.sandbox.root

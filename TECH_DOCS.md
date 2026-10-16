@@ -1283,7 +1283,7 @@ i18n (уже заведены, не плодить дубликаты): `auth.lo
 
 Не вызывает API и не пишет store — только `onSuccess(idToken)` / `onError(i18nKey)`.
 
-SDK: Expo 54, `expo-auth-session` (Google provider). Перед правками сверять [доку Expo SDK 54 AuthSession](https://docs.expo.dev/versions/v54.0.0/sdk/auth-session/). Хелперы Google в AuthSession помечены deprecated в пользу native SDK — **остаёмся на auth-session**, пока флоу стабилен на dev build; миграция — §8.11.
+SDK: Expo 55, `expo-auth-session` (Google provider). Перед правками сверять [доку Expo SDK 55 AuthSession](https://docs.expo.dev/versions/v55.0.0/sdk/auth-session/). Хелперы Google в AuthSession помечены deprecated в пользу native SDK — **остаёмся на auth-session**, пока флоу стабилен на dev build; миграция — §8.11.
 
 #### `src/api/auth.ts`
 
@@ -1763,7 +1763,7 @@ GET /auth/me/blocks
 # Hive — ТЗ на привлечение пользователей (frontend, React Native)
 
 Версия: 0.1
-Стек: Expo SDK 54 (см. [docs.expo.dev/versions/v54.0.0](https://docs.expo.dev/versions/v54.0.0/)), Expo Router, React Query, Zustand, NativeWind
+Стек: Expo SDK 55 (см. [docs.expo.dev/versions/v55.0.0](https://docs.expo.dev/versions/v55.0.0/)), Expo Router, React Query, Zustand, NativeWind
 Контракты и серверные правила: **`BACKEND_GROWTH_TZ.md`** — источник истины, здесь не дублируются
 Базовое ТЗ приложения: `часть «ТЗ frontend»`; архитектура модулей: `TECH_DOCS.md`
 
@@ -2793,7 +2793,7 @@ paused --(owner resume)-->    live
 
 ## 9. Frontend
 
-Expo SDK 54: камера и ImagePicker — по [документации версии](https://docs.expo.dev/versions/v54.0.0/). Не писать native-модули. Выбор обложки — `src/utils/pick-place-image.ts`, один кадр, `source: camera | library`.
+Expo SDK 55: камера и ImagePicker — по [документации версии](https://docs.expo.dev/versions/v55.0.0/). Не писать native-модули. Выбор обложки — `src/utils/pick-place-image.ts`, один кадр, `source: camera | library`.
 
 ### 9.1 Экраны
 

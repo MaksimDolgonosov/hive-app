@@ -97,7 +97,12 @@ export function LoadingScreen() {
           </View>
         </View>
         <View style={styles.wordmark}>
-          <Text style={[styles.appName, { color: theme.text, fontFamily: theme.fontDisplay }]}>
+          <Text
+            style={[
+              styles.appName,
+              { color: theme.text, fontFamily: theme.fontDisplay, fontWeight: '600' },
+            ]}
+          >
             HIVE
           </Text>
           <Text style={[styles.tagline, { color: theme.textMuted, fontFamily: theme.fontBody }]}>

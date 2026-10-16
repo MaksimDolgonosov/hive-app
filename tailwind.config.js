@@ -1,3 +1,5 @@
+const { platformSelect } = require('nativewind/theme');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -34,7 +36,11 @@ module.exports = {
         'inter-medium': ['Inter-Medium', 'sans-serif'],
         'inter-semibold': ['Inter-SemiBold', 'sans-serif'],
         'inter-bold': ['Inter-Bold', 'sans-serif'],
-        display: ['Unbounded-SemiBold', 'sans-serif'],
+        display: platformSelect({
+          ios: 'System',
+          android: 'sans-serif',
+          default: 'System',
+        }),
       },
     },
   },

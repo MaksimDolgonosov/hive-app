@@ -111,7 +111,7 @@ export default function InvitesScreen() {
               <Text className="font-inter-semibold text-xs uppercase tracking-[1px] text-hive-muted">
                 {t('invite.codeLabel')}
               </Text>
-              <Text className="mt-3 font-display text-[34px] tracking-[4px] text-hive-foreground">
+              <Text className="mt-3 font-semibold font-display text-[34px] tracking-[4px] text-hive-foreground">
                 {activeInvite.code}
               </Text>
               <Text className="mt-2 text-center font-inter text-xs text-hive-dim">

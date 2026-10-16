@@ -1,7 +1,7 @@
 import { ConfigContext, ExpoConfig } from 'expo/config';
 
-// Expo evaluates this file with sucrase. Node then cannot resolve other .ts imports,
-// so the host is duplicated from legal/public-site.ts.
+// Node loads the transpiled config and cannot import legal/public-site.ts,
+// so the host is duplicated here.
 const PUBLIC_SITE_HOST = 'hive-app.site';
 
 const PRODUCTION_API_URL = 'https://hive-backend-nodejs-production.up.railway.app/api/v1';
@@ -76,13 +76,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     icon: './assets/images/icon.png',
     scheme: ['hiveapp', 'site.hiveapp.app', ...googleOAuthSchemes],
     userInterfaceStyle: 'automatic',
-    newArchEnabled: true,
     platforms: ['ios', 'android'],
-    androidNavigationBar: {
-      backgroundColor: SPLASH_DARK_BACKGROUND,
-      barStyle: 'light-content',
-      enforceContrast: false,
-    },
     splash: {
       image: SPLASH_LIGHT_IMAGE,
       resizeMode: 'cover',
@@ -101,19 +95,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         ITSAppUsesNonExemptEncryption: false,
       },
       ...(appleSignInEnabled ? { usesAppleSignIn: true } : {}),
-      config: {
-        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
-      },
     },
     android: {
       package: 'site.hiveapp.app',
       permissions: ['VIBRATE'],
       blockedPermissions: ['android.permission.RECORD_AUDIO'],
-      config: {
-        googleMaps: {
-          apiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
-        },
-      },
       icon: './assets/images/android-icon.png',
       adaptiveIcon: {
         backgroundColor: SPLASH_DARK_BACKGROUND,
@@ -121,7 +107,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         foregroundImage: './assets/images/android-icon-foreground.png',
         monochromeImage: './assets/images/android-icon-monochrome.png',
       },
-      edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
       intentFilters: [
         ...(googleAndroidOAuthScheme
@@ -158,7 +143,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       ],
     },
     plugins: [
+      // Listed first so this mod runs after expo-audio. Expo applies manifest
+      // mods in reverse plugin order, and expo-audio drops the recording service
+      // entry when background recording is off.
+      './plugins/with-blocked-microphone',
       'expo-router',
+      'expo-asset',
       ...(appleSignInEnabled ? (['expo-apple-authentication'] as const) : []),
       'expo-secure-store',
       'expo-localization',
@@ -191,9 +181,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         {
           microphonePermission: false,
           recordAudioAndroid: false,
+          // SDK 55 defaults this to true and would add a background audio mode
+          // for a shutter click that only plays in the foreground.
+          enableBackgroundPlayback: false,
         },
       ],
-      './plugins/with-blocked-microphone',
       [
         'expo-notifications',
         {
@@ -216,6 +208,20 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         ],
       ],
       './plugins/with-ios-orange-alternate-icon',
+      [
+        'react-native-maps',
+        {
+          iosGoogleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
+          androidGoogleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
+        },
+      ],
+      [
+        'expo-navigation-bar',
+        {
+          enforceContrast: false,
+          barStyle: 'light',
+        },
+      ],
       [
         'expo-splash-screen',
         {

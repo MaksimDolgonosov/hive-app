@@ -74,7 +74,7 @@ export default function PartnerOnsiteScreen() {
         onCameraReady={() => setIsReady(true)}
       />
       <View className="absolute left-0 right-0 px-6" style={{ top: insets.top + 16 }}>
-        <Text className="text-center font-display text-xl text-white">{t('partner.onsiteTitle')}</Text>
+        <Text className="text-center font-semibold font-display text-xl text-white">{t('partner.onsiteTitle')}</Text>
         <Text className="mt-2 text-center font-inter text-sm leading-5 text-white/80">{t('partner.onsiteBody')}</Text>
       </View>
       <View className="absolute bottom-0 left-0 right-0 items-center" style={{ paddingBottom: insets.bottom + 28 }}>

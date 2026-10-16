@@ -16,7 +16,7 @@ type ProfileHeaderCardProps = {
 function StatItem({ value, label }: { value: number; label: string }) {
   return (
     <View className="flex-1 items-center gap-0.5">
-      <Text className="font-display text-2xl text-hive-foreground">{value}</Text>
+      <Text className="font-semibold font-display text-2xl text-hive-foreground">{value}</Text>
       <Text className="font-inter-semibold text-[10px] uppercase tracking-[0.8px] text-hive-dim">
         {label}
       </Text>
@@ -44,7 +44,7 @@ export function ProfileHeaderCard({
 
         <View className="flex-1 gap-1">
           <View className="flex-row items-center gap-2">
-            <Text className="font-display text-[20px] text-hive-foreground">{user.username}</Text>
+            <Text className="font-semibold font-display text-[20px] text-hive-foreground">{user.username}</Text>
             <AccountTypeBadge accountType={user.accountType} />
           </View>
           <Text className="font-inter text-[13px] text-hive-muted">{subtitle}</Text>

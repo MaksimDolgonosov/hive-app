@@ -39,7 +39,7 @@ export default function HiveDetailScreen() {
         >
           <ChevronLeft color={theme.text} size={24} />
         </Pressable>
-        <Text className="flex-1 text-center font-display text-lg text-hive-foreground">
+        <Text className="flex-1 text-center font-semibold font-display text-lg text-hive-foreground">
           {t('hive.title')}
         </Text>
         <View className="w-10" />

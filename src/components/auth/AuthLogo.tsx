@@ -123,7 +123,7 @@ export function AuthLogo({ subtitle, mark = 'hexagon' }: AuthLogoProps) {
     <View className="mb-2 gap-3">
       <View className="flex-row items-center gap-2.5">
         {mark === 'appIcon' ? <AppIconMark /> : <HexagonMark />}
-        <Text className="font-display text-[19px] uppercase tracking-[1.6px] text-hive-foreground">
+        <Text className="font-semibold font-display text-[19px] uppercase tracking-[1.6px] text-hive-foreground">
           HIVE
         </Text>
       </View>

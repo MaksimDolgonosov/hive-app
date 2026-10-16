@@ -123,7 +123,7 @@ export default function PlaceCardScreen() {
         {placeQuery.isError ? <Text className="font-inter text-sm text-hive-muted">{t('place.loadError')}</Text> : null}
         {place?.hidden ? (
           <View className="gap-2 rounded-2xl bg-hive-surface p-4">
-            <Text className="font-display text-lg text-hive-foreground">{t('place.hiddenTitle')}</Text>
+            <Text className="font-semibold font-display text-lg text-hive-foreground">{t('place.hiddenTitle')}</Text>
             <Text className="font-inter text-sm text-hive-muted">{t('place.hiddenBody')}</Text>
           </View>
         ) : null}
@@ -133,7 +133,7 @@ export default function PlaceCardScreen() {
               <Image source={{ uri: place.cover.imageUrl }} style={{ width: '100%', height: 240, borderRadius: 18 }} />
             ) : null}
             <View className="flex-row items-center gap-2">
-              <Text className="font-display text-2xl text-hive-foreground">{place.name}</Text>
+              <Text className="font-semibold font-display text-2xl text-hive-foreground">{place.name}</Text>
             </View>
             <Text className="font-inter-semibold text-sm text-hive-primary">{t('place.badge')}</Text>
             <Text className="font-inter text-sm text-hive-muted">

@@ -7,13 +7,12 @@ import {
   Inter_700Bold,
   useFonts,
 } from '@expo-google-fonts/inter';
-import { Unbounded_600SemiBold } from '@expo-google-fonts/unbounded';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import * as NavigationBar from 'expo-navigation-bar';
 import * as SystemUI from 'expo-system-ui';
-import { requireOptionalNativeModule } from 'expo-modules-core';
 import { useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { Platform, View } from 'react-native';
@@ -46,7 +45,6 @@ export default function RootLayout() {
     'Inter-Medium': Inter_500Medium,
     'Inter-SemiBold': Inter_600SemiBold,
     'Inter-Bold': Inter_700Bold,
-    'Unbounded-SemiBold': Unbounded_600SemiBold,
   });
 
   useEffect(() => {
@@ -63,15 +61,7 @@ export default function RootLayout() {
       return;
     }
 
-    const navigationBar = requireOptionalNativeModule<{
-      setButtonStyleAsync: (style: 'light' | 'dark') => Promise<void>;
-    }>('ExpoNavigationBar');
-
-    if (!navigationBar) {
-      return;
-    }
-
-    void navigationBar.setButtonStyleAsync(colorScheme === 'dark' ? 'light' : 'dark');
+    NavigationBar.setStyle(colorScheme === 'dark' ? 'dark' : 'light');
   }, [colorScheme]);
 
   const isReady = (fontsLoaded || Boolean(fontError)) && localeReady && preferencesReady;

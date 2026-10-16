@@ -106,7 +106,7 @@ export default function AwardsScreen() {
                 key={award.id ?? `${award.type}-${award.createdAt}-${index}`}
                 className="rounded-2xl border border-hive-stroke bg-hive-surface px-4 py-3.5"
               >
-                <Text className="font-display text-[16px] text-hive-foreground">{copy.title}</Text>
+                <Text className="font-semibold font-display text-[16px] text-hive-foreground">{copy.title}</Text>
                 {copy.hint ? (
                   <Text className="mt-1 font-inter text-[13px] text-hive-muted">{copy.hint}</Text>
                 ) : null}

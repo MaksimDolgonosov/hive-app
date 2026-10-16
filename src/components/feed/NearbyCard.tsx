@@ -61,7 +61,7 @@ export function NearbyCard({ sting, distanceM, onPress, onAuthorPress }: NearbyC
 
         <View className="absolute bottom-3 left-3 right-3 gap-1.5">
           {sting.comment ? (
-            <Text className="font-display text-[18px] text-[#F6F2EA]" numberOfLines={1}>
+            <Text className="font-semibold font-display text-[18px] text-[#F6F2EA]" numberOfLines={1}>
               {sting.comment}
             </Text>
           ) : null}

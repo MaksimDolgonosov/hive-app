@@ -48,7 +48,7 @@ export default function PushPermissionScreen() {
         className="flex-1 justify-end px-6"
         style={{ paddingBottom: insets.bottom + 24, paddingTop: insets.top + 24 }}
       >
-        <Text className="font-display text-[28px] text-hive-foreground">
+        <Text className="font-semibold font-display text-[28px] text-hive-foreground">
           {t('push.explainTitle')}
         </Text>
         <Text className="mt-3 font-inter text-[15px] text-hive-muted">

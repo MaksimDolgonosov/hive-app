@@ -175,6 +175,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     color: HiveTheme.textOnAccent,
     fontFamily: HiveTheme.fontDisplay,
+    fontWeight: '600',
     includeFontPadding: false,
     textAlign: 'center',
     textAlignVertical: 'center',

@@ -50,7 +50,7 @@ export function StingAuthorBadge({
             backgroundColor: HiveTheme.accent,
           }}
         >
-          <Text className="font-display text-[9px] text-hive-on-accent">{initials}</Text>
+          <Text className="font-semibold font-display text-[9px] text-hive-on-accent">{initials}</Text>
         </View>
       )}
 

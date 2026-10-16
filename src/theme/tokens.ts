@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export type AppColorScheme = 'dark' | 'light';
 
 /** light/dark фиксируют палитру. system повторяет тему телефона. */
@@ -50,7 +52,7 @@ const SHARED = {
   radiusLg: 28,
   radiusMd: 18,
   radiusPill: 999,
-  fontDisplay: 'Unbounded-SemiBold',
+  fontDisplay: Platform.OS === 'android' ? 'sans-serif' : 'System',
   fontBody: 'Inter',
   fontBodyMedium: 'Inter-Medium',
   fontBodySemiBold: 'Inter-SemiBold',

@@ -20,7 +20,7 @@ export function WaitlistContent({ zone, joining, joined, onJoin }: WaitlistConte
   if (joined) {
     return (
       <View className="flex-1 items-center justify-center px-8">
-        <Text className="text-center font-display text-[22px] text-hive-foreground">
+        <Text className="text-center font-semibold font-display text-[22px] text-hive-foreground">
           {t('invite.waitlistJoinedTitle')}
         </Text>
         <Text className="mt-3 text-center font-inter text-sm text-hive-muted">
@@ -32,7 +32,7 @@ export function WaitlistContent({ zone, joining, joined, onJoin }: WaitlistConte
 
   return (
     <View className="flex-1 items-center justify-center px-8">
-      <Text className="text-center font-display text-[22px] text-hive-foreground">
+      <Text className="text-center font-semibold font-display text-[22px] text-hive-foreground">
         {t('invite.waitlistTitle')}
       </Text>
       <Text className="mt-3 text-center font-inter text-sm text-hive-muted">

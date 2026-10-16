@@ -140,7 +140,7 @@ export function HiveDetailContent({ hiveId }: HiveDetailContentProps) {
                       {t('hive.dissolvesIn')}
                     </Text>
                   </View>
-                  <Text className="font-display text-[15px] text-hive-primary">
+                  <Text className="font-semibold font-display text-[15px] text-hive-primary">
                     {countdown.isExpired ? '0:00' : countdown.remainingLabel}
                   </Text>
                 </View>

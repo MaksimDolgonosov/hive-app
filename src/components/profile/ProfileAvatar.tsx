@@ -72,7 +72,7 @@ function AvatarContent({
         justifyContent: 'center',
       }}
     >
-      <Text className="font-display text-hive-on-accent" style={{ fontSize }}>
+      <Text className="font-semibold font-display text-hive-on-accent" style={{ fontSize }}>
         {initials}
       </Text>
     </View>

@@ -40,7 +40,7 @@ export function MapEmptyState({
                 <TitleIcon color={theme.accent} size={14} strokeWidth={2.4} />
                 <Text
                   numberOfLines={1}
-                  className="min-w-0 flex-1 font-display text-[15px] text-hive-foreground"
+                  className="min-w-0 flex-1 font-semibold font-display text-[15px] text-hive-foreground"
                 >
                   {isFirstEver ? t('growth.emptyFirstTitle') : t('growth.emptyQuietTitle')}
                 </Text>

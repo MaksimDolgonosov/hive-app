@@ -40,7 +40,7 @@ function resolveColorScheme(preference: ThemePreference): AppColorScheme {
 }
 
 function applyNativeColorScheme(preference: ThemePreference) {
-  Appearance.setColorScheme(preference === 'system' ? null : preference);
+  Appearance.setColorScheme(preference === 'system' ? 'unspecified' : preference);
 }
 
 interface PreferencesState {

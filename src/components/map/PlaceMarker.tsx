@@ -1,6 +1,6 @@
+import { Marker } from 'expo-yandex-mapkit';
 import { useEffect, useId, useMemo, useRef, useState, type Ref } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Marker } from 'expo-yandex-mapkit';
 import Svg, { ClipPath, Defs, Path, Image as SvgImage } from 'react-native-svg';
 
 import {
@@ -11,7 +11,7 @@ import { SEED_FILL } from '@/src/components/map/HiveMarkerFace';
 import type { PlaceSummary } from '@/src/types';
 import { getRoundedHexagonPath } from '@/src/utils/hive-hexagon';
 
-export const PLACE_MARKER_SIZE = 100;
+export const PLACE_MARKER_SIZE = 130;
 const BORDER = 2;
 
 type PlaceMarkerProps = {

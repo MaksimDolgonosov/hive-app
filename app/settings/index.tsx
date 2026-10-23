@@ -7,6 +7,7 @@ import { DeleteAccountSetting } from '@/src/components/profile/DeleteAccountSett
 import { OnboardingPreviewLink } from '@/src/components/profile/OnboardingPreviewLink';
 import { CommunityGuidelinesLink } from '@/src/components/profile/CommunityGuidelinesLink';
 import { PrivacyPolicyLink } from '@/src/components/profile/PrivacyPolicyLink';
+import { YandexMapsTermsLink } from '@/src/components/profile/YandexMapsTermsLink';
 import { ProfileCollectionLayout } from '@/src/components/profile/ProfileCollectionLayout';
 import { ProfileMenuRow } from '@/src/components/profile/ProfileMenuRow';
 import { PublishBuzzSetting } from '@/src/components/profile/PublishBuzzSetting';
@@ -75,6 +76,7 @@ export default function ProfileSettingsScreen() {
         <CommunityGuidelinesLink
           onPress={() => router.push('/(modals)/community-guidelines' as Href)}
         />
+        <YandexMapsTermsLink />
         <DeleteAccountSetting />
       </ScrollView>
     </ProfileCollectionLayout>

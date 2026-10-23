@@ -200,6 +200,7 @@ export const ru: TranslationSchema = {
     privacyPolicyTitle: 'Политика конфиденциальности',
     privacyPolicyHint: 'Как Hive собирает и использует ваши данные',
     communityGuidelinesTitle: 'Правила сообщества',
+    yandexMapsTermsTitle: 'Условия использования Яндекс Карт',
     deleteAccountLabel: 'Аккаунт',
     deleteAccountHint: 'Безвозвратно удалить профиль, фото и сессии',
     publishBuzzLabel: 'Вибрация при публикации',

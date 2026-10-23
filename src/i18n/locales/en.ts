@@ -197,6 +197,7 @@ export const en: TranslationSchema = {
     privacyPolicyTitle: 'Privacy Policy',
     privacyPolicyHint: 'How Hive collects and uses your data',
     communityGuidelinesTitle: 'Community Guidelines',
+    yandexMapsTermsTitle: 'Yandex Maps Terms of Use',
     deleteAccountLabel: 'Account',
     deleteAccountHint: 'Permanently delete your profile, photos and sessions',
     publishBuzzLabel: 'Vibration on publish',

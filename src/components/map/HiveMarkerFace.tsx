@@ -1,5 +1,5 @@
-import { useEffect, useId, useMemo } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { Image, Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { ClipPath, Defs, Image as SvgImage, Path } from 'react-native-svg';
 
+import { captureSvgMarkerIcon } from '@/src/components/map/capture-svg-marker-icon';
 import { HiveTheme } from '@/src/theme/tokens';
 import { getRoundedHexagonPath } from '@/src/utils/hive-hexagon';
 import { getHiveMarkerVisualMetrics } from '@/src/utils/hive-marker-visual';
@@ -23,23 +24,70 @@ type HiveMarkerFaceProps = {
   animate?: boolean;
   variant?: HiveMarkerVariant;
   coverUrl?: string | null;
+  /** Снять обложку в PNG: view маркера MapKit не показывает сетевой SvgImage. */
+  snapshotCover?: boolean;
+  onCoverReady?: () => void;
 };
 
 function HiveHexagonMark({
   count,
   variant = 'hive',
   coverUrl,
+  snapshotCover = false,
+  onCoverReady,
 }: {
   count: number;
   variant?: HiveMarkerVariant;
   coverUrl?: string | null;
+  snapshotCover?: boolean;
+  onCoverReady?: () => void;
 }) {
   const clipId = useId().replace(/:/g, '');
+  const svgRef = useRef<Svg>(null);
+  const [iconUri, setIconUri] = useState<string | null>(null);
   const metrics = getHiveMarkerVisualMetrics(count);
   const path = useMemo(
     () => getRoundedHexagonPath(metrics.markerSize, metrics.cornerRadius, metrics.strokeWidth / 2),
     [metrics.cornerRadius, metrics.markerSize, metrics.strokeWidth],
   );
+  const shouldSnapshot = snapshotCover && Boolean(coverUrl);
+
+  useEffect(() => {
+    setIconUri(null);
+  }, [coverUrl, metrics.markerSize, variant]);
+
+  useEffect(() => {
+    if (!shouldSnapshot) {
+      onCoverReady?.();
+    }
+  }, [onCoverReady, shouldSnapshot]);
+
+  const handleImageLoad = () => {
+    const svg = svgRef.current;
+    if (!svg) {
+      onCoverReady?.();
+      return;
+    }
+
+    setTimeout(() => {
+      if (svgRef.current !== svg) {
+        return;
+      }
+
+      void captureSvgMarkerIcon(svg, metrics.markerSize).then((uri) => {
+        if (svgRef.current !== svg) {
+          return;
+        }
+
+        if (uri) {
+          setIconUri(uri);
+          return;
+        }
+
+        onCoverReady?.();
+      });
+    }, 50);
+  };
 
   return (
     <View
@@ -51,40 +99,56 @@ function HiveHexagonMark({
         },
       ]}
     >
-      <Svg height={metrics.markerSize} width={metrics.markerSize} style={StyleSheet.absoluteFill}>
-        {coverUrl ? (
-          <>
-            <Defs>
-              <ClipPath id={clipId}>
-                <Path d={path} />
-              </ClipPath>
-            </Defs>
-            <SvgImage
-              clipPath={`url(#${clipId})`}
-              height={metrics.markerSize}
-              href={{ uri: coverUrl }}
-              preserveAspectRatio="xMidYMid slice"
-              width={metrics.markerSize}
-            />
-            {variant === 'seed' ? <Path d={path} fill="rgba(40, 28, 8, 0.38)" /> : null}
+      {shouldSnapshot && iconUri ? (
+        <Image
+          resizeMode="cover"
+          source={{ uri: iconUri }}
+          style={StyleSheet.absoluteFill}
+          onLoad={onCoverReady}
+        />
+      ) : (
+        <Svg
+          ref={svgRef}
+          height={metrics.markerSize}
+          style={StyleSheet.absoluteFill}
+          viewBox={`0 0 ${metrics.markerSize} ${metrics.markerSize}`}
+          width={metrics.markerSize}
+        >
+          {coverUrl ? (
+            <>
+              <Defs>
+                <ClipPath id={clipId}>
+                  <Path d={path} />
+                </ClipPath>
+              </Defs>
+              <SvgImage
+                clipPath={`url(#${clipId})`}
+                height={metrics.markerSize}
+                href={{ uri: coverUrl }}
+                preserveAspectRatio="xMidYMid slice"
+                width={metrics.markerSize}
+                onLoad={shouldSnapshot ? handleImageLoad : undefined}
+              />
+              {variant === 'seed' ? <Path d={path} fill="rgba(40, 28, 8, 0.38)" /> : null}
+              <Path
+                d={path}
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.45)"
+                strokeLinejoin="round"
+                strokeWidth={metrics.strokeWidth}
+              />
+            </>
+          ) : (
             <Path
               d={path}
-              fill="none"
-              stroke="rgba(255, 255, 255, 0.45)"
+              fill={variant === 'seed' ? SEED_FILL : HiveTheme.accent}
+              stroke="rgba(255, 255, 255, 0.25)"
               strokeLinejoin="round"
               strokeWidth={metrics.strokeWidth}
             />
-          </>
-        ) : (
-          <Path
-            d={path}
-            fill={variant === 'seed' ? SEED_FILL : HiveTheme.accent}
-            stroke="rgba(255, 255, 255, 0.25)"
-            strokeLinejoin="round"
-            strokeWidth={metrics.strokeWidth}
-          />
-        )}
-      </Svg>
+          )}
+        </Svg>
+      )}
       <Text
         allowFontScaling={false}
         numberOfLines={1}
@@ -100,7 +164,14 @@ function HiveHexagonMark({
   );
 }
 
-export function HiveMarkerFace({ count, animate = true, variant = 'hive', coverUrl }: HiveMarkerFaceProps) {
+export function HiveMarkerFace({
+  count,
+  animate = true,
+  variant = 'hive',
+  coverUrl,
+  snapshotCover = false,
+  onCoverReady,
+}: HiveMarkerFaceProps) {
   const metrics = getHiveMarkerVisualMetrics(count);
   const pulse = useSharedValue(1);
   // Сота не пульсирует: пульсация — признак живого улья (§G13).
@@ -137,7 +208,13 @@ export function HiveMarkerFace({ count, animate = true, variant = 'hive', coverU
         },
       ]}
     >
-      <HiveHexagonMark count={count} coverUrl={coverUrl} variant={variant} />
+      <HiveHexagonMark
+        count={count}
+        coverUrl={coverUrl}
+        snapshotCover={snapshotCover}
+        variant={variant}
+        onCoverReady={onCoverReady}
+      />
     </Animated.View>
   );
 }

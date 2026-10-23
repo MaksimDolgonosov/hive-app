@@ -59,7 +59,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     (scheme, index, schemes): scheme is string =>
       Boolean(scheme) && schemes.indexOf(scheme) === index,
   );
-  // Пока аккаунт Apple Developer не оплачен, capability не запрашиваем: EAS иначе падает.
+  // Пока аккаунт Apple Developer не оплачен, capability не запрашиваем.
+  // Sign in with Apple и associated domains требуют сертификат: без него не собирается даже симулятор.
   const appleSignInEnabled = process.env.EXPO_PUBLIC_APPLE_SIGN_IN_ENABLED === 'true';
 
   if (process.env.NODE_ENV !== 'production') {
@@ -90,11 +91,15 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       supportsTablet: false,
       bundleIdentifier: 'site.hiveapp.app',
       icon: './assets/Hive.icon',
-      associatedDomains: [`applinks:${PUBLIC_SITE_HOST}`],
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
-      ...(appleSignInEnabled ? { usesAppleSignIn: true } : {}),
+      ...(appleSignInEnabled
+        ? {
+            usesAppleSignIn: true,
+            associatedDomains: [`applinks:${PUBLIC_SITE_HOST}`],
+          }
+        : {}),
     },
     android: {
       package: 'site.hiveapp.app',
@@ -209,10 +214,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       ],
       './plugins/with-ios-orange-alternate-icon',
       [
-        'react-native-maps',
+        'expo-yandex-mapkit',
         {
-          iosGoogleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
-          androidGoogleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
+          apiKey: process.env.YANDEX_MAPKIT_API_KEY,
+          flavor: 'lite',
+          version: '4.42.0',
         },
       ],
       [
@@ -269,7 +275,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       googleWebClientId,
       googleIosClientId,
       googleAndroidClientId,
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
+      yandexMapKitConfigured: Boolean(process.env.YANDEX_MAPKIT_API_KEY),
       appleSignInEnabled,
     },
   };

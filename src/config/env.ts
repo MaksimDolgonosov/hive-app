@@ -7,7 +7,7 @@ type AppExtra = {
   googleWebClientId?: string;
   googleIosClientId?: string;
   googleAndroidClientId?: string;
-  googleMapsApiKey?: string;
+  yandexMapKitConfigured?: boolean;
   appleSignInEnabled?: boolean;
 };
 
@@ -46,9 +46,9 @@ function getExtra(): EnvConfig {
   const googleAndroidClientId =
     extra.googleAndroidClientId ?? process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? '';
 
-  const googleMapsApiKey = extra.googleMapsApiKey ?? process.env.GOOGLE_MAPS_API_KEY ?? '';
   const appleSignInEnabled =
     extra.appleSignInEnabled === true || process.env.EXPO_PUBLIC_APPLE_SIGN_IN_ENABLED === 'true';
+  const yandexMapKitConfigured = extra.yandexMapKitConfigured === true;
 
   if (__DEV__) {
     console.log('[env]', {
@@ -56,7 +56,7 @@ function getExtra(): EnvConfig {
       wsUrl,
       platform: Platform.OS,
       googleConfigured: Boolean(googleWebClientId),
-      googleMapsConfigured: Boolean(googleMapsApiKey),
+      yandexMapKitConfigured,
     });
   }
 
@@ -66,23 +66,14 @@ function getExtra(): EnvConfig {
     googleWebClientId,
     googleIosClientId,
     googleAndroidClientId,
-    googleMapsApiKey,
+    yandexMapKitConfigured,
     appleSignInEnabled,
   };
 }
 
 export const env = getExtra();
 
-/**
- * Maps SDK on Android reads the key from the APK manifest, not from Metro/.env.
- * Enabled after GOOGLE_MAPS_API_KEY was added as an EAS project secret.
- */
-const ANDROID_NATIVE_MAPS_KEY_EMBEDDED = true;
-
-export function isGoogleMapsConfigured(): boolean {
-  if (Platform.OS !== 'android') {
-    return true;
-  }
-
-  return ANDROID_NATIVE_MAPS_KEY_EMBEDDED;
+/** Ключ MapKit зашивается в нативную сборку плагином, в JS-бандл не попадает. */
+export function isYandexMapKitConfigured(): boolean {
+  return env.yandexMapKitConfigured === true;
 }

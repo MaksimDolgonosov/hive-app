@@ -28,13 +28,66 @@ export const OVERVIEW_DELTA_THRESHOLD = 0.5;
 export const OVERVIEW_ENTER_DELTA = OVERVIEW_DELTA_THRESHOLD * 1.1;
 export const OVERVIEW_EXIT_DELTA = OVERVIEW_DELTA_THRESHOLD * 0.9;
 
-/** Приблизительный zoom Google Maps из latitudeDelta. */
+export type MapCameraPosition = {
+  latitude: number;
+  longitude: number;
+  zoom: number;
+  azimuth: number;
+  tilt: number;
+};
+
+/** Zoom MapKit (~0…21) из высоты кадра. Та же шкала, что была у Google Maps. */
 export function regionZoom(latitudeDelta: number): number {
   if (latitudeDelta <= 0) {
     return 12;
   }
 
   return Math.max(1, Math.min(20, Math.log2(360 / latitudeDelta)));
+}
+
+export function zoomToLatitudeDelta(zoom: number): number {
+  return 360 / 2 ** zoom;
+}
+
+export function regionToCamera(region: MapRegion): MapCameraPosition {
+  return {
+    latitude: region.latitude,
+    longitude: region.longitude,
+    zoom: regionZoom(region.latitudeDelta),
+    azimuth: 0,
+    tilt: 0,
+  };
+}
+
+export function cameraToRegion(camera: {
+  latitude: number;
+  longitude: number;
+  zoom: number;
+}): MapRegion {
+  const latitudeDelta = zoomToLatitudeDelta(camera.zoom);
+
+  return {
+    latitude: camera.latitude,
+    longitude: camera.longitude,
+    latitudeDelta,
+    longitudeDelta: latitudeDelta,
+  };
+}
+
+/** Ось-выровненный кадр из квада `getVisibleRegion`. Поворот карты должен быть выключен. */
+export function visibleRegionToMapRegion(
+  center: { latitude: number; longitude: number },
+  corners: { latitude: number; longitude: number }[],
+): MapRegion {
+  const latitudes = corners.map((point) => point.latitude);
+  const longitudes = corners.map((point) => point.longitude);
+
+  return {
+    latitude: center.latitude,
+    longitude: center.longitude,
+    latitudeDelta: Math.max(Math.max(...latitudes) - Math.min(...latitudes), 0.0005),
+    longitudeDelta: Math.max(Math.max(...longitudes) - Math.min(...longitudes), 0.0005),
+  };
 }
 
 export function isDefaultMapRegion(region: MapRegion): boolean {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
-import { Circle, Marker } from 'react-native-maps';
+import { StyleSheet, View } from 'react-native';
+import { Circle, Marker } from 'expo-yandex-mapkit';
 
 import { HiveMarkerFace } from '@/src/components/map/HiveMarkerFace';
 import type { Hive } from '@/src/types';
@@ -8,7 +8,6 @@ import { getHiveMarkerVisualMetrics } from '@/src/utils/hive-marker-visual';
 
 interface HiveCircleProps {
   hive: Hive;
-  imageUri?: string | null;
   onPress?: () => void;
 }
 
@@ -30,22 +29,10 @@ function useCircleFillOpacity(activeStingsCount: number): number {
   );
 }
 
-export function HiveCircle({ hive, imageUri, onPress }: HiveCircleProps) {
+export function HiveCircle({ hive, onPress }: HiveCircleProps) {
   const metrics = getHiveMarkerVisualMetrics(hive.activeStingsCount);
   const circleFillOpacity = useCircleFillOpacity(hive.activeStingsCount);
-  const coverUrl = hive.place?.coverThumbnailUrl;
-  const [tracksViewChanges, setTracksViewChanges] = useState(Platform.OS !== 'android' || Boolean(coverUrl));
-
-  useEffect(() => {
-    if (!coverUrl) {
-      return;
-    }
-    setTracksViewChanges(true);
-    const timer = setTimeout(() => setTracksViewChanges(false), 800);
-    return () => clearTimeout(timer);
-  }, [coverUrl]);
-
-  const coordinate = {
+  const point = {
     latitude: hive.center.lat,
     longitude: hive.center.lng,
   };
@@ -53,43 +40,30 @@ export function HiveCircle({ hive, imageUri, onPress }: HiveCircleProps) {
   return (
     <>
       <Circle
-        center={coordinate}
+        center={point}
         fillColor={`rgba(255, 184, 0, ${circleFillOpacity * 0.45})`}
         radius={hive.radiusM}
         strokeColor="rgba(255, 184, 0, 0.35)"
         strokeWidth={1}
       />
-      {Platform.OS === 'android' && !coverUrl ? (
-        imageUri ? (
-          <Marker
-            coordinate={coordinate}
-            anchor={{ x: 0.5, y: 0.5 }}
-            image={{ uri: imageUri, width: metrics.markerSize, height: metrics.markerSize }}
-            tracksViewChanges={false}
-            onPress={onPress}
-          />
-        ) : null
-      ) : (
-        <Marker
-          coordinate={coordinate}
-          anchor={{ x: 0.5, y: 0.5 }}
-          tracksViewChanges={tracksViewChanges}
-          onPress={onPress}
+      <Marker anchor={{ x: 0.5, y: 0.5 }} handled point={point} tracksViewChanges onPress={onPress}>
+        <View
+          collapsable={false}
+          style={[
+            styles.markerRoot,
+            {
+              width: metrics.markerSize,
+              height: metrics.markerSize,
+            },
+          ]}
         >
-          <View
-            collapsable={false}
-            style={[
-              styles.markerRoot,
-              {
-                width: metrics.markerSize,
-                height: metrics.markerSize,
-              },
-            ]}
-          >
-            <HiveMarkerFace count={hive.activeStingsCount} coverUrl={coverUrl} />
-          </View>
-        </Marker>
-      )}
+          <HiveMarkerFace
+            count={hive.activeStingsCount}
+            coverUrl={hive.place?.coverThumbnailUrl}
+            snapshotCover
+          />
+        </View>
+      </Marker>
     </>
   );
 }

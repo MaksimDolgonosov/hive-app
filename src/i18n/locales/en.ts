@@ -133,7 +133,7 @@ export const en: TranslationSchema = {
     emptyMessage: 'Be the first here — your shot lands on the map right away.',
     mapsKeyMissingTitle: 'Map unavailable',
     mapsKeyMissingMessage:
-      'This APK was built without a Google Maps API key. A key in .env is not enough — rebuild the native client with the EAS secret.',
+      'This build has no Yandex MapKit key. A key in .env is not enough — rebuild the native client with the EAS secret YANDEX_MAPKIT_API_KEY.',
     filter: {
       all: 'All',
       fresh: 'Fresh',
@@ -197,6 +197,7 @@ export const en: TranslationSchema = {
     privacyPolicyTitle: 'Privacy Policy',
     privacyPolicyHint: 'How Hive collects and uses your data',
     communityGuidelinesTitle: 'Community Guidelines',
+    yandexMapsTermsTitle: 'Yandex Maps Terms of Use',
     deleteAccountLabel: 'Account',
     deleteAccountHint: 'Permanently delete your profile, photos and sessions',
     publishBuzzLabel: 'Vibration on publish',

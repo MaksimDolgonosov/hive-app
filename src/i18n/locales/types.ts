@@ -189,6 +189,7 @@ export type TranslationSchema = {
     privacyPolicyTitle: string;
     privacyPolicyHint: string;
     communityGuidelinesTitle: string;
+    yandexMapsTermsTitle: string;
     deleteAccountLabel: string;
     deleteAccountHint: string;
     publishBuzzLabel: string;

@@ -1,13 +1,12 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
-/** Liquid Glass только в production native-сборке (не Expo Go, не __DEV__). */
+/**
+ * Нативный Liquid Glass на iOS 26+, включая debug и симулятор.
+ * В Expo Go системного UIGlassEffect нет.
+ */
 export function shouldUseLiquidGlass(): boolean {
   if (Platform.OS !== 'ios') {
-    return false;
-  }
-
-  if (__DEV__) {
     return false;
   }
 
@@ -15,5 +14,6 @@ export function shouldUseLiquidGlass(): boolean {
     return false;
   }
 
-  return true;
+  const major = Number.parseInt(String(Platform.Version), 10);
+  return Number.isFinite(major) && major >= 26;
 }

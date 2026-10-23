@@ -304,7 +304,7 @@ export interface MapRegion {
   longitudeDelta: number;
 }
 
-/** Схема (дороги) или спутник. Нативный `hybrid` даёт снимок с подписями улиц. */
+/** Схема или спутник. На MapKit спутник — `hybrid` с подписями; без доступа к съёмке на ключе тайлы пустые. */
 export type HiveMapType = 'standard' | 'satellite';
 
 export interface SavedMapPlace {

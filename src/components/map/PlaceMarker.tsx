@@ -1,18 +1,16 @@
 import { Marker } from 'expo-yandex-mapkit';
-import { useEffect, useId, useMemo, useRef, useState, type Ref } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useId, useMemo, useState } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
 import Svg, { ClipPath, Defs, Path, Image as SvgImage } from 'react-native-svg';
 
-import {
-  captureSvgMarkerIcon,
-  markerIconScale,
-} from '@/src/components/map/capture-svg-marker-icon';
 import { SEED_FILL } from '@/src/components/map/HiveMarkerFace';
 import type { PlaceSummary } from '@/src/types';
 import { getRoundedHexagonPath } from '@/src/utils/hive-hexagon';
 
-export const PLACE_MARKER_SIZE = 130;
-const BORDER = 2;
+/** Сота места в тех же пунктах, что и маркер улья, а не полноразмерный кадр обложки. */
+export const PLACE_MARKER_SIZE = 56;
+const BORDER = 1.5;
+const CORNER_RADIUS = 6;
 
 type PlaceMarkerProps = {
   place: PlaceSummary;
@@ -22,19 +20,30 @@ type PlaceMarkerProps = {
 function PlaceMarkerFace({
   coverUrl,
   onImageLoad,
-  svgRef,
 }: {
   coverUrl: string | null;
   onImageLoad?: () => void;
-  svgRef?: Ref<Svg>;
 }) {
   const clipId = useId().replace(/:/g, '');
-  const path = useMemo(() => getRoundedHexagonPath(PLACE_MARKER_SIZE, 8, BORDER / 2 + 0.5), []);
+  const path = useMemo(
+    () => getRoundedHexagonPath(PLACE_MARKER_SIZE, CORNER_RADIUS, BORDER / 2 + 0.5),
+    [],
+  );
+  const [coverLaidOut, setCoverLaidOut] = useState(!coverUrl);
+
+  useEffect(() => {
+    setCoverLaidOut(!coverUrl);
+  }, [coverUrl]);
 
   return (
-    <View collapsable={false} style={styles.root}>
+    <View
+      collapsable={false}
+      style={[
+        styles.root,
+        { width: PLACE_MARKER_SIZE + (coverUrl && !coverLaidOut ? 1 : 0) },
+      ]}
+    >
       <Svg
-        ref={svgRef}
         height={PLACE_MARKER_SIZE}
         viewBox={`0 0 ${PLACE_MARKER_SIZE} ${PLACE_MARKER_SIZE}`}
         width={PLACE_MARKER_SIZE}
@@ -44,6 +53,7 @@ function PlaceMarkerFace({
             <Path d={path} />
           </ClipPath>
         </Defs>
+        <Path d={path} fill="#C4B49A" />
         {coverUrl ? (
           <SvgImage
             clipPath={`url(#${clipId})`}
@@ -51,11 +61,12 @@ function PlaceMarkerFace({
             href={{ uri: coverUrl }}
             preserveAspectRatio="xMidYMid slice"
             width={PLACE_MARKER_SIZE}
-            onLoad={onImageLoad}
+            onLoad={() => {
+              setCoverLaidOut(true);
+              onImageLoad?.();
+            }}
           />
-        ) : (
-          <Path d={path} fill="#C4B49A" />
-        )}
+        ) : null}
         <Path d={path} fill="none" stroke={SEED_FILL} strokeLinejoin="round" strokeWidth={BORDER} />
       </Svg>
     </View>
@@ -63,78 +74,69 @@ function PlaceMarkerFace({
 }
 
 export function PlaceMarker({ place, onPress }: PlaceMarkerProps) {
-  const svgRef = useRef<Svg>(null);
-  const [iconUri, setIconUri] = useState<string | null>(null);
   const coverUrl = place.coverThumbnailUrl;
+  const [tracksViewChanges, setTracksViewChanges] = useState(true);
   const point = { latitude: place.center.lat, longitude: place.center.lng };
 
   useEffect(() => {
-    setIconUri(null);
-  }, [coverUrl]);
-
-  const handleImageLoad = () => {
-    const svg = svgRef.current;
-    if (!svg) {
-      return;
+    setTracksViewChanges(true);
+    if (!coverUrl) {
+      const timer = setTimeout(() => setTracksViewChanges(false), 400);
+      return () => clearTimeout(timer);
     }
 
-    setTimeout(() => {
-      if (svgRef.current !== svg) {
+    let cancelled = false;
+    const stop = setTimeout(() => {
+      if (!cancelled) {
+        setTracksViewChanges(false);
+      }
+    }, 2500);
+
+    void Image.prefetch(coverUrl).then((loaded) => {
+      if (cancelled || !loaded) {
         return;
       }
 
-      void captureSvgMarkerIcon(svg, PLACE_MARKER_SIZE).then((uri) => {
-        if (uri && svgRef.current === svg) {
-          setIconUri(uri);
+      setTimeout(() => {
+        if (cancelled) {
+          return;
         }
-      });
-    }, 50);
+
+        setTracksViewChanges(true);
+        setTimeout(() => {
+          if (!cancelled) {
+            setTracksViewChanges(false);
+          }
+        }, 450);
+      }, 100);
+    });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(stop);
+    };
+  }, [coverUrl]);
+
+  const handleImageLoad = () => {
+    setTracksViewChanges(true);
+    setTimeout(() => setTracksViewChanges(false), 450);
   };
 
-  if (coverUrl && iconUri) {
-    return (
-      <Marker
-        anchor={{ x: 0.5, y: 0.5 }}
-        handled
-        point={point}
-        scale={markerIconScale()}
-        source={{ uri: iconUri }}
-        tracksViewChanges={false}
-        onPress={onPress}
-      />
-    );
-  }
-
   return (
-    <>
-      {coverUrl ? (
-        <View collapsable={false} pointerEvents="none" style={styles.rasterizer}>
-          <PlaceMarkerFace coverUrl={coverUrl} svgRef={svgRef} onImageLoad={handleImageLoad} />
-        </View>
-      ) : null}
-      <Marker
-        anchor={{ x: 0.5, y: 0.5 }}
-        handled
-        point={point}
-        tracksViewChanges={false}
-        onPress={onPress}
-      >
-        <PlaceMarkerFace coverUrl={null} />
-      </Marker>
-    </>
+    <Marker
+      anchor={{ x: 0.5, y: 0.5 }}
+      handled
+      point={point}
+      tracksViewChanges={tracksViewChanges}
+      onPress={onPress}
+    >
+      <PlaceMarkerFace coverUrl={coverUrl} onImageLoad={coverUrl ? handleImageLoad : undefined} />
+    </Marker>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
-    width: PLACE_MARKER_SIZE,
-    height: PLACE_MARKER_SIZE,
-  },
-  rasterizer: {
-    position: 'absolute',
-    left: -1000,
-    top: 0,
-    width: PLACE_MARKER_SIZE,
     height: PLACE_MARKER_SIZE,
   },
 });

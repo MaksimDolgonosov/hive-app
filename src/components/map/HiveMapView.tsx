@@ -1,12 +1,9 @@
 import { YandexMapView, type YandexMapViewProps, type YandexMapViewRef } from 'expo-yandex-mapkit';
-import { forwardRef, useCallback, useEffect, useRef, useState, type ForwardedRef } from 'react';
+import { forwardRef, useCallback, useRef, type ForwardedRef } from 'react';
 import { type StyleProp, type ViewStyle } from 'react-native';
 
-import { markerIconScale } from '@/src/components/map/capture-svg-marker-icon';
-import { UserLocationIconRaster } from '@/src/components/map/UserLocationIconRaster';
-import { useAuthStore } from '@/src/stores/authStore';
+import { UserLocationMarker } from '@/src/components/map/UserLocationMarker';
 import type { HiveMapType, MapRegion } from '@/src/types';
-import { buildAvatarDisplayUri } from '@/src/utils/avatar-url';
 import { cameraToRegion, visibleRegionToMapRegion, type MapCameraPosition } from '@/src/utils/map';
 
 type HiveMapViewProps = {
@@ -55,14 +52,6 @@ export const HiveMapView = forwardRef<YandexMapViewRef, HiveMapViewProps>(functi
   ref,
 ) {
   const mapRef = useRef<YandexMapViewRef>(null);
-  const avatarUrl = useAuthStore((state) => state.user?.avatarUrl ?? null);
-  const avatarCacheVersion = useAuthStore((state) => state.avatarCacheVersion);
-  const avatarUri = avatarUrl ? buildAvatarDisplayUri(avatarUrl, avatarCacheVersion) : null;
-  const [locationIconUri, setLocationIconUri] = useState<string | null>(null);
-
-  useEffect(() => {
-    setLocationIconUri(null);
-  }, [avatarUri]);
 
   const handleCameraPositionChanged = useCallback(
     (event: { nativeEvent: { finished: boolean; cameraPosition: MapCameraPosition } }) => {
@@ -124,11 +113,9 @@ export const HiveMapView = forwardRef<YandexMapViewRef, HiveMapViewProps>(functi
       nightMode={colorScheme === 'dark' && mapType !== 'satellite'}
       rotateGesturesEnabled={false}
       scrollGesturesEnabled={scrollEnabled}
-      showUserPosition={showUserPosition}
+      showUserPosition={false}
       style={style}
       tiltGesturesEnabled={false}
-      userLocationIcon={showUserPosition && locationIconUri ? { uri: locationIconUri } : undefined}
-      userLocationIconScale={showUserPosition && locationIconUri ? markerIconScale() : undefined}
       zoomGesturesEnabled={zoomEnabled}
       onCameraPositionChanged={
         onRegionChange || onRegionChangeComplete ? handleCameraPositionChanged : undefined
@@ -136,9 +123,7 @@ export const HiveMapView = forwardRef<YandexMapViewRef, HiveMapViewProps>(functi
       onMapPress={onPress ? (event) => onPress(event.nativeEvent.point) : undefined}
       onMapReady={onMapReady}
     >
-      {showUserPosition && avatarUri && !locationIconUri ? (
-        <UserLocationIconRaster key={avatarUri} uri={avatarUri} onReady={setLocationIconUri} />
-      ) : null}
+      {showUserPosition ? <UserLocationMarker /> : null}
       {children}
     </YandexMapView>
   );

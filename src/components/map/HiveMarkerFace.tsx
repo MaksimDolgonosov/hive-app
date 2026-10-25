@@ -1,5 +1,5 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { Image, Platform, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useId, useMemo, useState } from 'react';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -9,7 +9,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { ClipPath, Defs, Image as SvgImage, Path } from 'react-native-svg';
 
-import { captureSvgMarkerIcon } from '@/src/components/map/capture-svg-marker-icon';
 import { HiveTheme } from '@/src/theme/tokens';
 import { getRoundedHexagonPath } from '@/src/utils/hive-hexagon';
 import { getHiveMarkerVisualMetrics } from '@/src/utils/hive-marker-visual';
@@ -24,7 +23,7 @@ type HiveMarkerFaceProps = {
   animate?: boolean;
   variant?: HiveMarkerVariant;
   coverUrl?: string | null;
-  /** Снять обложку в PNG: view маркера MapKit не показывает сетевой SvgImage. */
+  /** Сообщить карте, когда сетевая обложка уже нарисована и пин можно переснять. */
   snapshotCover?: boolean;
   onCoverReady?: () => void;
 };
@@ -43,8 +42,7 @@ function HiveHexagonMark({
   onCoverReady?: () => void;
 }) {
   const clipId = useId().replace(/:/g, '');
-  const svgRef = useRef<Svg>(null);
-  const [iconUri, setIconUri] = useState<string | null>(null);
+  const [coverLaidOut, setCoverLaidOut] = useState(!coverUrl);
   const metrics = getHiveMarkerVisualMetrics(count);
   const path = useMemo(
     () => getRoundedHexagonPath(metrics.markerSize, metrics.cornerRadius, metrics.strokeWidth / 2),
@@ -53,8 +51,8 @@ function HiveHexagonMark({
   const shouldSnapshot = snapshotCover && Boolean(coverUrl);
 
   useEffect(() => {
-    setIconUri(null);
-  }, [coverUrl, metrics.markerSize, variant]);
+    setCoverLaidOut(!coverUrl);
+  }, [coverUrl, metrics.markerSize]);
 
   useEffect(() => {
     if (!shouldSnapshot) {
@@ -63,57 +61,29 @@ function HiveHexagonMark({
   }, [onCoverReady, shouldSnapshot]);
 
   const handleImageLoad = () => {
-    const svg = svgRef.current;
-    if (!svg) {
-      onCoverReady?.();
-      return;
-    }
-
     setTimeout(() => {
-      if (svgRef.current !== svg) {
-        return;
-      }
-
-      void captureSvgMarkerIcon(svg, metrics.markerSize).then((uri) => {
-        if (svgRef.current !== svg) {
-          return;
-        }
-
-        if (uri) {
-          setIconUri(uri);
-          return;
-        }
-
-        onCoverReady?.();
-      });
-    }, 50);
+      setCoverLaidOut(true);
+      onCoverReady?.();
+    }, 100);
   };
 
   return (
     <View
+      collapsable={false}
       style={[
         styles.mark,
         {
-          width: metrics.markerSize,
+          width: metrics.markerSize + (shouldSnapshot && !coverLaidOut ? 1 : 0),
           height: metrics.markerSize,
         },
       ]}
     >
-      {shouldSnapshot && iconUri ? (
-        <Image
-          resizeMode="cover"
-          source={{ uri: iconUri }}
-          style={StyleSheet.absoluteFill}
-          onLoad={onCoverReady}
-        />
-      ) : (
-        <Svg
-          ref={svgRef}
-          height={metrics.markerSize}
-          style={StyleSheet.absoluteFill}
-          viewBox={`0 0 ${metrics.markerSize} ${metrics.markerSize}`}
-          width={metrics.markerSize}
-        >
+      <Svg
+        height={metrics.markerSize}
+        style={StyleSheet.absoluteFill}
+        viewBox={`0 0 ${metrics.markerSize} ${metrics.markerSize}`}
+        width={metrics.markerSize}
+      >
           {coverUrl ? (
             <>
               <Defs>
@@ -127,7 +97,7 @@ function HiveHexagonMark({
                 href={{ uri: coverUrl }}
                 preserveAspectRatio="xMidYMid slice"
                 width={metrics.markerSize}
-                onLoad={shouldSnapshot ? handleImageLoad : undefined}
+                onLoad={handleImageLoad}
               />
               {variant === 'seed' ? <Path d={path} fill="rgba(40, 28, 8, 0.38)" /> : null}
               <Path
@@ -148,7 +118,6 @@ function HiveHexagonMark({
             />
           )}
         </Svg>
-      )}
       <Text
         allowFontScaling={false}
         numberOfLines={1}

@@ -68,11 +68,11 @@ export default function PlaceCardScreen() {
   }, [coords, placeQuery.data?.place]);
 
   const place = placeQuery.data?.place;
-  const outside = useMemo(() => {
+  const canShootHere = useMemo(() => {
     if (!place || !coords) {
       return false;
     }
-    return haversineDistance({ lat: coords.latitude, lng: coords.longitude }, place.center) > place.radiusM;
+    return haversineDistance({ lat: coords.latitude, lng: coords.longitude }, place.center) <= place.radiusM;
   }, [coords, place]);
 
   const hideFromMap = useMutation({
@@ -98,6 +98,9 @@ export default function PlaceCardScreen() {
   }
 
   function openCamera() {
+    if (!canShootHere) {
+      return;
+    }
     router.push('/(modals)/camera' as Href);
   }
 
@@ -150,17 +153,22 @@ export default function PlaceCardScreen() {
               chipColor={theme.surface}
               borderColor={theme.stroke}
             />
-            <Pressable className="h-[52px] items-center justify-center rounded-full bg-hive-primary" onPress={openCamera}>
-              <Text className="font-inter-bold text-hive-on-accent">{t('place.shootHere')}</Text>
-            </Pressable>
-            {outside ? <Text className="font-inter text-xs text-hive-muted">{t('place.outsideRadius')}</Text> : null}
+            {canShootHere ? (
+              <Pressable className="h-[52px] items-center justify-center rounded-full bg-hive-primary" onPress={openCamera}>
+                <Text className="font-inter-bold text-hive-on-accent">{t('place.shootHere')}</Text>
+              </Pressable>
+            ) : (
+              <Text className="font-inter text-sm text-hive-muted">{t('place.outsideRadius')}</Text>
+            )}
             <Text className="font-inter-semibold text-sm text-hive-foreground">{t('place.guests')}</Text>
             {(stingsQuery.data?.stings.length ?? 0) === 0 ? (
               <View className="gap-3 rounded-2xl bg-hive-surface p-4">
                 <Text className="font-inter text-sm text-hive-muted">{t('place.quietTitle')}</Text>
-                <Pressable onPress={openCamera}>
-                  <Text className="font-inter-semibold text-hive-primary">{t('place.quietCta')}</Text>
-                </Pressable>
+                {canShootHere ? (
+                  <Pressable onPress={openCamera}>
+                    <Text className="font-inter-semibold text-hive-primary">{t('place.quietCta')}</Text>
+                  </Pressable>
+                ) : null}
               </View>
             ) : (
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>

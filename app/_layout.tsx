@@ -7,11 +7,12 @@ import {
   Inter_700Bold,
   useFonts,
 } from '@expo-google-fonts/inter';
+
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import * as NavigationBar from 'expo-navigation-bar';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import * as NavigationBar from 'expo-navigation-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
@@ -20,12 +21,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { AuthProvider } from '@/src/components/auth/AuthProvider';
+import { QueryProvider } from '@/src/components/providers/QueryProvider';
 import { BlockedUsersSync } from '@/src/components/safety/BlockedUsersSync';
 import { AppShell } from '@/src/components/ui/AppShell';
-import { QueryProvider } from '@/src/components/providers/QueryProvider';
 import i18n from '@/src/i18n';
-import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import { useLocaleStore } from '@/src/stores/localeStore';
+import { usePreferencesStore } from '@/src/stores/preferencesStore';
 import { HiveThemes } from '@/src/theme/tokens';
 
 SplashScreen.preventAutoHideAsync();

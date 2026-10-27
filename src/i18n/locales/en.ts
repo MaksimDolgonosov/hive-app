@@ -561,7 +561,7 @@ export const en: TranslationSchema = {
   place: {
     badge: 'Venue',
     shootHere: 'Shoot here',
-    outsideRadius: 'A sting is linked to this place only if you shoot on site',
+    outsideRadius: 'You can shoot here only while you are at this place',
     guests: 'Here now',
     quietTitle: 'Quiet for now — be the first',
     quietCta: 'Shoot',

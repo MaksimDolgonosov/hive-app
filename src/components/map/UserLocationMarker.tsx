@@ -8,7 +8,7 @@ import { useAuthStore } from '@/src/stores/authStore';
 import { useLocationStore } from '@/src/stores/locationStore';
 import { buildAvatarDisplayUri } from '@/src/utils/avatar-url';
 
-const SIZE = 56;
+const SIZE = 46;
 
 /** Своя точка на карте. Слой геопозиции MapKit рисует зелёный кружок «Я», его не используем. */
 export function UserLocationMarker() {

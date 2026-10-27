@@ -565,7 +565,7 @@ export const ru: TranslationSchema = {
   place: {
     badge: 'Заведение',
     shootHere: 'Снять здесь',
-    outsideRadius: 'Жало привяжется к месту, только если снять на точке',
+    outsideRadius: 'Снять здесь можно только на точке',
     guests: 'Сейчас здесь',
     quietTitle: 'Пока тихо — стань первым',
     quietCta: 'Снять',

@@ -27,7 +27,7 @@ const TABS: TabConfig[] = [
 ];
 
 const GLASS_CORNER_RADIUS = 28;
-const INACTIVE_TAB_COLOR = '#8B7355';
+const INACTIVE_TAB_COLOR = '#bcad99';
 const ACTIVE_TAB_COLOR = '#FFFFFF';
 
 const TAB_SPRING = {

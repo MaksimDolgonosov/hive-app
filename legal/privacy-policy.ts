@@ -61,7 +61,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
           },
           {
             type: 'paragraph',
-            text: 'Пользовательский контент: фото, снятые встроенной камерой Приложения; необязательный комментарий к фото; реакции (лайки); сведения о том, какие фото вы опубликовали и в каких «ульях» участвовали.',
+            text: 'Пользовательский контент: фото, снятые встроенной камерой Приложения; необязательный комментарий к фото; реакции (лайки); сведения о том, какие фото вы опубликовали и в каких «тусовках» участвовали.',
           },
           {
             type: 'paragraph',
@@ -336,7 +336,7 @@ export const privacyPolicyByLanguage: Record<PrivacyPolicyLanguage, PrivacyPolic
           },
           {
             type: 'paragraph',
-            text: 'User content: photos taken with the App’s built-in camera; optional photo comments; likes; records of photos you published and hives you joined.',
+            text: 'User content: photos taken with the App’s built-in camera; optional photo comments; likes; records of photos you published and hangouts you joined.',
           },
           {
             type: 'paragraph',

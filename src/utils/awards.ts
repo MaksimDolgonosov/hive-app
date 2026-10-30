@@ -41,7 +41,7 @@ export function formatAwardToastMessage(awards: readonly AwardAnnouncement[]): s
     .join('\n');
 }
 
-/** Поздравление за награды первооткрывателя и зажигания улья (§G5, §G13). */
+/** Поздравление за награды первооткрывателя и зажигания тусовки (§G5, §G13). */
 export function announceAwards(awards: readonly AwardAnnouncement[]): void {
   const message = formatAwardToastMessage(awards);
 

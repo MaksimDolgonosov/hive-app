@@ -2,8 +2,8 @@ openapi: 3.0.3
 info:
   title: Sting App API
   description: >
-    API мобильного приложения «Улей»: публикация геолоцированных фото
-    ("жал"), которые исчезают через 4 часа, и их кластеризация в «ульи».
+    API мобильного приложения «Тусовка»: публикация геолоцированных фото
+    ("жал"), которые исчезают через 4 часа, и их кластеризация в «тусовки».
   version: 0.1.0
   contact:
     name: Sting App backend team
@@ -20,7 +20,7 @@ tags:
   - name: stings
     description: Публикация и просмотр жал
   - name: hives
-    description: Просмотр ульев (кластеров жал)
+    description: Просмотр тусовок (кластеров жал)
   - name: places
     description: Карточки заведений
   - name: partner
@@ -30,7 +30,7 @@ tags:
   - name: map
     description: Обзор карты на дальнем зуме
   - name: campaigns
-    description: Час улья и событийные кампании
+    description: Час тусовки и событийные кампании
   - name: invites
     description: Инвайты и атрибуция
   - name: waitlist
@@ -371,7 +371,7 @@ paths:
   /auth/me/hives:
     get:
       tags: [auth]
-      summary: Ульи, в которых есть фото текущего пользователя
+      summary: Тусовки, в которых есть фото текущего пользователя
       parameters:
         - in: query
           name: cursor
@@ -385,7 +385,7 @@ paths:
             maximum: 50
       responses:
         '200':
-          description: Пагинированный список ульев пользователя
+          description: Пагинированный список тусовок пользователя
           content:
             application/json:
               schema:
@@ -508,7 +508,7 @@ paths:
   /stings/nearby:
     get:
       tags: [stings]
-      summary: Активные жала и ульи в видимой области карты
+      summary: Активные жала и тусовки в видимой области карты
       parameters:
         - $ref: '#/components/parameters/SwLat'
         - $ref: '#/components/parameters/SwLng'
@@ -531,7 +531,7 @@ paths:
           schema: { type: integer, minimum: 1, default: 50000 }
       responses:
         '200':
-          description: Список жал и ульев в bounding box
+          description: Список жал и тусовок в bounding box
           content:
             application/json:
               schema:
@@ -955,12 +955,12 @@ paths:
   /hives/{id}:
     get:
       tags: [hives]
-      summary: Улей и список жал в нём
+      summary: Тусовка и список жал в ней
       parameters:
         - $ref: '#/components/parameters/HiveId'
       responses:
         '200':
-          description: Улей найден
+          description: Тусовка найдена
           content:
             application/json:
               schema:
@@ -975,7 +975,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
-          description: Улей не найден (растворился — не осталось активных жал)
+          description: Тусовка не найдена (растворилась — не осталось активных жал)
           content:
             application/json:
               schema:
@@ -984,7 +984,7 @@ paths:
   /hives/{id}/stings:
     get:
       tags: [hives]
-      summary: Пагинированный список жал в улье
+      summary: Пагинированный список жал в тусовке
       parameters:
         - $ref: '#/components/parameters/HiveId'
         - in: query
@@ -1001,7 +1001,7 @@ paths:
             maximum: 50
       responses:
         '200':
-          description: Страница жал улья
+          description: Страница жал тусовки
           content:
             application/json:
               schema:
@@ -1360,7 +1360,7 @@ components:
           description: Активные опубликованные жала пользователя
         hives:
           type: integer
-          description: Уникальные улья с участием фото пользователя
+          description: Уникальные тусовки с участием фото пользователя
         likes:
           type: integer
           description: Сумма reactionsCount на активных жала пользователя
@@ -1398,7 +1398,7 @@ components:
           properties:
             userStingsCount:
               type: integer
-              description: Число активных жал пользователя в этом улье
+              description: Число активных жал пользователя в этой тусовке
           required: [userStingsCount]
 
     UserHivesPage:

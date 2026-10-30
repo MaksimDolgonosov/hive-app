@@ -7,7 +7,7 @@ import { SEED_FILL } from '@/src/components/map/HiveMarkerFace';
 import type { PlaceSummary } from '@/src/types';
 import { getRoundedHexagonPath } from '@/src/utils/hive-hexagon';
 
-/** Сота места в тех же пунктах, что и маркер улья, а не полноразмерный кадр обложки. */
+/** Сота места в тех же пунктах, что и маркер тусовки, а не полноразмерный кадр обложки. */
 export const PLACE_MARKER_SIZE = 56;
 const BORDER = 1.5;
 const CORNER_RADIUS = 6;

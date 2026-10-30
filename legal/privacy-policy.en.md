@@ -18,7 +18,7 @@ Third-party sign-in data: if you sign in with Google, we receive an ID token and
 
 Profile data: profile photo (camera or photo library); bio text; public social links you choose to add (Instagram, Telegram, TikTok, YouTube, website). If you publish a venue: its name, address text, contact email, optional venue phone, and a facade photo taken with the in-app camera on site. That frame is not a map moment. Cover and gallery photos are the public venue card, not map moments.
 
-User content: photos taken with the App’s built-in camera; optional photo comments; likes; records of photos you published and hives you joined.
+User content: photos taken with the App’s built-in camera; optional photo comments; likes; records of photos you published and hangouts you joined.
 
 Precise location: device coordinates when you use the map, the Nearby feed, or publish a photo. Location is required to show photos near you and to attach a publication to the place it was taken. We request When In Use access, not always-on background location. The precise coordinates of an active photo are visible to other users on the map while the photo is live.
 

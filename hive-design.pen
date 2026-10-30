@@ -1,5 +1,5 @@
 {
-  "version": "2.17",
+  "version": "2.20",
   "children": [
     {
       "type": "frame",
@@ -157,7 +157,7 @@
               "type": "text",
               "id": "U8pmC",
               "fill": "$--muted",
-              "content": "Ульи",
+              "content": "Тусовки",
               "fontFamily": "Inter",
               "fontSize": 10,
               "fontWeight": "normal"
@@ -1501,7 +1501,7 @@
                           "type": "text",
                           "id": "I42jzp",
                           "fill": "$--muted",
-                          "content": "Улья",
+                          "content": "Тусовки",
                           "fontFamily": "Inter",
                           "fontSize": 12,
                           "fontWeight": "normal"
@@ -1703,7 +1703,7 @@
                           "type": "text",
                           "id": "btD73",
                           "fill": "$--foreground",
-                          "content": "Мои улья",
+                          "content": "Мои тусовки",
                           "fontFamily": "Inter",
                           "fontSize": 15,
                           "fontWeight": "500"
@@ -3456,7 +3456,7 @@
                               "type": "text",
                               "id": "JNdUS",
                               "fill": "$--foreground",
-                              "content": "Улей · 12 фото",
+                              "content": "Тусовка · 12 фото",
                               "fontFamily": "Inter",
                               "fontSize": 18,
                               "fontWeight": "700"
@@ -6334,7 +6334,7 @@
               "fill": "$--foreground",
               "textGrowth": "fixed-width",
               "width": 334,
-              "content": "Где много — там улей",
+              "content": "Где много — там тусовка",
               "textAlign": "center",
               "fontFamily": "Inter",
               "fontSize": 26,
@@ -6358,7 +6358,7 @@
               "fill": "$--muted",
               "textGrowth": "fixed-width",
               "width": 334,
-              "content": "Когда в одном месте собирается много моментов, они превращаются в улей — сразу видно, где что-то происходит.",
+              "content": "Когда в одном месте собирается много моментов, они превращаются в тусовку — сразу видно, где что-то происходит.",
               "lineHeight": 1.5,
               "textAlign": "center",
               "fontFamily": "Inter",
@@ -7814,7 +7814,7 @@
                 {
                   "type": "frame",
                   "id": "Q9UO9",
-                  "name": "Chip Ульи",
+                  "name": "Chip Тусовки",
                   "height": 34,
                   "fill": "$v2-glass",
                   "cornerRadius": 17,
@@ -7848,7 +7848,7 @@
                       "id": "bgev4",
                       "name": "Label",
                       "fill": "$v2-text",
-                      "content": "Ульи",
+                      "content": "Тусовки",
                       "fontFamily": "$v2-font-body",
                       "fontSize": 13,
                       "fontWeight": "600"
@@ -9023,7 +9023,7 @@
                   "id": "v9hIr",
                   "name": "Label",
                   "fill": "#0B0A08B3",
-                  "content": "улей",
+                  "content": "тусовка",
                   "fontFamily": "$v2-font-body",
                   "fontSize": 9,
                   "fontWeight": "600",
@@ -9174,7 +9174,7 @@
                 {
                   "type": "frame",
                   "id": "HLXKb",
-                  "name": "Chip Ульи",
+                  "name": "Chip Тусовки",
                   "height": 34,
                   "fill": "$v2-glass",
                   "cornerRadius": 17,
@@ -9208,7 +9208,7 @@
                       "id": "sK6We",
                       "name": "Label",
                       "fill": "$v2-text",
-                      "content": "Ульи",
+                      "content": "Тусовки",
                       "fontFamily": "$v2-font-body",
                       "fontSize": 13,
                       "fontWeight": "600"
@@ -9474,7 +9474,7 @@
                           "id": "VCQd1",
                           "name": "Title",
                           "fill": "$v2-text",
-                          "content": "Улей на Пушкинской",
+                          "content": "Тусовка на Пушкинской",
                           "fontFamily": "$v2-font-display",
                           "fontSize": 24,
                           "fontWeight": "700",
@@ -9586,7 +9586,7 @@
                               "id": "diWNl",
                               "name": "Text",
                               "fill": "$v2-text-muted",
-                              "content": "Улей растворится через",
+                              "content": "Тусовка растворится через",
                               "fontFamily": "$v2-font-body",
                               "fontSize": 13,
                               "fontWeight": "500"
@@ -9661,7 +9661,7 @@
                             "type": "image",
                             "enabled": true,
                             "url": "https://images.unsplash.com/photo-1771980589836-a18bec351059?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIxNzV8&ixlib=rb-4.1.0&q=80&w=1080",
-                            "mode": "fill"
+                            "mode": "cover"
                           },
                           "cornerRadius": 18,
                           "layout": "vertical",
@@ -9729,7 +9729,7 @@
                                 "type": "image",
                                 "enabled": true,
                                 "url": "https://images.unsplash.com/photo-1722065974454-169f30653393?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIxNzZ8&ixlib=rb-4.1.0&q=80&w=1080",
-                                "mode": "fill"
+                                "mode": "cover"
                               },
                               "cornerRadius": 18
                             },
@@ -9750,7 +9750,7 @@
                                 "type": "image",
                                 "enabled": true,
                                 "url": "https://images.unsplash.com/photo-1655681197004-ef1c7c4e17d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIxNzd8&ixlib=rb-4.1.0&q=80&w=1080",
-                                "mode": "fill"
+                                "mode": "cover"
                               },
                               "cornerRadius": 18
                             }
@@ -9783,7 +9783,7 @@
                             "type": "image",
                             "enabled": true,
                             "url": "https://images.unsplash.com/photo-1554195576-93a79d300165?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIxNzd8&ixlib=rb-4.1.0&q=80&w=1080",
-                            "mode": "fill"
+                            "mode": "cover"
                           },
                           "cornerRadius": 16,
                           "justifyContent": "center",
@@ -9806,7 +9806,7 @@
                             "type": "image",
                             "enabled": true,
                             "url": "https://images.unsplash.com/photo-1548809988-619418ad859c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIxNzh8&ixlib=rb-4.1.0&q=80&w=1080",
-                            "mode": "fill"
+                            "mode": "cover"
                           },
                           "cornerRadius": 16,
                           "justifyContent": "center",
@@ -9829,7 +9829,7 @@
                             "type": "image",
                             "enabled": true,
                             "url": "https://images.unsplash.com/photo-1624075250557-9e020cecaaf6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIxNzh8&ixlib=rb-4.1.0&q=80&w=1080",
-                            "mode": "fill"
+                            "mode": "cover"
                           },
                           "cornerRadius": 16,
                           "justifyContent": "center",
@@ -10384,7 +10384,7 @@
                         "type": "image",
                         "enabled": true,
                         "url": "https://images.unsplash.com/photo-1716385514083-765bcc2b7cf3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIyNzJ8&ixlib=rb-4.1.0&q=80&w=1080",
-                        "mode": "fill"
+                        "mode": "cover"
                       },
                       "cornerRadius": 16,
                       "layout": "vertical",
@@ -10435,7 +10435,7 @@
                         "type": "image",
                         "enabled": true,
                         "url": "https://images.unsplash.com/photo-1624338618005-0a93e308abae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIyNzN8&ixlib=rb-4.1.0&q=80&w=1080",
-                        "mode": "fill"
+                        "mode": "cover"
                       },
                       "cornerRadius": 16,
                       "layout": "vertical",
@@ -10459,7 +10459,7 @@
                         "type": "image",
                         "enabled": true,
                         "url": "https://images.unsplash.com/photo-1534986136417-89b28be6a379?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIyNzN8&ixlib=rb-4.1.0&q=80&w=1080",
-                        "mode": "fill"
+                        "mode": "cover"
                       },
                       "cornerRadius": 16,
                       "layout": "vertical",
@@ -10541,7 +10541,7 @@
                 {
                   "type": "frame",
                   "id": "Q8Cp6x",
-                  "name": "Row Мои ульи",
+                  "name": "Row Мои тусовки",
                   "width": "fill_container",
                   "height": 54,
                   "gap": 14,
@@ -10564,7 +10564,7 @@
                       "fill": "$v2-text",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "Мои ульи",
+                      "content": "Мои тусовки",
                       "fontFamily": "$v2-font-body",
                       "fontSize": 15,
                       "fontWeight": "500"
@@ -10930,7 +10930,7 @@
                 {
                   "type": "frame",
                   "id": "Q8zdl",
-                  "name": "Chip Ульи",
+                  "name": "Chip Тусовки",
                   "height": 34,
                   "fill": "$v2-surface",
                   "cornerRadius": 17,
@@ -10948,7 +10948,7 @@
                       "id": "hakYi",
                       "name": "Label",
                       "fill": "$v2-text-muted",
-                      "content": "Ульи",
+                      "content": "Тусовки",
                       "fontFamily": "$v2-font-body",
                       "fontSize": 13,
                       "fontWeight": "600"
@@ -10982,7 +10982,7 @@
                     "type": "image",
                     "enabled": true,
                     "url": "https://images.unsplash.com/photo-1705328361283-1790279044bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIzMzN8&ixlib=rb-4.1.0&q=80&w=1080",
-                    "mode": "fill"
+                    "mode": "cover"
                   },
                   "cornerRadius": 22,
                   "layout": "none",
@@ -11194,7 +11194,7 @@
                 {
                   "type": "frame",
                   "id": "T4ra4u",
-                  "name": "Card Улей",
+                  "name": "Card Тусовка",
                   "clip": true,
                   "width": "fill_container",
                   "fill": "$v2-surface",
@@ -11226,7 +11226,7 @@
                             "type": "image",
                             "enabled": true,
                             "url": "https://images.unsplash.com/photo-1705328361283-1790279044bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIzMzN8&ixlib=rb-4.1.0&q=80&w=1080",
-                            "mode": "fill"
+                            "mode": "cover"
                           },
                           "cornerRadius": 10
                         },
@@ -11241,7 +11241,7 @@
                             "type": "image",
                             "enabled": true,
                             "url": "https://images.unsplash.com/photo-1558618005-3c8a366b4ac1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIzMzR8&ixlib=rb-4.1.0&q=80&w=1080",
-                            "mode": "fill"
+                            "mode": "cover"
                           },
                           "cornerRadius": 10
                         },
@@ -11256,7 +11256,7 @@
                             "type": "image",
                             "enabled": true,
                             "url": "https://images.unsplash.com/photo-1617170709251-dd8f915df721?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIzMzR8&ixlib=rb-4.1.0&q=80&w=1080",
-                            "mode": "fill"
+                            "mode": "cover"
                           },
                           "cornerRadius": 10
                         }
@@ -11314,7 +11314,7 @@
                               "id": "K7nUS",
                               "name": "Label",
                               "fill": "#0B0A08B3",
-                              "content": "улей",
+                              "content": "тусовка",
                               "fontFamily": "$v2-font-body",
                               "fontSize": 9,
                               "fontWeight": "600",
@@ -11335,7 +11335,7 @@
                               "id": "gczmf",
                               "name": "Title",
                               "fill": "$v2-text",
-                              "content": "Улей",
+                              "content": "Тусовка",
                               "fontFamily": "$v2-font-display",
                               "fontSize": 17,
                               "fontWeight": "700"
@@ -11467,7 +11467,7 @@
                     "type": "image",
                     "enabled": true,
                     "url": "https://images.unsplash.com/photo-1558618005-3c8a366b4ac1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIzMzR8&ixlib=rb-4.1.0&q=80&w=1080",
-                    "mode": "fill"
+                    "mode": "cover"
                   },
                   "cornerRadius": 22,
                   "layout": "none",
@@ -11693,7 +11693,7 @@
                     "type": "image",
                     "enabled": true,
                     "url": "https://images.unsplash.com/photo-1617170709251-dd8f915df721?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODIzMzR8&ixlib=rb-4.1.0&q=80&w=1080",
-                    "mode": "fill"
+                    "mode": "cover"
                   },
                   "cornerRadius": 22,
                   "layout": "none",
@@ -11980,7 +11980,7 @@
             "type": "image",
             "enabled": true,
             "url": "https://images.unsplash.com/photo-1780962401042-66542cc69dca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODM4OTJ8&ixlib=rb-4.1.0&q=80&w=1080",
-            "mode": "fill"
+            "mode": "cover"
           }
         },
         {
@@ -14296,7 +14296,7 @@
             "type": "image",
             "enabled": true,
             "url": "https://images.unsplash.com/photo-1566863996132-c7e7db115807?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODY0NTV8&ixlib=rb-4.1.0&q=80&w=1080",
-            "mode": "fill"
+            "mode": "cover"
           }
         },
         {
@@ -14536,7 +14536,7 @@
             "type": "image",
             "enabled": true,
             "url": "https://images.unsplash.com/photo-1622748173958-9d63fedef03e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODY0MDJ8&ixlib=rb-4.1.0&q=80&w=1080",
-            "mode": "fill"
+            "mode": "cover"
           }
         },
         {
@@ -14776,7 +14776,7 @@
             "type": "image",
             "enabled": true,
             "url": "https://images.unsplash.com/photo-1659273145165-a2f9970fc431?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODg4ODY0MDJ8&ixlib=rb-4.1.0&q=80&w=1080",
-            "mode": "fill"
+            "mode": "cover"
           }
         },
         {
@@ -14893,7 +14893,7 @@
                   "fill": "$v2-text",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "Где много — там улей",
+                  "content": "Где много — там тусовка",
                   "lineHeight": 1.02,
                   "fontFamily": "$v2-font-display",
                   "fontSize": 40,
@@ -14907,7 +14907,7 @@
                   "fill": "#C2B8AC",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
-                  "content": "Когда в одном месте собирается много моментов, они превращаются в улей — сразу видно, где что-то происходит.",
+                  "content": "Когда в одном месте собирается много моментов, они превращаются в тусовку — сразу видно, где что-то происходит.",
                   "lineHeight": 1.55,
                   "fontFamily": "$v2-font-body",
                   "fontSize": 15,
@@ -17352,7 +17352,7 @@
                   "id": "hzIK3",
                   "name": "Tagline",
                   "fill": "$--muted",
-                  "content": "Собираем улей",
+                  "content": "Собираем тусовку",
                   "fontFamily": "Inter",
                   "fontSize": 15,
                   "fontWeight": "normal"
@@ -18278,7 +18278,7 @@
                   "id": "i5moft",
                   "name": "Tagline",
                   "fill": "$v2-text-muted",
-                  "content": "Собираем улей",
+                  "content": "Собираем тусовку",
                   "fontFamily": "$v2-font-body",
                   "fontSize": 15,
                   "fontWeight": "normal"

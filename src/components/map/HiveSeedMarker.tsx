@@ -12,8 +12,8 @@ interface HiveSeedMarkerProps {
 }
 
 /**
- * Маркер «соты» (§G13): место, где уже есть фото, но улья ещё нет.
- * Отличается от улья приглушённым видом и отсутствием пульсации.
+ * Маркер «соты» (§G13): место, где уже есть фото, но тусовки ещё нет.
+ * Отличается от тусовки приглушённым видом и отсутствием пульсации.
  */
 export function HiveSeedMarker({ hive, onPress }: HiveSeedMarkerProps) {
   const metrics = getHiveMarkerVisualMetrics(hive.activeStingsCount);

@@ -317,7 +317,7 @@ export type TranslationSchema = {
     firstCaptureAction: string;
     firstCaptureLater: string;
   };
-  /** Кампании и «час улья» (§G7). */
+  /** Кампании и «час тусовки» (§G7). */
   campaign: {
     hiveHour: string;
     event: string;
@@ -356,7 +356,7 @@ export type TranslationSchema = {
     waitlistJoinedTitle: string;
     waitlistJoinedMessage: string;
   };
-  /** Награды первооткрывателя и зажигания улья (§G5, §G13). */
+  /** Награды первооткрывателя и зажигания тусовки (§G5, §G13). */
   awards: {
     title: string;
     zoneFirst: string;

@@ -1,6 +1,6 @@
 import type { Hive, HiveStage } from '@/src/types';
 
-/** Минимум activationCount для активации улья — совпадает с HIVE_ACTIVATION_THRESHOLD на backend. */
+/** Минимум activationCount для активации тусовки — совпадает с HIVE_ACTIVATION_THRESHOLD на backend. */
 export const HIVE_ACTIVATION_THRESHOLD = 3;
 
 /** Максимальный вклад одного автора в activationCount (§G13). Держится в синхроне с backend. */
@@ -18,7 +18,7 @@ export function resolveHiveStage(hive: HiveStageInput): HiveStage {
     return hive.stage;
   }
 
-  // Неизвестное значение стадии трактуем как улей: лучше показать кластер, чем потерять.
+  // Неизвестное значение стадии трактуем как тусовку: лучше показать кластер, чем потерять.
   if (hive.stage != null) {
     return 'hive';
   }

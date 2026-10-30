@@ -15,7 +15,7 @@ import { getHiveMarkerVisualMetrics } from '@/src/utils/hive-marker-visual';
 
 export type HiveMarkerVariant = 'hive' | 'seed';
 
-/** Приглушённая заливка соты — визуально отделяет «ещё не улей» от улья (§G13). */
+/** Приглушённая заливка соты — визуально отделяет «ещё не тусовка» от тусовки (§G13). */
 export const SEED_FILL = '#B99A55';
 
 type HiveMarkerFaceProps = {
@@ -143,7 +143,7 @@ export function HiveMarkerFace({
 }: HiveMarkerFaceProps) {
   const metrics = getHiveMarkerVisualMetrics(count);
   const pulse = useSharedValue(1);
-  // Сота не пульсирует: пульсация — признак живого улья (§G13).
+  // Сота не пульсирует: пульсация — признак живой тусовки (§G13).
   const shouldAnimate = animate && variant !== 'seed';
 
   useEffect(() => {

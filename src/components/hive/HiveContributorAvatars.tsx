@@ -15,7 +15,7 @@ const DEFAULT_MAX = 5;
 const OVERLAP_RATIO = 0.25;
 
 type HiveContributorAvatarsProps = {
-  /** Источник из списка жал (экран улья). */
+  /** Источник из списка жал (экран тусовки). */
   stings?: Sting[];
   /** Готовый список участников из DTO кластера (§G13) — предпочтителен на карте/в ленте. */
   contributors?: HiveContributor[];
